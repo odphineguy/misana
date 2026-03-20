@@ -1,4 +1,4 @@
-# Adding llama.cpp to PadreAI 🚀
+# Adding llama.cpp to MiSana 🚀
 
 ## ✅ Code Updated!
 

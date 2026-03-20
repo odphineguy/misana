@@ -1,6 +1,6 @@
 //
 //  AppointmentPrepView.swift
-//  PadreAI
+//  MiSana
 //
 //  Created by Abe Perez on 3/11/26.
 //
@@ -65,8 +65,8 @@ struct AppointmentPrepView: View {
                 .fontWeight(.semibold)
 
             Text(selectedLanguage == .spanish ?
-                 "PadreAI te ayuda a llegar listo a tu cita" :
-                 "PadreAI helps you arrive ready for your appointment")
+                 "MiSana te ayuda a llegar listo a tu cita" :
+                 "MiSana helps you arrive ready for your appointment")
                 .font(.subheadline)
                 .foregroundStyle(.secondary)
                 .multilineTextAlignment(.center)
@@ -161,8 +161,8 @@ struct AppointmentPrepView: View {
             } label: {
                 Label(
                     selectedLanguage == .spanish ?
-                        "Preparar con PadreAI" :
-                        "Prepare with PadreAI",
+                        "Preparar con MiSana" :
+                        "Prepare with MiSana",
                     systemImage: "message.fill"
                 )
                 .font(.subheadline)

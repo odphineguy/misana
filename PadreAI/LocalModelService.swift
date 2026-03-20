@@ -1,6 +1,6 @@
 //
 //  LocalModelService.swift
-//  PadreAI
+//  MiSana
 //
 //  Created by Abe Perez on 3/11/26.
 //
@@ -40,7 +40,7 @@ class LocalModelService: ObservableObject {
     // MARK: - System Prompt
     
     private let systemPrompt = """
-    Eres PadreAI, un compañero de salud bilingüe para familias hispanas. Hablas como una tía o abuela cariñosa que sabe de salud — en español mexicano claro, con calidez y respeto.
+    Eres MiSana, un compañero de salud bilingüe para familias hispanas. Hablas como una tía o abuela cariñosa que sabe de salud — en español mexicano claro, con calidez y respeto.
 
     TU TONO:
     - Cálido y familiar, como alguien de la familia que se preocupa de verdad. Puedes decir "mijo/mija" o "no te apures".

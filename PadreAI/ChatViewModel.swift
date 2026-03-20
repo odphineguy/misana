@@ -1,6 +1,6 @@
 //
 //  ChatViewModel.swift
-//  PadreAI
+//  MiSana
 //
 //  Created by Abe Perez on 3/11/26.
 //
@@ -77,7 +77,7 @@ class ChatViewModel: ObservableObject {
     
     private func addWelcomeMessage() {
         let welcomeText = """
-        ¡Hola! Soy PadreAI, tu asistente de salud bilingüe. 👋
+        ¡Hola! Soy MiSana, tu asistente de salud bilingüe. 👋
         
         Puedo ayudarte con preguntas sobre:
         • Medicamentos y dosis

@@ -1,6 +1,6 @@
 //
 //  HealthChatView.swift
-//  PadreAI
+//  MiSana
 //
 //  Created by Abe Perez on 3/11/26.
 //
@@ -95,7 +95,7 @@ struct HealthChatView: View {
                 }
                 .padding()
             }
-            .navigationTitle(selectedLanguage == .spanish ? "Pregunta a PadreAI" : "Ask PadreAI")
+            .navigationTitle(selectedLanguage == .spanish ? "Pregunta a MiSana" : "Ask MiSana")
             .toolbar {
                 ToolbarItem(placement: .automatic) {
                     Menu {
@@ -189,7 +189,7 @@ struct HealthChatView: View {
     
     private func addWelcomeMessage() {
         let welcomeText = """
-        ¡Hola! Soy PadreAI, tu asistente de salud bilingüe. 👋
+        ¡Hola! Soy MiSana, tu asistente de salud bilingüe. 👋
         
         Puedo ayudarte con preguntas sobre:
         • Medicamentos y dosis

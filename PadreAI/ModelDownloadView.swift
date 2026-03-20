@@ -1,6 +1,6 @@
 //
 //  ModelDownloadView.swift
-//  PadreAI
+//  MiSana
 //
 //  Created by Abe Perez on 3/11/26.
 //
@@ -13,7 +13,11 @@ struct ModelDownloadView: View {
     @State private var isDownloading = false
     @State private var showDisclaimer = true
     @State private var showErrorAlert = false
+    @State private var availableSpaceGB: Double = 0
     @Environment(\.dismiss) private var dismiss
+
+    private let requiredSpaceGB: Double = 3.0 // 2.5GB model + buffer
+    private var hasEnoughSpace: Bool { availableSpaceGB >= requiredSpaceGB }
     
     var body: some View {
         NavigationStack {
@@ -55,8 +59,8 @@ struct ModelDownloadView: View {
                 // Title
                 VStack(spacing: 12) {
                     Text(selectedLanguage == .spanish ? 
-                         "Bienvenido a PadreAI" : 
-                         "Welcome to PadreAI")
+                         "Bienvenido a MiSana" : 
+                         "Welcome to MiSana")
                         .font(.title)
                         .fontWeight(.bold)
                         .multilineTextAlignment(.center)
@@ -81,8 +85,8 @@ struct ModelDownloadView: View {
                     }
                     
                     Text(selectedLanguage == .spanish ? 
-                         "PadreAI no es un doctor ni reemplaza el consejo médico profesional.\n\nEste asistente de salud es solo para fines educativos e informativos. Siempre consulta con un profesional de salud certificado para diagnósticos, tratamientos, o cualquier decisión médica.\n\nSi experimentas una emergencia médica, llama al 911 inmediatamente." : 
-                         "PadreAI is not a doctor and does not replace professional medical advice.\n\nThis health assistant is for educational and informational purposes only. Always consult with a certified healthcare professional for diagnoses, treatments, or any medical decisions.\n\nIf you experience a medical emergency, call 911 immediately.")
+                         "MiSana no es un doctor ni reemplaza el consejo médico profesional.\n\nEste asistente de salud es solo para fines educativos e informativos. Siempre consulta con un profesional de salud certificado para diagnósticos, tratamientos, o cualquier decisión médica.\n\nSi experimentas una emergencia médica, llama al 911 inmediatamente." : 
+                         "MiSana is not a doctor and does not replace professional medical advice.\n\nThis health assistant is for educational and informational purposes only. Always consult with a certified healthcare professional for diagnoses, treatments, or any medical decisions.\n\nIf you experience a medical emergency, call 911 immediately.")
                         .font(.subheadline)
                         .foregroundStyle(.secondary)
                 }
@@ -93,8 +97,8 @@ struct ModelDownloadView: View {
                 // Features
                 VStack(alignment: .leading, spacing: 12) {
                     Text(selectedLanguage == .spanish ? 
-                         "PadreAI puede ayudarte con:" : 
-                         "PadreAI can help you with:")
+                         "MiSana puede ayudarte con:" : 
+                         "MiSana can help you with:")
                         .font(.headline)
                     
                     FeatureRow(
@@ -188,8 +192,8 @@ struct ModelDownloadView: View {
                     .fontWeight(.bold)
                 
                 Text(selectedLanguage == .spanish ? 
-                     "Para usar PadreAI sin internet, necesitas descargar el modelo de inteligencia artificial (Gemma 3 4B)." : 
-                     "To use PadreAI offline, you need to download the AI model (Gemma 3 4B).")
+                     "Para usar MiSana sin internet, necesitas descargar el modelo de inteligencia artificial (Gemma 3 4B)." : 
+                     "To use MiSana offline, you need to download the AI model (Gemma 3 4B).")
                     .font(.subheadline)
                     .foregroundStyle(.secondary)
                     .multilineTextAlignment(.center)
@@ -224,6 +228,10 @@ struct ModelDownloadView: View {
             .clipShape(RoundedRectangle(cornerRadius: 12))
             .padding(.horizontal)
             
+            // Storage Info
+            storageCard
+                .padding(.horizontal)
+
             // Download Progress
             if isDownloading {
                 VStack(spacing: 12) {
@@ -254,17 +262,18 @@ struct ModelDownloadView: View {
                     } label: {
                         HStack {
                             Image(systemName: "arrow.down.circle.fill")
-                            Text(selectedLanguage == .spanish ? 
-                                 "Descargar Modelo (2.5 GB)" : 
+                            Text(selectedLanguage == .spanish ?
+                                 "Descargar Modelo (2.5 GB)" :
                                  "Download Model (2.5 GB)")
                         }
                         .font(.headline)
                         .foregroundStyle(.white)
                         .frame(maxWidth: .infinity)
                         .padding()
-                        .background(Color.blue)
+                        .background(hasEnoughSpace ? Color.blue : Color.gray)
                         .clipShape(RoundedRectangle(cornerRadius: 12))
                     }
+                    .disabled(!hasEnoughSpace)
                     
                     Button {
                         dismiss()
@@ -296,8 +305,72 @@ struct ModelDownloadView: View {
         }
     }
     
+    // MARK: - Storage Card
+
+    private var storageCard: some View {
+        VStack(spacing: 12) {
+            HStack {
+                Image(systemName: hasEnoughSpace ? "internaldrive.fill" : "exclamationmark.triangle.fill")
+                    .foregroundStyle(hasEnoughSpace ? .blue : .orange)
+                Text(selectedLanguage == .spanish ? "Almacenamiento" : "Storage")
+                    .font(.headline)
+                Spacer()
+            }
+
+            // Storage bar
+            GeometryReader { geo in
+                ZStack(alignment: .leading) {
+                    RoundedRectangle(cornerRadius: 6)
+                        .fill(Color.secondary.opacity(0.2))
+                    RoundedRectangle(cornerRadius: 6)
+                        .fill(hasEnoughSpace ? Color.blue : Color.orange)
+                        .frame(width: max(0, min(geo.size.width, geo.size.width * (1 - availableSpaceGB / max(availableSpaceGB + 20, 1)))))
+                }
+            }
+            .frame(height: 12)
+
+            HStack {
+                Text(selectedLanguage == .spanish ?
+                     "Disponible: \(String(format: "%.1f", availableSpaceGB)) GB" :
+                     "Available: \(String(format: "%.1f", availableSpaceGB)) GB")
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+                Spacer()
+                Text(selectedLanguage == .spanish ?
+                     "Necesario: ~\(String(format: "%.1f", requiredSpaceGB)) GB" :
+                     "Required: ~\(String(format: "%.1f", requiredSpaceGB)) GB")
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+            }
+
+            if !hasEnoughSpace {
+                HStack(spacing: 6) {
+                    Image(systemName: "xmark.circle.fill")
+                        .foregroundStyle(.red)
+                    Text(selectedLanguage == .spanish ?
+                         "No hay suficiente espacio. Libera al menos \(String(format: "%.1f", requiredSpaceGB - availableSpaceGB)) GB para continuar." :
+                         "Not enough space. Free at least \(String(format: "%.1f", requiredSpaceGB - availableSpaceGB)) GB to continue.")
+                        .font(.caption)
+                        .foregroundStyle(.red)
+                }
+            }
+        }
+        .padding()
+        .background(hasEnoughSpace ? Color.secondary.opacity(0.1) : Color.orange.opacity(0.1))
+        .clipShape(RoundedRectangle(cornerRadius: 12))
+        .onAppear { checkStorage() }
+    }
+
     // MARK: - Actions
-    
+
+    private func checkStorage() {
+        let home = URL(fileURLWithPath: NSHomeDirectory())
+        if let values = try? home.resourceValues(forKeys: [.volumeAvailableCapacityForImportantUsageKey]),
+           let bytes = values.volumeAvailableCapacityForImportantUsage {
+            availableSpaceGB = Double(bytes) / 1_073_741_824
+        }
+    }
+
     private func startDownload() {
         isDownloading = true
         

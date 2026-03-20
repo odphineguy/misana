@@ -131,7 +131,7 @@ Press **▶️** to run the app
 ```
 User: ¿Es seguro el tylenol para niños?
 
-PadreAI: El Tylenol (acetaminofén) es generalmente seguro 
+MiSana: El Tylenol (acetaminofén) es generalmente seguro 
 para niños cuando se usa correctamente. Sin embargo, es muy 
 importante seguir las dosis recomendadas según la edad y peso 
 del niño...

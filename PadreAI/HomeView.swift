@@ -1,6 +1,6 @@
 //
 //  HomeView.swift
-//  PadreAI
+//  MiSana
 //
 //  Created by Abe Perez on 3/11/26.
 //
@@ -75,7 +75,7 @@ struct HomeView: View {
                     Spacer()
                 }
             }
-            .navigationTitle(selectedLanguage == .spanish ? "PadreAI" : "PadreAI")
+            .navigationTitle(selectedLanguage == .spanish ? "MiSana" : "MiSana")
             .toolbar {
                 ToolbarItem(placement: .automatic) {
                     Menu {

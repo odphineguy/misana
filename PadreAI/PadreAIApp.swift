@@ -1,6 +1,6 @@
 //
-//  PadreAIApp.swift
-//  PadreAI
+//  MiSanaApp.swift
+//  MiSana
 //
 //  Created by Abe Perez on 3/11/26.
 //
@@ -8,7 +8,7 @@
 import SwiftUI
 
 @main
-struct PadreAIApp: App {
+struct MiSanaApp: App {
     @StateObject private var modelService = LocalModelService()
     @StateObject private var healthKitService = HealthKitService()
 

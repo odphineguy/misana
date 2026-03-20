@@ -1,8 +1,8 @@
-# PadreAI - Local LLM Integration Setup
+# MiSana - Local LLM Integration Setup
 
 ## 📦 What We've Built
 
-PadreAI now has a complete **on-device AI** infrastructure ready for Gemma 3 4B integration:
+MiSana now has a complete **on-device AI** infrastructure ready for Gemma 3 4B integration:
 
 ### ✅ Completed Files:
 1. **`LocalModelService.swift`** - Model download, loading, and inference management
@@ -20,7 +20,7 @@ PadreAI now has a complete **on-device AI** infrastructure ready for Gemma 3 4B 
 1. In Xcode, go to **File → Add Package Dependencies**
 2. Add this URL: `https://github.com/ggerganov/llama.cpp`
 3. Select version: **Latest**
-4. Add to target: **PadreAI**
+4. Add to target: **MiSana**
 
 **Alternative (Swift wrapper):**
 - For easier Swift integration, consider: `https://github.com/ShenghaiWang/SwiftLlama`
@@ -30,7 +30,7 @@ PadreAI now has a complete **on-device AI** infrastructure ready for Gemma 3 4B 
 1. In Xcode, go to **File → Add Package Dependencies**
 2. Add this URL: `https://github.com/ml-explore/mlx-swift`
 3. Select version: **Latest**
-4. Add to target: **PadreAI**
+4. Add to target: **MiSana**
 
 ---
 
@@ -188,7 +188,7 @@ let response = "Esta es una respuesta de ejemplo. Una vez que instalemos llama.c
 
 ### **System Prompt (Mexican Spanish):**
 ```
-Eres PadreAI, un asistente de salud bilingüe para familias hispanas.
+Eres MiSana, un asistente de salud bilingüe para familias hispanas.
 Hablas español mexicano (no castellano) de manera natural y clara.
 
 REGLAS IMPORTANTES:
@@ -233,7 +233,7 @@ After adding the packages and enabling real inference:
 
 ## 🎯 Why This Architecture Wins
 
-| Feature | PadreAI | Cloud AI Apps |
+| Feature | MiSana | Cloud AI Apps |
 |---------|---------|---------------|
 | **Privacy** | 100% on-device | ❌ Data sent to servers |
 | **Cost** | $0 forever | 💰 $20-50/month |

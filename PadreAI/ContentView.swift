@@ -1,6 +1,6 @@
 //
 //  ContentView.swift
-//  PadreAI
+//  MiSana
 //
 //  Created by Abe Perez on 3/11/26.
 //
@@ -84,7 +84,7 @@ struct HealthDisclaimerView: View {
                     .font(.system(size: 72))
                     .foregroundStyle(.red)
 
-                Text("PadreAI")
+                Text("MiSana")
                     .font(.largeTitle)
                     .fontWeight(.bold)
 
@@ -116,7 +116,7 @@ struct HealthDisclaimerView: View {
 
                     Text(selectedLanguage == .spanish ?
                          """
-                         PadreAI NO es un doctor ni un profesional médico. Esta aplicación:
+                         MiSana NO es un doctor ni un profesional médico. Esta aplicación:
 
                          • No diagnostica enfermedades
                          • No reemplaza la opinión de un médico
@@ -128,7 +128,7 @@ struct HealthDisclaimerView: View {
                          Siempre consulta con un profesional de salud antes de tomar decisiones médicas.
                          """ :
                          """
-                         PadreAI is NOT a doctor or medical professional. This application:
+                         MiSana is NOT a doctor or medical professional. This application:
 
                          • Does not diagnose diseases
                          • Does not replace a doctor's opinion

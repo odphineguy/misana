@@ -11,7 +11,7 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
-		7D9FABCB2F62662200BEA898 /* PadreAI.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = PadreAI.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		7D9FABCB2F62662200BEA898 /* MiSana.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = MiSana.app; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
@@ -45,7 +45,7 @@
 		7D9FABCC2F62662200BEA898 /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				7D9FABCB2F62662200BEA898 /* PadreAI.app */,
+				7D9FABCB2F62662200BEA898 /* MiSana.app */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -53,9 +53,9 @@
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
-		7D9FABCA2F62662200BEA898 /* PadreAI */ = {
+		7D9FABCA2F62662200BEA898 /* MiSana */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = 7D9FABD62F62662400BEA898 /* Build configuration list for PBXNativeTarget "PadreAI" */;
+			buildConfigurationList = 7D9FABD62F62662400BEA898 /* Build configuration list for PBXNativeTarget "MiSana" */;
 			buildPhases = (
 				7D9FABC72F62662200BEA898 /* Sources */,
 				7D9FABC82F62662200BEA898 /* Frameworks */,
@@ -68,12 +68,12 @@
 			fileSystemSynchronizedGroups = (
 				7D9FABCD2F62662200BEA898 /* PadreAI */,
 			);
-			name = PadreAI;
+			name = MiSana;
 			packageProductDependencies = (
 				7D74D0AB2F62ACB900F6AB2E /* LLM */,
 			);
 			productName = PadreAI;
-			productReference = 7D9FABCB2F62662200BEA898 /* PadreAI.app */;
+			productReference = 7D9FABCB2F62662200BEA898 /* MiSana.app */;
 			productType = "com.apple.product-type.application";
 		};
 /* End PBXNativeTarget section */
@@ -91,7 +91,7 @@
 					};
 				};
 			};
-			buildConfigurationList = 7D9FABC62F62662200BEA898 /* Build configuration list for PBXProject "PadreAI" */;
+			buildConfigurationList = 7D9FABC62F62662200BEA898 /* Build configuration list for PBXProject "MiSana" */;
 			developmentRegion = en;
 			hasScannedForEncodings = 0;
 			knownRegions = (
@@ -108,7 +108,7 @@
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
-				7D9FABCA2F62662200BEA898 /* PadreAI */,
+				7D9FABCA2F62662200BEA898 /* MiSana */,
 			);
 		};
 /* End PBXProject section */
@@ -265,8 +265,8 @@
 				DEVELOPMENT_TEAM = K5BU9QZMNW;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
-				INFOPLIST_KEY_NSCameraUsageDescription = "PadreAI necesita acceso a la cámara para escanear etiquetas de medicinas y recetas.";
-				INFOPLIST_KEY_NSHealthShareUsageDescription = "PadreAI usa tus datos de salud para darte recomendaciones personalizadas. Tus datos nunca salen de tu dispositivo.";
+				INFOPLIST_KEY_NSCameraUsageDescription = "MiSana necesita acceso a la cámara para escanear etiquetas de medicinas y recetas.";
+				INFOPLIST_KEY_NSHealthShareUsageDescription = "MiSana usa tus datos de salud para darte recomendaciones personalizadas. Tus datos nunca salen de tu dispositivo.";
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
@@ -301,8 +301,8 @@
 				DEVELOPMENT_TEAM = K5BU9QZMNW;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
-				INFOPLIST_KEY_NSCameraUsageDescription = "PadreAI necesita acceso a la cámara para escanear etiquetas de medicinas y recetas.";
-				INFOPLIST_KEY_NSHealthShareUsageDescription = "PadreAI usa tus datos de salud para darte recomendaciones personalizadas. Tus datos nunca salen de tu dispositivo.";
+				INFOPLIST_KEY_NSCameraUsageDescription = "MiSana necesita acceso a la cámara para escanear etiquetas de medicinas y recetas.";
+				INFOPLIST_KEY_NSHealthShareUsageDescription = "MiSana usa tus datos de salud para darte recomendaciones personalizadas. Tus datos nunca salen de tu dispositivo.";
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
@@ -329,7 +329,7 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
-		7D9FABC62F62662200BEA898 /* Build configuration list for PBXProject "PadreAI" */ = {
+		7D9FABC62F62662200BEA898 /* Build configuration list for PBXProject "MiSana" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				7D9FABD42F62662400BEA898 /* Debug */,
@@ -338,7 +338,7 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		7D9FABD62F62662400BEA898 /* Build configuration list for PBXNativeTarget "PadreAI" */ = {
+		7D9FABD62F62662400BEA898 /* Build configuration list for PBXNativeTarget "MiSana" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				7D9FABD72F62662400BEA898 /* Debug */,

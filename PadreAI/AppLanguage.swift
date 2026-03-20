@@ -1,6 +1,6 @@
 //
 //  AppLanguage.swift
-//  PadreAI
+//  MiSana
 //
 //  Created by Abe Perez on 3/11/26.
 //

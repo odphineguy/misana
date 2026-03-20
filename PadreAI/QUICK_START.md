@@ -1,8 +1,8 @@
-# PadreAI - Local LLM Quick Start Guide 🚀
+# MiSana - Local LLM Quick Start Guide 🚀
 
 ## ✅ What's Been Built (Ready to Use)
 
-You now have a **complete local AI infrastructure** for PadreAI. Here's what works:
+You now have a **complete local AI infrastructure** for MiSana. Here's what works:
 
 ### **Files Created:**
 ```
@@ -67,7 +67,7 @@ LOCAL_LLM_SETUP.md         → Full documentation
 
 ### **1. Bilingual Disclaimer (First Launch)**
 ```
-🩺 "PadreAI no es un doctor ni reemplaza el consejo médico profesional..."
+🩺 "MiSana no es un doctor ni reemplaza el consejo médico profesional..."
 ```
 - Shows legal disclaimer in Spanish + English
 - Lists features (medications, symptoms, remedios)
@@ -84,7 +84,7 @@ LOCAL_LLM_SETUP.md         → Full documentation
 
 ### **3. Smart Chat Interface**
 ```
-💬 Chat with PadreAI
+💬 Chat with MiSana
 - Status banner if model not downloaded
 - "Thinking..." indicator while generating
 - Message bubbles (user vs AI)
@@ -94,7 +94,7 @@ LOCAL_LLM_SETUP.md         → Full documentation
 
 ### **4. System Prompt (Mexican Spanish)**
 ```
-"Eres PadreAI, un asistente de salud bilingüe para familias hispanas.
+"Eres MiSana, un asistente de salud bilingüe para familias hispanas.
 Hablas español mexicano (no castellano)..."
 ```
 - Configured for Mexican Spanish (not Castilian)
@@ -151,7 +151,7 @@ Optimized for: M1, M2, M3 Macs
 
 ## 🚀 Demo Script (For Investors/Users)
 
-**"Let me show you PadreAI - the first 100% private, offline health AI for Latino families."**
+**"Let me show you MiSana - the first 100% private, offline health AI for Latino families."**
 
 1. **Open app:** "No internet needed, no subscriptions."
 
@@ -174,7 +174,7 @@ Optimized for: M1, M2, M3 Macs
 
 ## 🎯 Why This Beats Cloud AI
 
-| Feature | PadreAI (Local) | ChatGPT/Cloud |
+| Feature | MiSana (Local) | ChatGPT/Cloud |
 |---------|----------------|---------------|
 | Cost | **$0 forever** | $20-50/month |
 | Privacy | **100% on-device** | ❌ Sent to servers |

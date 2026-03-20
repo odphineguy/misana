@@ -1,6 +1,6 @@
 //
 //  HealthKitService.swift
-//  PadreAI
+//  MiSana
 //
 //  Created by Abe Perez on 3/20/26.
 //
