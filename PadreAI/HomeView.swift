@@ -12,6 +12,7 @@ struct HomeView: View {
     @Binding var selectedLanguage: AppLanguage
     @EnvironmentObject private var healthKitService: HealthKitService
     @AppStorage("appTheme") private var appTheme: AppTheme = .system
+    @Environment(\.colorScheme) private var colorScheme
     @State private var showStepsDetail = false
     @State private var showHeartDetail = false
     @State private var showSleepDetail = false
@@ -22,7 +23,7 @@ struct HomeView: View {
                 VStack(spacing: 28) {
                     // Logo + Settings row
                     HStack {
-                        Image("MiSanaLogo")
+                        Image(colorScheme == .dark ? "MiSanaLogoDark" : "MiSanaLogo")
                             .resizable()
                             .scaledToFit()
                             .frame(height: 44)
