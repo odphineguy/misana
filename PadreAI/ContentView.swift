@@ -39,7 +39,7 @@ struct ContentView: View {
 
             SymptomCheckerView(selectedLanguage: selectedLanguage)
                 .tabItem {
-                    Label(selectedLanguage == .spanish ? "Síntomas" : "Symptoms",
+                    Label(selectedLanguage == .spanish ? "Sintomas" : "Symptoms",
                           systemImage: "heart.text.square.fill")
                 }
                 .tag(Tab.symptoms)

@@ -191,13 +191,13 @@ struct ModelDownloadView: View {
                     .font(.title2)
                     .fontWeight(.bold)
                 
-                Text(selectedLanguage == .spanish ? 
-                     "Para usar MiSana sin internet, necesitas descargar el modelo de inteligencia artificial (Gemma 3 4B)." : 
+                Text(selectedLanguage == .spanish ?
+                     "Para usar MiSana sin internet, necesitas descargar el modelo de inteligencia artificial (Gemma 3 4B)." :
                      "To use MiSana offline, you need to download the AI model (Gemma 3 4B).")
                     .font(.subheadline)
                     .foregroundStyle(.secondary)
                     .multilineTextAlignment(.center)
-                    .padding(.horizontal, 40)
+                    .padding(.horizontal, 16)
             }
             
             // Model Info

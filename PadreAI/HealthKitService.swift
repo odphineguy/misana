@@ -27,6 +27,16 @@ struct HealthSummary {
     var bloodOxygen: [DailySample] = []
     var bodyMass: Double?
 
+    // Detailed data for detail views
+    var deepSleep: [DailySample] = []
+    var remSleep: [DailySample] = []
+    var timeInBed: [DailySample] = []
+    var restingHeartRate: [DailySample] = []
+    var heartRateMin: [DailySample] = []
+    var heartRateMax: [DailySample] = []
+    var distance: [DailySample] = []
+    var flightsClimbed: [DailySample] = []
+
     var todaySteps: Int {
         Int(steps.last?.value ?? 0)
     }
@@ -37,6 +47,34 @@ struct HealthSummary {
 
     var lastNightSleep: Double {
         sleepHours.last?.value ?? 0
+    }
+
+    var lastRestingHR: Int {
+        Int(restingHeartRate.last?.value ?? 0)
+    }
+
+    var avgSleep: Double {
+        guard !sleepHours.isEmpty else { return 0 }
+        return sleepHours.map(\.value).reduce(0, +) / Double(sleepHours.count)
+    }
+
+    var avgSteps: Int {
+        guard !steps.isEmpty else { return 0 }
+        return Int(steps.map(\.value).reduce(0, +) / Double(steps.count))
+    }
+
+    var sleepQuality: Double {
+        guard !sleepHours.isEmpty, !timeInBed.isEmpty else { return 0 }
+        let totalAsleep = sleepHours.map(\.value).reduce(0, +)
+        let totalInBed = timeInBed.map(\.value).reduce(0, +)
+        guard totalInBed > 0 else { return 0 }
+        return min((totalAsleep / totalInBed) * 100, 100)
+    }
+
+    var sleepDeficit: Double {
+        let target = 8.0 * Double(sleepHours.count)
+        let actual = sleepHours.map(\.value).reduce(0, +)
+        return actual - target
     }
 
     var isEmpty: Bool {
@@ -120,6 +158,9 @@ class HealthKitService: ObservableObject {
         if let diastolic = HKQuantityType.quantityType(forIdentifier: .bloodPressureDiastolic) { types.insert(diastolic) }
         if let bloodOxygen = HKQuantityType.quantityType(forIdentifier: .oxygenSaturation) { types.insert(bloodOxygen) }
         if let bodyMass = HKQuantityType.quantityType(forIdentifier: .bodyMass) { types.insert(bodyMass) }
+        if let restingHR = HKQuantityType.quantityType(forIdentifier: .restingHeartRate) { types.insert(restingHR) }
+        if let distance = HKQuantityType.quantityType(forIdentifier: .distanceWalkingRunning) { types.insert(distance) }
+        if let flights = HKQuantityType.quantityType(forIdentifier: .flightsClimbed) { types.insert(flights) }
         return types
     }
 
@@ -148,6 +189,12 @@ class HealthKitService: ObservableObject {
         async let dia = fetchDailySamples(identifier: .bloodPressureDiastolic, unit: .millimeterOfMercury())
         async let o2 = fetchDailySamples(identifier: .oxygenSaturation, unit: .percent())
         async let mass = fetchLatestQuantity(identifier: .bodyMass, unit: HKUnit.gramUnit(with: .kilo))
+        async let restingHR = fetchDailySamples(identifier: .restingHeartRate, unit: HKUnit.count().unitDivided(by: .minute()))
+        async let hrMin = fetchDailyMinMax(identifier: .heartRate, unit: HKUnit.count().unitDivided(by: .minute()), option: .discreteMin)
+        async let hrMax = fetchDailyMinMax(identifier: .heartRate, unit: HKUnit.count().unitDivided(by: .minute()), option: .discreteMax)
+        async let dist = fetchDailySum(identifier: .distanceWalkingRunning, unit: .meter())
+        async let flights = fetchDailySum(identifier: .flightsClimbed, unit: .count())
+        async let sleepDetail = fetchDetailedSleepData()
 
         summary.steps = await steps
         summary.heartRate = await hr
@@ -157,6 +204,16 @@ class HealthKitService: ObservableObject {
         summary.diastolic = await dia
         summary.bloodOxygen = await o2
         summary.bodyMass = await mass
+        summary.restingHeartRate = await restingHR
+        summary.heartRateMin = await hrMin
+        summary.heartRateMax = await hrMax
+        summary.distance = await dist
+        summary.flightsClimbed = await flights
+
+        let detail = await sleepDetail
+        summary.deepSleep = detail.deep
+        summary.remSleep = detail.rem
+        summary.timeInBed = detail.inBed
 
         isLoading = false
     }
@@ -275,6 +332,105 @@ class HealthKitService: ObservableObject {
                 let sorted = nightlyHours.sorted { $0.key < $1.key }
                     .map { DailySample(date: $0.key, value: $0.value) }
                 continuation.resume(returning: sorted)
+            }
+
+            store.execute(query)
+        }
+    }
+
+    /// Fetch daily min or max for the last 7 days
+    private func fetchDailyMinMax(identifier: HKQuantityTypeIdentifier, unit: HKUnit, option: HKStatisticsOptions) async -> [DailySample] {
+        guard let quantityType = HKQuantityType.quantityType(forIdentifier: identifier) else { return [] }
+
+        let calendar = Calendar.current
+        let endDate = Date()
+        guard let startDate = calendar.date(byAdding: .day, value: -6, to: calendar.startOfDay(for: endDate)) else { return [] }
+
+        let predicate = HKQuery.predicateForSamples(withStart: startDate, end: endDate, options: .strictStartDate)
+        let interval = DateComponents(day: 1)
+        let anchorDate = calendar.startOfDay(for: endDate)
+
+        return await withCheckedContinuation { continuation in
+            let query = HKStatisticsCollectionQuery(
+                quantityType: quantityType,
+                quantitySamplePredicate: predicate,
+                options: option,
+                anchorDate: anchorDate,
+                intervalComponents: interval
+            )
+
+            query.initialResultsHandler = { _, results, _ in
+                var samples: [DailySample] = []
+                results?.enumerateStatistics(from: startDate, to: endDate) { stats, _ in
+                    let value: Double?
+                    if option == .discreteMin {
+                        value = stats.minimumQuantity()?.doubleValue(for: unit)
+                    } else {
+                        value = stats.maximumQuantity()?.doubleValue(for: unit)
+                    }
+                    if let v = value {
+                        samples.append(DailySample(date: stats.startDate, value: v))
+                    }
+                }
+                continuation.resume(returning: samples)
+            }
+
+            store.execute(query)
+        }
+    }
+
+    /// Fetch detailed sleep data broken down by stage
+    private func fetchDetailedSleepData() async -> (deep: [DailySample], rem: [DailySample], inBed: [DailySample]) {
+        guard let sleepType = HKCategoryType.categoryType(forIdentifier: .sleepAnalysis) else { return ([], [], []) }
+
+        let calendar = Calendar.current
+        let endDate = Date()
+        guard let startDate = calendar.date(byAdding: .day, value: -7, to: calendar.startOfDay(for: endDate)) else { return ([], [], []) }
+
+        let predicate = HKQuery.predicateForSamples(withStart: startDate, end: endDate, options: .strictStartDate)
+        let sortDescriptor = NSSortDescriptor(key: HKSampleSortIdentifierStartDate, ascending: true)
+
+        return await withCheckedContinuation { continuation in
+            let query = HKSampleQuery(
+                sampleType: sleepType,
+                predicate: predicate,
+                limit: HKObjectQueryNoLimit,
+                sortDescriptors: [sortDescriptor]
+            ) { _, results, _ in
+                guard let samples = results as? [HKCategorySample] else {
+                    continuation.resume(returning: ([], [], []))
+                    return
+                }
+
+                var deepByNight: [Date: Double] = [:]
+                var remByNight: [Date: Double] = [:]
+                var inBedByNight: [Date: Double] = [:]
+
+                for sample in samples {
+                    let duration = sample.endDate.timeIntervalSince(sample.startDate) / 3600.0
+                    let nightDate = calendar.startOfDay(for: sample.startDate)
+
+                    switch sample.value {
+                    case HKCategoryValueSleepAnalysis.inBed.rawValue:
+                        inBedByNight[nightDate, default: 0] += duration
+                    case HKCategoryValueSleepAnalysis.asleepDeep.rawValue:
+                        deepByNight[nightDate, default: 0] += duration
+                    case HKCategoryValueSleepAnalysis.asleepREM.rawValue:
+                        remByNight[nightDate, default: 0] += duration
+                    case HKCategoryValueSleepAnalysis.asleepUnspecified.rawValue,
+                         HKCategoryValueSleepAnalysis.asleepCore.rawValue:
+                        // Count all asleep time as in-bed too if no explicit inBed samples
+                        inBedByNight[nightDate, default: 0] += duration
+                    default:
+                        break
+                    }
+                }
+
+                let deep = deepByNight.sorted { $0.key < $1.key }.map { DailySample(date: $0.key, value: $0.value) }
+                let rem = remByNight.sorted { $0.key < $1.key }.map { DailySample(date: $0.key, value: $0.value) }
+                let inBed = inBedByNight.sorted { $0.key < $1.key }.map { DailySample(date: $0.key, value: $0.value) }
+
+                continuation.resume(returning: (deep, rem, inBed))
             }
 
             store.execute(query)

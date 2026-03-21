@@ -265,6 +265,7 @@
 				DEVELOPMENT_TEAM = K5BU9QZMNW;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_CFBundleDisplayName = MiSana;
 				INFOPLIST_KEY_NSCameraUsageDescription = "MiSana necesita acceso a la cámara para escanear etiquetas de medicinas y recetas.";
 				INFOPLIST_KEY_NSHealthShareUsageDescription = "MiSana usa tus datos de salud para darte recomendaciones personalizadas. Tus datos nunca salen de tu dispositivo.";
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
@@ -301,6 +302,7 @@
 				DEVELOPMENT_TEAM = K5BU9QZMNW;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_CFBundleDisplayName = MiSana;
 				INFOPLIST_KEY_NSCameraUsageDescription = "MiSana necesita acceso a la cámara para escanear etiquetas de medicinas y recetas.";
 				INFOPLIST_KEY_NSHealthShareUsageDescription = "MiSana usa tus datos de salud para darte recomendaciones personalizadas. Tus datos nunca salen de tu dispositivo.";
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;

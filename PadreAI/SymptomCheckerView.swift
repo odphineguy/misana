@@ -11,70 +11,99 @@ struct SymptomCheckerView: View {
     let selectedLanguage: AppLanguage
     @State private var selectedSymptoms: Set<Symptom> = []
     @State private var navigateToChat = false
-    
+    @State private var searchText = ""
+
     var body: some View {
         NavigationStack {
-            VStack(spacing: 0) {
-                // Header
-                VStack(spacing: 12) {
-                    Image(systemName: "heart.text.square.fill")
-                        .font(.system(size: 48))
-                        .foregroundStyle(.red)
-                    
-                    Text(selectedLanguage == .spanish ? 
-                         "¿Qué estás sintiendo?" : 
-                         "What are you feeling?")
-                        .font(.title2)
-                        .fontWeight(.bold)
-                    
-                    Text(selectedLanguage == .spanish ? 
-                         "Selecciona tus síntomas" : 
-                         "Select your symptoms")
-                        .font(.subheadline)
-                        .foregroundStyle(.secondary)
-                }
-                .padding(.vertical, 24)
-                
-                // Symptom Categories
+            ZStack(alignment: .bottom) {
                 ScrollView {
-                    VStack(spacing: 16) {
-                        symptomCategory(
-                            title: selectedLanguage == .spanish ? "Comunes" : "Common",
-                            symptoms: commonSymptoms
-                        )
-                        
-                        symptomCategory(
-                            title: selectedLanguage == .spanish ? "Respiratorios" : "Respiratory",
-                            symptoms: respiratorySymptoms
-                        )
-                        
-                        symptomCategory(
-                            title: selectedLanguage == .spanish ? "Digestivos" : "Digestive",
-                            symptoms: digestiveSymptoms
-                        )
+                    VStack(spacing: 24) {
+                        // Header
+                        VStack(alignment: .leading, spacing: 4) {
+                            Text(selectedLanguage == .spanish ?
+                                 "Que estas sintiendo?" :
+                                 "What are you feeling?")
+                                .font(.system(size: 28, weight: .bold))
+                            Text(selectedLanguage == .spanish ?
+                                 "Selecciona tus sintomas" :
+                                 "Select your symptoms")
+                                .font(.subheadline)
+                                .foregroundStyle(.secondary)
+                        }
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                        .padding(.horizontal)
+
+                        // Search bar
+                        HStack(spacing: 8) {
+                            Image(systemName: "magnifyingglass")
+                                .foregroundStyle(.secondary)
+                            TextField(
+                                selectedLanguage == .spanish ?
+                                    "Buscar sintomas" :
+                                    "Search symptoms",
+                                text: $searchText
+                            )
+                            .font(.subheadline)
+                        }
+                        .padding(12)
+                        .background(Color(uiColor: .secondarySystemGroupedBackground))
+                        .clipShape(RoundedRectangle(cornerRadius: 12))
+                        .padding(.horizontal)
+
+                        // Symptom Categories
+                        VStack(spacing: 20) {
+                            symptomCategory(
+                                title: selectedLanguage == .spanish ? "Comunes" : "Common",
+                                symptoms: filteredSymptoms(commonSymptoms)
+                            )
+
+                            symptomCategory(
+                                title: selectedLanguage == .spanish ? "Respiratorios" : "Respiratory",
+                                symptoms: filteredSymptoms(respiratorySymptoms)
+                            )
+
+                            symptomCategory(
+                                title: selectedLanguage == .spanish ? "Digestivos" : "Digestive",
+                                symptoms: filteredSymptoms(digestiveSymptoms)
+                            )
+                        }
+                        .padding(.horizontal)
+
+                        // Bottom spacer for floating button
+                        if !selectedSymptoms.isEmpty {
+                            Spacer().frame(height: 80)
+                        }
                     }
-                    .padding()
+                    .padding(.top, 8)
                 }
-                
-                // Action Button
+
+                // Floating CTA
                 if !selectedSymptoms.isEmpty {
                     Button {
                         navigateToChat = true
                     } label: {
-                        Text(selectedLanguage == .spanish ?
-                             "Revisar \(selectedSymptoms.count) síntoma(s) con IA" :
-                             "Check \(selectedSymptoms.count) symptom(s) with AI")
-                            .font(.headline)
-                            .foregroundStyle(.white)
-                            .frame(maxWidth: .infinity)
-                            .padding()
-                            .background(Color.red)
-                            .clipShape(RoundedRectangle(cornerRadius: 12))
+                        HStack {
+                            Image(systemName: "brain.head.profile")
+                                .font(.body)
+                            Text(selectedLanguage == .spanish ?
+                                 "Revisar \(selectedSymptoms.count) sintoma\(selectedSymptoms.count == 1 ? "" : "s") con IA" :
+                                 "Check \(selectedSymptoms.count) symptom\(selectedSymptoms.count == 1 ? "" : "s") with AI")
+                                .fontWeight(.semibold)
+                        }
+                        .font(.subheadline)
+                        .foregroundStyle(.white)
+                        .frame(maxWidth: .infinity)
+                        .padding(.vertical, 14)
+                        .background(Color.red)
+                        .clipShape(RoundedRectangle(cornerRadius: 14))
                     }
-                    .padding()
+                    .padding(.horizontal)
+                    .padding(.bottom, 8)
+                    .transition(.move(edge: .bottom).combined(with: .opacity))
+                    .animation(.spring(response: 0.3), value: selectedSymptoms.isEmpty)
                 }
             }
-            .navigationTitle(selectedLanguage == .spanish ? "Síntomas" : "Symptoms")
+            .navigationTitle(selectedLanguage == .spanish ? "Sintomas" : "Symptoms")
             .navigationDestination(isPresented: $navigateToChat) {
                 HealthChatView(
                     selectedLanguage: selectedLanguage,
@@ -83,56 +112,69 @@ struct SymptomCheckerView: View {
             }
         }
     }
-    
+
+    private func filteredSymptoms(_ symptoms: [Symptom]) -> [Symptom] {
+        guard !searchText.isEmpty else { return symptoms }
+        return symptoms.filter {
+            $0.nameES.localizedCaseInsensitiveContains(searchText) ||
+            $0.nameEN.localizedCaseInsensitiveContains(searchText)
+        }
+    }
+
     private func symptomCategory(title: String, symptoms: [Symptom]) -> some View {
-        VStack(alignment: .leading, spacing: 12) {
-            Text(title)
-                .font(.headline)
-                .foregroundStyle(.secondary)
-            
-            LazyVGrid(columns: [GridItem(.adaptive(minimum: 130))], spacing: 12) {
-                ForEach(symptoms) { symptom in
-                    SymptomButton(
-                        symptom: symptom,
-                        isSelected: selectedSymptoms.contains(symptom),
-                        selectedLanguage: selectedLanguage
-                    ) {
-                        if selectedSymptoms.contains(symptom) {
-                            selectedSymptoms.remove(symptom)
-                        } else {
-                            selectedSymptoms.insert(symptom)
+        Group {
+            if !symptoms.isEmpty {
+                VStack(alignment: .leading, spacing: 10) {
+                    Text(title)
+                        .font(.headline)
+
+                    LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible())], spacing: 10) {
+                        ForEach(symptoms) { symptom in
+                            SymptomChip(
+                                symptom: symptom,
+                                isSelected: selectedSymptoms.contains(symptom),
+                                selectedLanguage: selectedLanguage
+                            ) {
+                                withAnimation(.spring(response: 0.25)) {
+                                    if selectedSymptoms.contains(symptom) {
+                                        selectedSymptoms.remove(symptom)
+                                    } else {
+                                        selectedSymptoms.insert(symptom)
+                                    }
+                                }
+                            }
                         }
                     }
                 }
             }
         }
     }
-    
-    // Sample symptom data
+
+    // Symptom data
     private var commonSymptoms: [Symptom] {
         [
             Symptom(nameES: "Fiebre", nameEN: "Fever", icon: "thermometer"),
             Symptom(nameES: "Dolor de cabeza", nameEN: "Headache", icon: "brain.head.profile"),
             Symptom(nameES: "Fatiga", nameEN: "Fatigue", icon: "bed.double.fill"),
-            Symptom(nameES: "Dolor muscular", nameEN: "Muscle pain", icon: "figure.arms.open")
+            Symptom(nameES: "Mareos", nameEN: "Dizziness", icon: "arrow.triangle.2.circlepath")
         ]
     }
-    
+
     private var respiratorySymptoms: [Symptom] {
         [
             Symptom(nameES: "Tos", nameEN: "Cough", icon: "wind"),
-            Symptom(nameES: "Dolor de garganta", nameEN: "Sore throat", icon: "mouth"),
-            Symptom(nameES: "Nariz congestionada", nameEN: "Stuffy nose", icon: "nose"),
-            Symptom(nameES: "Falta de aire", nameEN: "Shortness of breath", icon: "lungs.fill")
+            Symptom(nameES: "Congestion", nameEN: "Congestion", icon: "nose"),
+            Symptom(nameES: "Dificultad respirar", nameEN: "Shortness of breath", icon: "lungs.fill"),
+            Symptom(nameES: "Garganta", nameEN: "Sore Throat", icon: "mouth")
         ]
     }
-    
+
     private var digestiveSymptoms: [Symptom] {
         [
-            Symptom(nameES: "Náusea", nameEN: "Nausea", icon: "drop.fill"),
-            Symptom(nameES: "Dolor de estómago", nameEN: "Stomach pain", icon: "cross.case.fill"),
+            Symptom(nameES: "Nausea", nameEN: "Nausea", icon: "drop.fill"),
+            Symptom(nameES: "Dolor de estomago", nameEN: "Stomach pain", icon: "cross.case.fill"),
             Symptom(nameES: "Diarrea", nameEN: "Diarrhea", icon: "toilet.fill"),
-            Symptom(nameES: "Vómito", nameEN: "Vomiting", icon: "xmark.circle.fill")
+            Symptom(nameES: "Vomito", nameEN: "Vomiting", icon: "xmark.circle.fill")
         ]
     }
 
@@ -142,7 +184,7 @@ struct SymptomCheckerView: View {
             .joined(separator: ", ")
 
         if selectedLanguage == .spanish {
-            return "Tengo estos síntomas: \(symptomNames). ¿Qué me recomiendas? ¿Debería ir al doctor?"
+            return "Tengo estos sintomas: \(symptomNames). Que me recomiendas? Deberia ir al doctor?"
         } else {
             return "I have these symptoms: \(symptomNames). What do you recommend? Should I see a doctor?"
         }
@@ -150,44 +192,50 @@ struct SymptomCheckerView: View {
 }
 
 struct Symptom: Identifiable, Hashable {
-    let id = UUID()
+    var id: String { nameEN }
     let nameES: String
     let nameEN: String
     let icon: String
-    
+
     func name(for language: AppLanguage) -> String {
         language == .spanish ? nameES : nameEN
     }
+
+    func hash(into hasher: inout Hasher) {
+        hasher.combine(nameEN)
+    }
+
+    static func == (lhs: Symptom, rhs: Symptom) -> Bool {
+        lhs.nameEN == rhs.nameEN
+    }
 }
 
-struct SymptomButton: View {
+struct SymptomChip: View {
     let symptom: Symptom
     let isSelected: Bool
     let selectedLanguage: AppLanguage
     let action: () -> Void
-    
+
     var body: some View {
         Button(action: action) {
-            HStack {
+            HStack(spacing: 8) {
                 Image(systemName: symptom.icon)
-                    .font(.title3)
+                    .font(.system(size: 16))
                     .foregroundStyle(isSelected ? .white : .primary)
-                
+
                 Text(symptom.name(for: selectedLanguage))
-                    .font(.subheadline)
+                    .font(.caption)
+                    .fontWeight(.medium)
                     .foregroundStyle(isSelected ? .white : .primary)
                     .lineLimit(1)
                     .minimumScaleFactor(0.8)
-                
+
                 Spacer()
             }
-            .padding()
-            .background(isSelected ? Color.red : Color.secondary.opacity(0.15))
+            .padding(.horizontal, 12)
+            .padding(.vertical, 10)
+            .background(isSelected ? Color.red : Color(uiColor: .secondarySystemGroupedBackground))
             .clipShape(RoundedRectangle(cornerRadius: 12))
-            .overlay(
-                RoundedRectangle(cornerRadius: 12)
-                    .stroke(isSelected ? Color.red : Color.clear, lineWidth: 2)
-            )
         }
         .buttonStyle(.plain)
     }

@@ -282,30 +282,44 @@ struct MedicationView: View {
     // MARK: - Medication List
 
     private var medicationListView: some View {
-        List {
-            if !drugService.interactions.isEmpty {
-                Section {
-                    ForEach(drugService.interactions) { interaction in
-                        HStack(spacing: 10) {
+        ScrollView {
+            VStack(spacing: 16) {
+                // Interaction Warning Banner
+                if !drugService.interactions.isEmpty {
+                    VStack(alignment: .leading, spacing: 8) {
+                        HStack(spacing: 8) {
                             Image(systemName: "exclamationmark.triangle.fill")
-                                .foregroundStyle(.red)
+                                .foregroundStyle(.white)
+                                .font(.title3)
                             VStack(alignment: .leading, spacing: 2) {
-                                Text("\(interaction.drug1Name) + \(interaction.drug2Name)")
+                                Text(selectedLanguage == .spanish ?
+                                     "Alerta de Interaccion" :
+                                     "Interaction Warning")
                                     .font(.subheadline)
-                                    .fontWeight(.medium)
-                                Text(interaction.description)
-                                    .font(.caption)
-                                    .foregroundStyle(.secondary)
-                                    .lineLimit(3)
+                                    .fontWeight(.bold)
+                                    .foregroundStyle(.white)
+                                Text(selectedLanguage == .spanish ?
+                                     "ALERTA DE INTERACCION" :
+                                     "INTERACTION WARNING")
+                                    .font(.system(size: 9, weight: .medium))
+                                    .foregroundStyle(.white.opacity(0.8))
                             }
+                            Spacer()
+                        }
+                        ForEach(drugService.interactions) { interaction in
+                            Text("\(interaction.drug1Name) + \(interaction.drug2Name): \(interaction.description)")
+                                .font(.caption)
+                                .foregroundStyle(.white.opacity(0.9))
+                                .lineLimit(2)
                         }
                     }
-                } header: {
-                    Text(selectedLanguage == .spanish ? "Interacciones" : "Interactions")
+                    .padding()
+                    .background(Color.red.gradient)
+                    .clipShape(RoundedRectangle(cornerRadius: 16))
+                    .padding(.horizontal)
                 }
-            }
 
-            Section {
+                // Medication Cards
                 ForEach(medications) { medication in
                     NavigationLink {
                         MedicationDetailView(
@@ -314,15 +328,24 @@ struct MedicationView: View {
                             drugService: drugService
                         )
                     } label: {
-                        MedicationRowView(medication: medication, selectedLanguage: selectedLanguage)
+                        MedicationCardView(medication: medication, selectedLanguage: selectedLanguage)
+                    }
+                    .buttonStyle(.plain)
+                    .contextMenu {
+                        Button(role: .destructive) {
+                            if let idx = medications.firstIndex(where: { $0.id == medication.id }) {
+                                medications.remove(at: idx)
+                                saveMedications()
+                                refreshInteractions()
+                            }
+                        } label: {
+                            Label(selectedLanguage == .spanish ? "Eliminar" : "Delete", systemImage: "trash")
+                        }
                     }
                 }
-                .onDelete { indexSet in
-                    medications.remove(atOffsets: indexSet)
-                    saveMedications()
-                    refreshInteractions()
-                }
+                .padding(.horizontal)
             }
+            .padding(.vertical)
         }
     }
 
@@ -524,7 +547,7 @@ struct MedicationView: View {
 
 // MARK: - Medication Row
 
-struct MedicationRowView: View {
+struct MedicationCardView: View {
     let medication: Medication
     let selectedLanguage: AppLanguage
 
@@ -534,35 +557,75 @@ struct MedicationRowView: View {
             ZStack {
                 Circle()
                     .fill((medication.pillColor?.color ?? .blue).gradient)
-                    .frame(width: 48, height: 48)
+                    .frame(width: 52, height: 52)
+                    .shadow(color: (medication.pillColor?.color ?? .blue).opacity(0.3), radius: 4, y: 2)
                 Image(systemName: medication.type?.icon ?? "pill.fill")
                     .font(.title3)
                     .foregroundStyle(medication.pillColor == .white ? .gray : .white)
             }
 
             VStack(alignment: .leading, spacing: 4) {
-                Text(medication.name)
-                    .font(.headline)
-                    .lineLimit(1)
-                HStack(spacing: 8) {
-                    if !medication.dosage.isEmpty {
-                        Text(medication.dosage)
-                            .font(.subheadline)
-                            .foregroundStyle(.secondary)
+                HStack {
+                    Text(medication.name)
+                        .font(.subheadline)
+                        .fontWeight(.semibold)
+                        .lineLimit(1)
+                    Spacer()
+                    // Schedule chip
+                    if let freq = medication.scheduleFrequency {
+                        Text(freq == .daily ? (selectedLanguage == .spanish ? "DIARIO" : "DAILY") :
+                             freq.label(for: selectedLanguage).uppercased())
+                            .font(.system(size: 9, weight: .bold))
+                            .padding(.horizontal, 8)
+                            .padding(.vertical, 3)
+                            .background(Color.green.opacity(0.15))
+                            .foregroundStyle(.green)
+                            .clipShape(Capsule())
                     }
-                    if !medication.frequency.isEmpty {
-                        Text("·")
-                            .foregroundStyle(.secondary)
-                        Text(medication.frequency)
-                            .font(.subheadline)
-                            .foregroundStyle(.secondary)
-                            .lineLimit(1)
+                }
+
+                if !medication.dosage.isEmpty || !medication.frequency.isEmpty {
+                    HStack(spacing: 10) {
+                        if !medication.dosage.isEmpty {
+                            HStack(spacing: 3) {
+                                Image(systemName: "pills.fill")
+                                    .font(.system(size: 10))
+                                    .foregroundStyle(.secondary)
+                                Text(medication.dosage)
+                                    .font(.caption)
+                                    .foregroundStyle(.secondary)
+                            }
+                        }
+                        if let time = medication.scheduleTime {
+                            HStack(spacing: 3) {
+                                Image(systemName: "clock.fill")
+                                    .font(.system(size: 10))
+                                    .foregroundStyle(.secondary)
+                                Text(time, style: .time)
+                                    .font(.caption)
+                                    .foregroundStyle(.secondary)
+                            }
+                        }
                     }
                 }
             }
-            Spacer()
+
+            Image(systemName: "chevron.right")
+                .font(.caption2)
+                .foregroundStyle(.tertiary)
         }
-        .padding(.vertical, 4)
+        .padding(14)
+        .background(Color(uiColor: .secondarySystemGroupedBackground))
+        .clipShape(RoundedRectangle(cornerRadius: 16))
+    }
+}
+
+// Keep for backward compat with any other usage
+struct MedicationRowView: View {
+    let medication: Medication
+    let selectedLanguage: AppLanguage
+    var body: some View {
+        MedicationCardView(medication: medication, selectedLanguage: selectedLanguage)
     }
 }
 

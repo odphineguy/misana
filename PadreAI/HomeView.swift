@@ -12,80 +12,94 @@ struct HomeView: View {
     @Binding var selectedLanguage: AppLanguage
     @EnvironmentObject private var healthKitService: HealthKitService
     @AppStorage("appTheme") private var appTheme: AppTheme = .system
-    @State private var userName: String = ""
-    @State private var showHealthDetail = false
+    @State private var showStepsDetail = false
+    @State private var showHeartDetail = false
+    @State private var showSleepDetail = false
 
     var body: some View {
         NavigationStack {
             ScrollView {
-                VStack(spacing: 24) {
+                VStack(spacing: 28) {
                     // Welcome Header
-                    VStack(spacing: 8) {
-                        Text(greeting)
-                            .font(.largeTitle)
-                            .fontWeight(.bold)
-
-                        Text(tagline)
-                            .font(.title3)
+                    VStack(alignment: .leading, spacing: 4) {
+                        Text(selectedLanguage == .spanish ? "Hola!" : "Hello!")
+                            .font(.system(size: 32, weight: .bold))
+                        Text(selectedLanguage == .spanish ?
+                             "Bienvenido a tu santuario de salud." :
+                             "Welcome back to your health sanctuary.")
+                            .font(.subheadline)
                             .foregroundStyle(.secondary)
-                            .multilineTextAlignment(.center)
                     }
-                    .padding(.top, 20)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .padding(.horizontal)
+                    .padding(.top, 8)
 
-                    // Health Dashboard Card
+                    // Health Dashboard
                     if healthKitService.isAvailable {
                         healthDashboardCard
                             .padding(.horizontal)
                     }
 
                     // Quick Actions
-                    VStack(spacing: 16) {
-                        NavigationLink(destination: MedicationView(selectedLanguage: selectedLanguage)) {
-                            QuickActionCard(
-                                icon: "camera.fill",
-                                title: selectedLanguage == .spanish ? "Escanear Receta" : "Scan Prescription",
-                                subtitle: selectedLanguage == .spanish ? "Lee etiquetas de medicinas" : "Read medication labels",
-                                color: .blue
-                            )
+                    VStack(alignment: .leading, spacing: 12) {
+                        Text(selectedLanguage == .spanish ? "Acciones" : "Quick Actions")
+                            .font(.headline)
+                            .foregroundStyle(.secondary)
+                            .padding(.horizontal)
+
+                        VStack(spacing: 12) {
+                            NavigationLink(destination: MedicationView(selectedLanguage: selectedLanguage)) {
+                                ActionCard(
+                                    icon: "camera.viewfinder",
+                                    iconColor: .blue,
+                                    title: selectedLanguage == .spanish ? "Escanear Receta" : "Scan Prescription",
+                                    subtitle: selectedLanguage == .spanish ?
+                                        "Escanea la etiqueta para agregarla automaticamente." :
+                                        "Scan your medication label to add it automatically."
+                                )
+                            }
+                            .buttonStyle(.plain)
+
+                            NavigationLink(destination: SymptomCheckerView(selectedLanguage: selectedLanguage)) {
+                                ActionCard(
+                                    icon: "stethoscope",
+                                    iconColor: .red,
+                                    title: selectedLanguage == .spanish ? "Revisar Sintomas" : "Check Symptoms",
+                                    subtitle: selectedLanguage == .spanish ?
+                                        "Revisa lo que sientes con tu asistente de IA." :
+                                        "Check what you are feeling with your AI assistant."
+                                )
+                            }
+                            .buttonStyle(.plain)
+
+                            NavigationLink(destination: AppointmentPrepView(selectedLanguage: selectedLanguage)) {
+                                ActionCard(
+                                    icon: "list.clipboard.fill",
+                                    iconColor: .green,
+                                    title: selectedLanguage == .spanish ? "Preparar Cita" : "Prepare Appointment",
+                                    subtitle: selectedLanguage == .spanish ?
+                                        "Organiza tus preguntas para tu proxima cita." :
+                                        "Organize your questions for your next doctor visit."
+                                )
+                            }
+                            .buttonStyle(.plain)
                         }
-                        .buttonStyle(.plain)
-                        
-                        NavigationLink(destination: SymptomCheckerView(selectedLanguage: selectedLanguage)) {
-                            QuickActionCard(
-                                icon: "stethoscope",
-                                title: selectedLanguage == .spanish ? "Revisar Síntomas" : "Check Symptoms",
-                                subtitle: selectedLanguage == .spanish ? "¿Qué estás sintiendo?" : "What are you feeling?",
-                                color: .red
-                            )
-                        }
-                        .buttonStyle(.plain)
-                        
-                        NavigationLink(destination: AppointmentPrepView(selectedLanguage: selectedLanguage)) {
-                            QuickActionCard(
-                                icon: "list.clipboard.fill",
-                                title: selectedLanguage == .spanish ? "Preparar Cita" : "Prepare Appointment",
-                                subtitle: selectedLanguage == .spanish ? "Preguntas para el doctor" : "Questions for the doctor",
-                                color: .green
-                            )
-                        }
-                        .buttonStyle(.plain)
+                        .padding(.horizontal)
                     }
-                    .padding(.horizontal)
-                    
-                    Spacer()
+
+                    Spacer(minLength: 20)
                 }
             }
-            .navigationTitle(selectedLanguage == .spanish ? "MiSana" : "MiSana")
+            .navigationTitle("MiSana")
             .toolbar {
                 ToolbarItem(placement: .automatic) {
                     Menu {
-                        // Language
                         Section(selectedLanguage == .spanish ? "Idioma" : "Language") {
                             Button {
                                 selectedLanguage = .spanish
                             } label: {
                                 HStack {
-                                    Text("Español")
+                                    Text("Espanol")
                                     if selectedLanguage == .spanish {
                                         Image(systemName: "checkmark")
                                     }
@@ -103,7 +117,6 @@ struct HomeView: View {
                             }
                         }
 
-                        // Theme
                         Section(selectedLanguage == .spanish ? "Tema" : "Theme") {
                             ForEach(AppTheme.allCases, id: \.self) { theme in
                                 Button {
@@ -119,67 +132,113 @@ struct HomeView: View {
                             }
                         }
                     } label: {
-                        Image(systemName: "gearshape")
+                        Image(systemName: "gearshape.fill")
                             .font(.title3)
                     }
                 }
             }
         }
     }
-    
+
     // MARK: - Health Dashboard Card
 
     @ViewBuilder
     private var healthDashboardCard: some View {
         if healthKitService.isAuthorized {
-            Button {
-                showHealthDetail = true
-            } label: {
-                VStack(spacing: 12) {
-                    HStack {
-                        Image(systemName: "heart.fill")
-                            .foregroundStyle(.pink)
-                        Text(selectedLanguage == .spanish ? "Tu Salud Hoy" : "Your Health Today")
-                            .font(.headline)
-                        Spacer()
-                        Image(systemName: "chevron.right")
-                            .foregroundStyle(.secondary)
+            VStack(spacing: 12) {
+                HStack(spacing: 12) {
+                    // Steps card
+                    Button { showStepsDetail = true } label: {
+                        VStack(alignment: .leading, spacing: 8) {
+                            HStack(spacing: 6) {
+                                Image(systemName: "figure.walk")
+                                    .font(.caption)
+                                    .foregroundStyle(.blue)
+                                Text(selectedLanguage == .spanish ? "PASOS" : "STEPS")
+                                    .font(.system(size: 10, weight: .semibold))
+                                    .foregroundStyle(.secondary)
+                            }
+                            Text("\(healthKitService.summary.todaySteps)")
+                                .font(.system(size: 28, weight: .bold))
+                            Text(selectedLanguage == .spanish ? "pasos diarios" : "daily steps")
+                                .font(.caption2)
+                                .foregroundStyle(.secondary)
+                        }
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                        .padding()
+                        .background(Color.blue.opacity(0.08))
+                        .clipShape(RoundedRectangle(cornerRadius: 16))
                     }
+                    .buttonStyle(.plain)
 
-                    HStack(spacing: 20) {
-                        healthStat(
-                            icon: "figure.walk",
-                            value: "\(healthKitService.summary.todaySteps)",
-                            label: selectedLanguage == .spanish ? "Pasos" : "Steps",
-                            color: .green
-                        )
-                        healthStat(
-                            icon: "heart.fill",
-                            value: healthKitService.summary.lastHeartRate > 0 ? "\(healthKitService.summary.lastHeartRate)" : "--",
-                            label: "BPM",
-                            color: .red
-                        )
-                        healthStat(
-                            icon: "moon.fill",
-                            value: healthKitService.summary.lastNightSleep > 0 ? String(format: "%.1f", healthKitService.summary.lastNightSleep) : "--",
-                            label: selectedLanguage == .spanish ? "Horas" : "Hours",
-                            color: .indigo
-                        )
+                    VStack(spacing: 12) {
+                        // Heart Rate card
+                        Button { showHeartDetail = true } label: {
+                            VStack(alignment: .leading, spacing: 4) {
+                                HStack(spacing: 4) {
+                                    Image(systemName: "heart.fill")
+                                        .font(.system(size: 10))
+                                        .foregroundStyle(.red)
+                                    Text(selectedLanguage == .spanish ? "CORAZON" : "HEART RATE")
+                                        .font(.system(size: 8, weight: .semibold))
+                                        .foregroundStyle(.secondary)
+                                }
+                                HStack(alignment: .firstTextBaseline, spacing: 2) {
+                                    Text(healthKitService.summary.lastHeartRate > 0 ?
+                                         "\(healthKitService.summary.lastHeartRate)" : "--")
+                                        .font(.system(size: 20, weight: .bold))
+                                    Text("BPM")
+                                        .font(.system(size: 9, weight: .medium))
+                                        .foregroundStyle(.secondary)
+                                }
+                            }
+                            .frame(maxWidth: .infinity, alignment: .leading)
+                            .padding(10)
+                            .background(Color.red.opacity(0.08))
+                            .clipShape(RoundedRectangle(cornerRadius: 12))
+                        }
+                        .buttonStyle(.plain)
+
+                        // Sleep card
+                        Button { showSleepDetail = true } label: {
+                            VStack(alignment: .leading, spacing: 4) {
+                                HStack(spacing: 4) {
+                                    Image(systemName: "moon.fill")
+                                        .font(.system(size: 10))
+                                        .foregroundStyle(.indigo)
+                                    Text(selectedLanguage == .spanish ? "SUENO" : "SLEEP")
+                                        .font(.system(size: 8, weight: .semibold))
+                                        .foregroundStyle(.secondary)
+                                }
+                                HStack(alignment: .firstTextBaseline, spacing: 2) {
+                                    if healthKitService.summary.lastNightSleep > 0 {
+                                        let hours = Int(healthKitService.summary.lastNightSleep)
+                                        let mins = Int((healthKitService.summary.lastNightSleep - Double(hours)) * 60)
+                                        Text("\(hours)h \(mins)m")
+                                            .font(.system(size: 20, weight: .bold))
+                                    } else {
+                                        Text("--")
+                                            .font(.system(size: 20, weight: .bold))
+                                    }
+                                }
+                            }
+                            .frame(maxWidth: .infinity, alignment: .leading)
+                            .padding(10)
+                            .background(Color.indigo.opacity(0.08))
+                            .clipShape(RoundedRectangle(cornerRadius: 12))
+                        }
+                        .buttonStyle(.plain)
                     }
                 }
-                .padding()
-                .background(
-                    RoundedRectangle(cornerRadius: 16)
-                        .fill(Color.primary.opacity(0.05))
-                )
-                .overlay(
-                    RoundedRectangle(cornerRadius: 16)
-                        .stroke(Color.pink.opacity(0.3), lineWidth: 1)
-                )
             }
-            .buttonStyle(.plain)
-            .sheet(isPresented: $showHealthDetail) {
-                HealthDetailView(selectedLanguage: selectedLanguage, summary: healthKitService.summary)
+            .sheet(isPresented: $showStepsDetail) {
+                StepsDetailView(selectedLanguage: selectedLanguage, summary: healthKitService.summary)
+            }
+            .sheet(isPresented: $showHeartDetail) {
+                HeartRateDetailView(selectedLanguage: selectedLanguage, summary: healthKitService.summary)
+            }
+            .sheet(isPresented: $showSleepDetail) {
+                SleepDetailView(selectedLanguage: selectedLanguage, summary: healthKitService.summary)
             }
         } else {
             // Permission not yet granted
@@ -187,7 +246,7 @@ struct HomeView: View {
                 HStack {
                     Image(systemName: "heart.text.square.fill")
                         .font(.title2)
-                        .foregroundStyle(.pink)
+                        .foregroundStyle(.blue)
                     VStack(alignment: .leading, spacing: 2) {
                         Text(selectedLanguage == .spanish ? "Conectar datos de salud" : "Connect health data")
                             .font(.headline)
@@ -209,44 +268,55 @@ struct HomeView: View {
                         .foregroundStyle(.white)
                         .frame(maxWidth: .infinity)
                         .padding(.vertical, 10)
-                        .background(Color.pink)
+                        .background(Color.blue)
                         .clipShape(RoundedRectangle(cornerRadius: 10))
                 }
             }
             .padding()
             .background(
                 RoundedRectangle(cornerRadius: 16)
-                    .fill(Color.primary.opacity(0.05))
-            )
-            .overlay(
-                RoundedRectangle(cornerRadius: 16)
-                    .stroke(Color.pink.opacity(0.2), lineWidth: 1)
+                    .fill(Color.blue.opacity(0.05))
             )
         }
     }
+}
 
-    private func healthStat(icon: String, value: String, label: String, color: Color) -> some View {
-        VStack(spacing: 4) {
+// MARK: - Action Card (Stitch-inspired)
+
+struct ActionCard: View {
+    let icon: String
+    let iconColor: Color
+    let title: String
+    let subtitle: String
+
+    var body: some View {
+        HStack(spacing: 14) {
             Image(systemName: icon)
-                .foregroundStyle(color)
-            Text(value)
-                .font(.title3)
-                .fontWeight(.bold)
-            Text(label)
-                .font(.caption2)
-                .foregroundStyle(.secondary)
+                .font(.system(size: 22))
+                .foregroundStyle(.white)
+                .frame(width: 48, height: 48)
+                .background(iconColor)
+                .clipShape(RoundedRectangle(cornerRadius: 12))
+
+            VStack(alignment: .leading, spacing: 3) {
+                Text(title)
+                    .font(.subheadline)
+                    .fontWeight(.semibold)
+                Text(subtitle)
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+                    .lineLimit(2)
+            }
+
+            Spacer()
+
+            Image(systemName: "chevron.right")
+                .font(.caption)
+                .foregroundStyle(.tertiary)
         }
-        .frame(maxWidth: .infinity)
-    }
-
-    private var greeting: String {
-        selectedLanguage == .spanish ? "Hola! 👋" : "Hello! 👋"
-    }
-
-    private var tagline: String {
-        selectedLanguage == .spanish ?
-            "Tu doctor de bolsillo" :
-            "Your pocket doctor"
+        .padding(14)
+        .background(Color(uiColor: .secondarySystemGroupedBackground))
+        .clipShape(RoundedRectangle(cornerRadius: 16))
     }
 }
 
@@ -264,7 +334,7 @@ struct HealthDetailView: View {
                     trendSection(
                         title: selectedLanguage == .spanish ? "Pasos" : "Steps",
                         icon: "figure.walk",
-                        color: .green,
+                        color: .blue,
                         samples: summary.steps,
                         format: { "\(Int($0))" }
                     )
@@ -375,47 +445,6 @@ struct HealthDetailView: View {
         df.dateFormat = "EEE"
         df.locale = Locale(identifier: selectedLanguage == .spanish ? "es" : "en")
         return df.string(from: date)
-    }
-}
-
-struct QuickActionCard: View {
-    let icon: String
-    let title: String
-    let subtitle: String
-    let color: Color
-    
-    var body: some View {
-        HStack(spacing: 16) {
-            Image(systemName: icon)
-                .font(.system(size: 32))
-                .foregroundStyle(color)
-                .frame(width: 60, height: 60)
-                .background(color.opacity(0.1))
-                .clipShape(RoundedRectangle(cornerRadius: 12))
-            
-            VStack(alignment: .leading, spacing: 4) {
-                Text(title)
-                    .font(.headline)
-                Text(subtitle)
-                    .font(.subheadline)
-                    .foregroundStyle(.secondary)
-            }
-            
-            Spacer()
-            
-            Image(systemName: "chevron.right")
-                .foregroundStyle(.secondary)
-        }
-        .padding()
-        .background(
-            RoundedRectangle(cornerRadius: 16)
-                .fill(Color.primary.opacity(0.05))
-        )
-        .overlay(
-            RoundedRectangle(cornerRadius: 16)
-                .stroke(Color.secondary.opacity(0.2), lineWidth: 1)
-        )
-        .shadow(color: .black.opacity(0.05), radius: 8, x: 0, y: 2)
     }
 }
 
