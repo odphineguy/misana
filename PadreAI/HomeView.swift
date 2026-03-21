@@ -20,10 +20,29 @@ struct HomeView: View {
         NavigationStack {
             ScrollView {
                 VStack(spacing: 28) {
+                    // Logo + Settings row
+                    HStack {
+                        Image("MiSanaLogo")
+                            .resizable()
+                            .scaledToFit()
+                            .frame(height: 44)
+                        Spacer()
+                        HStack(spacing: 12) {
+                            // Profile image
+                            Image(systemName: "person.crop.circle.fill")
+                                .font(.system(size: 32))
+                                .foregroundStyle(.secondary)
+
+                            settingsMenu
+                        }
+                    }
+                    .padding(.horizontal)
+                    .padding(.top, 8)
+
                     // Welcome Header
                     VStack(alignment: .leading, spacing: 4) {
                         Text(selectedLanguage == .spanish ? "Hola!" : "Hello!")
-                            .font(.system(size: 32, weight: .bold))
+                            .font(.system(size: 28, weight: .bold))
                         Text(selectedLanguage == .spanish ?
                              "Bienvenido a tu santuario de salud." :
                              "Welcome back to your health sanctuary.")
@@ -32,7 +51,6 @@ struct HomeView: View {
                     }
                     .frame(maxWidth: .infinity, alignment: .leading)
                     .padding(.horizontal)
-                    .padding(.top, 8)
 
                     // Health Dashboard
                     if healthKitService.isAvailable {
@@ -90,53 +108,52 @@ struct HomeView: View {
                     Spacer(minLength: 20)
                 }
             }
-            .navigationTitle("MiSana")
-            .toolbar {
-                ToolbarItem(placement: .automatic) {
-                    Menu {
-                        Section(selectedLanguage == .spanish ? "Idioma" : "Language") {
-                            Button {
-                                selectedLanguage = .spanish
-                            } label: {
-                                HStack {
-                                    Text("Espanol")
-                                    if selectedLanguage == .spanish {
-                                        Image(systemName: "checkmark")
-                                    }
-                                }
-                            }
-                            Button {
-                                selectedLanguage = .english
-                            } label: {
-                                HStack {
-                                    Text("English")
-                                    if selectedLanguage == .english {
-                                        Image(systemName: "checkmark")
-                                    }
-                                }
-                            }
-                        }
+            .navigationBarHidden(true)
+        }
+    }
 
-                        Section(selectedLanguage == .spanish ? "Tema" : "Theme") {
-                            ForEach(AppTheme.allCases, id: \.self) { theme in
-                                Button {
-                                    appTheme = theme
-                                } label: {
-                                    HStack {
-                                        Label(theme.label(for: selectedLanguage), systemImage: theme.icon)
-                                        if appTheme == theme {
-                                            Image(systemName: "checkmark")
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                    } label: {
-                        Image(systemName: "gearshape.fill")
-                            .font(.title3)
+    // MARK: - Settings Menu
+
+    private var settingsMenu: some View {
+        Menu {
+            Section(selectedLanguage == .spanish ? "Idioma" : "Language") {
+                Button {
+                    selectedLanguage = .spanish
+                } label: {
+                    HStack {
+                        Text("Espanol")
+                        if selectedLanguage == .spanish { Image(systemName: "checkmark") }
+                    }
+                }
+                Button {
+                    selectedLanguage = .english
+                } label: {
+                    HStack {
+                        Text("English")
+                        if selectedLanguage == .english { Image(systemName: "checkmark") }
                     }
                 }
             }
+
+            Section(selectedLanguage == .spanish ? "Tema" : "Theme") {
+                ForEach(AppTheme.allCases, id: \.self) { theme in
+                    Button {
+                        appTheme = theme
+                    } label: {
+                        HStack {
+                            Label(theme.label(for: selectedLanguage), systemImage: theme.icon)
+                            if appTheme == theme { Image(systemName: "checkmark") }
+                        }
+                    }
+                }
+            }
+        } label: {
+            Image(systemName: "ellipsis")
+                .font(.title3)
+                .foregroundStyle(.secondary)
+                .frame(width: 36, height: 36)
+                .background(Color(uiColor: .secondarySystemGroupedBackground))
+                .clipShape(Circle())
         }
     }
 

@@ -280,7 +280,7 @@ struct AppointmentPrepView: View {
                         },
                         onDelete: {
                             if let index = questions.firstIndex(where: { $0.id == question.id }) {
-                                withAnimation {
+                                let _ = withAnimation {
                                     questions.remove(at: index)
                                 }
                             }
