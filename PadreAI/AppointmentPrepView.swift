@@ -15,6 +15,24 @@ struct AppointmentPrepView: View {
     @State private var selectedAppointmentType: AppointmentType = .checkup
     @State private var navigateToChat = false
 
+    private var questionsFileURL: URL? {
+        FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first?
+            .appendingPathComponent("appointment_questions.json")
+    }
+
+    private func saveQuestions() {
+        guard let url = questionsFileURL,
+              let data = try? JSONEncoder().encode(questions) else { return }
+        try? data.write(to: url)
+    }
+
+    private func loadQuestions() {
+        guard let url = questionsFileURL,
+              let data = try? Data(contentsOf: url),
+              let loaded = try? JSONDecoder().decode([Question].self, from: data) else { return }
+        questions = loaded
+    }
+
     var body: some View {
         NavigationStack {
             ScrollView {
@@ -64,10 +82,13 @@ struct AppointmentPrepView: View {
                     selectedLanguage: selectedLanguage,
                     onAdd: { questionText in
                         questions.append(Question(text: questionText))
+                        saveQuestions()
                         showingAddQuestion = false
                     }
                 )
             }
+            .onAppear { loadQuestions() }
+            .onChange(of: questions) { _, _ in saveQuestions() }
         }
     }
 
@@ -331,8 +352,8 @@ struct AppointmentPrepView: View {
 
 // MARK: - Models
 
-struct Question: Identifiable {
-    let id = UUID()
+struct Question: Identifiable, Codable {
+    var id = UUID()
     let text: String
     var isAsked: Bool = false
 }

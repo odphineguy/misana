@@ -257,14 +257,31 @@ struct ModelDownloadView: View {
             // Action Buttons
             VStack(spacing: 12) {
                 if !isDownloading {
+                    // Show retry message if there was an error
+                    if modelService.downloadError != nil {
+                        HStack(spacing: 8) {
+                            Image(systemName: "exclamationmark.triangle.fill")
+                                .foregroundStyle(.orange)
+                            Text(selectedLanguage == .spanish ?
+                                 "La descarga fallo. Verifica tu conexion e intenta de nuevo." :
+                                 "Download failed. Check your connection and try again.")
+                                .font(.caption)
+                                .foregroundStyle(.secondary)
+                        }
+                        .padding()
+                        .background(Color.orange.opacity(0.1))
+                        .clipShape(RoundedRectangle(cornerRadius: 10))
+                    }
+
                     Button {
+                        modelService.downloadError = nil
                         startDownload()
                     } label: {
                         HStack {
                             Image(systemName: "arrow.down.circle.fill")
-                            Text(selectedLanguage == .spanish ?
-                                 "Descargar Modelo (2.5 GB)" :
-                                 "Download Model (2.5 GB)")
+                            Text(modelService.downloadError != nil ?
+                                 (selectedLanguage == .spanish ? "Reintentar Descarga" : "Retry Download") :
+                                 (selectedLanguage == .spanish ? "Descargar Modelo (2.5 GB)" : "Download Model (2.5 GB)"))
                         }
                         .font(.headline)
                         .foregroundStyle(.white)
@@ -274,12 +291,12 @@ struct ModelDownloadView: View {
                         .clipShape(RoundedRectangle(cornerRadius: 12))
                     }
                     .disabled(!hasEnoughSpace)
-                    
+
                     Button {
                         dismiss()
                     } label: {
-                        Text(selectedLanguage == .spanish ? 
-                             "Descargar Más Tarde" : 
+                        Text(selectedLanguage == .spanish ?
+                             "Descargar Mas Tarde" :
                              "Download Later")
                             .font(.subheadline)
                             .foregroundStyle(.secondary)
@@ -288,8 +305,8 @@ struct ModelDownloadView: View {
                     Button {
                         cancelDownload()
                     } label: {
-                        Text(selectedLanguage == .spanish ? 
-                             "Cancelar Descarga" : 
+                        Text(selectedLanguage == .spanish ?
+                             "Cancelar Descarga" :
                              "Cancel Download")
                             .font(.headline)
                             .foregroundStyle(.white)
