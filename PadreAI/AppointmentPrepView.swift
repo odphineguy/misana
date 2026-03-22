@@ -352,7 +352,7 @@ struct AppointmentPrepView: View {
 
 // MARK: - Models
 
-struct Question: Identifiable, Codable {
+struct Question: Identifiable, Codable, Equatable {
     var id = UUID()
     let text: String
     var isAsked: Bool = false
