@@ -111,28 +111,10 @@ struct HealthChatView: View {
             .navigationTitle(selectedLanguage == .spanish ? "Pregunta a MiSana" : "Ask MiSana")
             .toolbar {
                 ToolbarItem(placement: .automatic) {
-                    Menu {
-                        Button {
-                            clearMessages()
-                        } label: {
-                            Label(
-                                selectedLanguage == .spanish ? "Nueva conversacion" : "New conversation",
-                                systemImage: "plus.message"
-                            )
-                        }
-
-                        if modelService.isModelLoaded {
-                            Button(role: .destructive) {
-                                modelService.unloadModel()
-                            } label: {
-                                Label(
-                                    selectedLanguage == .spanish ? "Descargar modelo de memoria" : "Unload model from memory",
-                                    systemImage: "trash"
-                                )
-                            }
-                        }
+                    Button {
+                        clearMessages()
                     } label: {
-                        Image(systemName: "ellipsis.circle")
+                        Image(systemName: "plus.message")
                     }
                 }
             }

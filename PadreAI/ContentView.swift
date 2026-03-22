@@ -73,20 +73,18 @@ struct ContentView: View {
 struct HealthDisclaimerView: View {
     @Binding var selectedLanguage: AppLanguage
     let onAccept: () -> Void
+    @Environment(\.colorScheme) private var colorScheme
 
     var body: some View {
         ScrollView {
             VStack(spacing: 24) {
                 Spacer().frame(height: 20)
 
-                // Icon
-                Image(systemName: "heart.text.square.fill")
-                    .font(.system(size: 72))
-                    .foregroundStyle(.red)
-
-                Text("MiSana")
-                    .font(.largeTitle)
-                    .fontWeight(.bold)
+                // Logo
+                Image(colorScheme == .dark ? "MiSanaLogoDark" : "MiSanaLogo")
+                    .resizable()
+                    .scaledToFit()
+                    .frame(height: 60)
 
                 Text(selectedLanguage == .spanish ?
                      "Tu compañero de salud familiar" :

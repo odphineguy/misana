@@ -15,6 +15,7 @@ struct ModelDownloadView: View {
     @State private var showErrorAlert = false
     @State private var availableSpaceGB: Double = 0
     @Environment(\.dismiss) private var dismiss
+    @Environment(\.colorScheme) private var colorScheme
 
     private let requiredSpaceGB: Double = 3.0 // 2.5GB model + buffer
     private var hasEnoughSpace: Bool { availableSpaceGB >= requiredSpaceGB }
@@ -50,10 +51,11 @@ struct ModelDownloadView: View {
     private var disclaimerView: some View {
         ScrollView {
             VStack(spacing: 24) {
-                // Icon
-                Image(systemName: "heart.text.square.fill")
-                    .font(.system(size: 80))
-                    .foregroundStyle(.brand)
+                // Logo
+                Image(colorScheme == .dark ? "MiSanaLogoDark" : "MiSanaLogo")
+                    .resizable()
+                    .scaledToFit()
+                    .frame(height: 60)
                     .padding(.top, 40)
                 
                 // Title
@@ -174,13 +176,13 @@ struct ModelDownloadView: View {
     // MARK: - Download View
     
     private var downloadView: some View {
+        ScrollView {
         VStack(spacing: 32) {
-            Spacer()
             
             // Icon
             Image(systemName: isDownloading ? "arrow.down.circle.fill" : "brain.fill")
                 .font(.system(size: 80))
-                .foregroundStyle(isDownloading ? .blue : .purple)
+                .foregroundStyle(.brand)
                 .symbolEffect(.bounce, value: isDownloading)
             
             // Title & Description
@@ -197,6 +199,7 @@ struct ModelDownloadView: View {
                     .font(.subheadline)
                     .foregroundStyle(.secondary)
                     .multilineTextAlignment(.center)
+                    .fixedSize(horizontal: false, vertical: true)
                     .padding(.horizontal, 16)
             }
             
@@ -251,8 +254,6 @@ struct ModelDownloadView: View {
                 }
                 .padding(.horizontal, 40)
             }
-            
-            Spacer()
             
             // Action Buttons
             VStack(spacing: 12) {
@@ -320,8 +321,9 @@ struct ModelDownloadView: View {
             .padding(.horizontal, 40)
             .padding(.bottom, 20)
         }
+        }
     }
-    
+
     // MARK: - Storage Card
 
     private var storageCard: some View {
