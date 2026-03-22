@@ -44,9 +44,9 @@ struct HealthChatView: View {
                                 HStack(spacing: 10) {
                                     Image(systemName: "brain.head.profile")
                                         .font(.system(size: 14))
-                                        .foregroundStyle(.blue)
+                                        .foregroundStyle(.brand)
                                         .frame(width: 28, height: 28)
-                                        .background(Color.blue.opacity(0.1))
+                                        .background(Color.brand.opacity(0.1))
                                         .clipShape(Circle())
 
                                     HStack(spacing: 6) {
@@ -176,7 +176,7 @@ struct HealthChatView: View {
                     .foregroundStyle(.white)
                     .padding(.horizontal, 16)
                     .padding(.vertical, 8)
-                    .background(Color.blue)
+                    .background(Color.brand)
                     .clipShape(RoundedRectangle(cornerRadius: 8))
             }
         }
@@ -320,7 +320,7 @@ struct ChatBubbleView: View {
                     .font(.system(size: 14))
                     .foregroundStyle(.white)
                     .frame(width: 28, height: 28)
-                    .background(Color.blue)
+                    .background(Color.brand)
                     .clipShape(Circle())
             }
 
@@ -329,7 +329,7 @@ struct ChatBubbleView: View {
                     HStack(spacing: 4) {
                         Text("MISANA")
                             .font(.system(size: 9, weight: .bold))
-                            .foregroundStyle(.blue)
+                            .foregroundStyle(.brand)
                         Text("\u{2022}")
                             .font(.system(size: 8))
                             .foregroundStyle(.tertiary)
@@ -344,7 +344,7 @@ struct ChatBubbleView: View {
                      (try? AttributedString(markdown: message.text)) ?? AttributedString(message.text))
                     .font(.subheadline)
                     .padding(12)
-                    .background(message.isUser ? Color.blue : Color(uiColor: .secondarySystemGroupedBackground))
+                    .background(message.isUser ? Color.brand : Color(uiColor: .secondarySystemGroupedBackground))
                     .foregroundStyle(message.isUser ? .white : .primary)
                     .clipShape(RoundedRectangle(cornerRadius: 16))
 
@@ -352,7 +352,7 @@ struct ChatBubbleView: View {
                     HStack(spacing: 4) {
                         Text(selectedLanguage == .spanish ? "TU" : "YOU")
                             .font(.system(size: 9, weight: .bold))
-                            .foregroundStyle(.blue)
+                            .foregroundStyle(.brand)
                         Text("\u{2022}")
                             .font(.system(size: 8))
                             .foregroundStyle(.tertiary)

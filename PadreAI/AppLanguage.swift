@@ -8,6 +8,16 @@
 import Foundation
 import SwiftUI
 
+// MARK: - Brand Colors
+
+extension Color {
+    static let brand = Color(red: 0x11/255, green: 0x69/255, blue: 0xA0/255) // #1169A0
+}
+
+extension ShapeStyle where Self == Color {
+    static var brand: Color { .brand }
+}
+
 enum AppTheme: String, CaseIterable {
     case system
     case light

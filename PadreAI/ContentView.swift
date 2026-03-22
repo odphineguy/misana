@@ -148,7 +148,7 @@ struct HealthDisclaimerView: View {
 
                 // Features
                 VStack(alignment: .leading, spacing: 12) {
-                    featureRow(icon: "lock.shield.fill", color: .blue,
+                    featureRow(icon: "lock.shield.fill", color: .brand,
                                text: selectedLanguage == .spanish ?
                                "100% privado — todo se procesa en tu dispositivo" :
                                "100% private — everything is processed on your device")
@@ -174,7 +174,7 @@ struct HealthDisclaimerView: View {
                         .foregroundStyle(.white)
                         .frame(maxWidth: .infinity)
                         .padding()
-                        .background(Color.blue)
+                        .background(Color.brand)
                         .clipShape(RoundedRectangle(cornerRadius: 14))
                 }
                 .padding(.horizontal)

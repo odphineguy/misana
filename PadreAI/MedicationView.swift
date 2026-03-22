@@ -229,7 +229,7 @@ struct MedicationView: View {
         VStack(spacing: 16) {
             Image(systemName: "pill.circle")
                 .font(.system(size: 64))
-                .foregroundStyle(.blue)
+                .foregroundStyle(.brand)
 
             Text(selectedLanguage == .spanish ? "No hay medicinas" : "No medications")
                 .font(.title2)
@@ -255,7 +255,7 @@ struct MedicationView: View {
                     .fontWeight(.semibold)
                     .foregroundStyle(.white)
                     .padding()
-                    .background(Color.blue)
+                    .background(Color.brand)
                     .clipShape(RoundedRectangle(cornerRadius: 12))
                 }
 
@@ -269,9 +269,9 @@ struct MedicationView: View {
                     )
                     .font(.subheadline)
                     .fontWeight(.semibold)
-                    .foregroundStyle(.blue)
+                    .foregroundStyle(.brand)
                     .padding()
-                    .background(Color.blue.opacity(0.12))
+                    .background(Color.brand.opacity(0.12))
                     .clipShape(RoundedRectangle(cornerRadius: 12))
                 }
             }
@@ -556,9 +556,9 @@ struct MedicationCardView: View {
             // Pill icon
             ZStack {
                 Circle()
-                    .fill((medication.pillColor?.color ?? .blue).gradient)
+                    .fill((medication.pillColor?.color ?? .brand).gradient)
                     .frame(width: 52, height: 52)
-                    .shadow(color: (medication.pillColor?.color ?? .blue).opacity(0.3), radius: 4, y: 2)
+                    .shadow(color: (medication.pillColor?.color ?? .brand).opacity(0.3), radius: 4, y: 2)
                 Image(systemName: medication.type?.icon ?? "pill.fill")
                     .font(.title3)
                     .foregroundStyle(medication.pillColor == .white ? .gray : .white)
@@ -578,8 +578,8 @@ struct MedicationCardView: View {
                             .font(.system(size: 9, weight: .bold))
                             .padding(.horizontal, 8)
                             .padding(.vertical, 3)
-                            .background(Color.green.opacity(0.15))
-                            .foregroundStyle(.green)
+                            .background(Color.brand.opacity(0.15))
+                            .foregroundStyle(.brand)
                             .clipShape(Capsule())
                     }
                 }
@@ -647,9 +647,9 @@ struct MedicationDetailView: View {
                     VStack(spacing: 8) {
                         ZStack {
                             Circle()
-                                .fill((medication.pillColor?.color ?? .blue).gradient)
+                                .fill((medication.pillColor?.color ?? .brand).gradient)
                                 .frame(width: 72, height: 72)
-                                .shadow(color: (medication.pillColor?.color ?? .blue).opacity(0.3), radius: 8, y: 4)
+                                .shadow(color: (medication.pillColor?.color ?? .brand).opacity(0.3), radius: 8, y: 4)
                             Image(systemName: medication.type?.icon ?? "pill.fill")
                                 .font(.title)
                                 .foregroundStyle(medication.pillColor == .white ? .gray : .white)
@@ -897,7 +897,7 @@ struct AddMedicationView: View {
                         } label: {
                             HStack {
                                 Image(systemName: "magnifyingglass")
-                                    .foregroundStyle(.blue)
+                                    .foregroundStyle(.brand)
                                 Text(result.name)
                                     .font(.subheadline)
                                     .foregroundStyle(.primary)
@@ -918,7 +918,7 @@ struct AddMedicationView: View {
 
                 if let rxcui = selectedRxcui {
                     HStack {
-                        Image(systemName: "checkmark.circle.fill").foregroundStyle(.green)
+                        Image(systemName: "checkmark.circle.fill").foregroundStyle(.brand)
                         Text(selectedLanguage == .spanish ? "Verificada (RxCUI: \(rxcui))" : "Verified (RxCUI: \(rxcui))")
                             .font(.caption).foregroundStyle(.secondary)
                     }
@@ -943,7 +943,7 @@ struct AddMedicationView: View {
                             VStack(spacing: 6) {
                                 ZStack {
                                     Circle()
-                                        .fill(medType == type ? Color.blue : Color(uiColor: .tertiarySystemGroupedBackground))
+                                        .fill(medType == type ? Color.brand : Color(uiColor: .tertiarySystemGroupedBackground))
                                         .frame(width: 52, height: 52)
                                     Image(systemName: type.icon)
                                         .font(.title3)
@@ -983,7 +983,7 @@ struct AddMedicationView: View {
                                 .font(.title2)
                                 .foregroundStyle(pillShape == shape ? .white : .primary)
                                 .frame(width: 44, height: 44)
-                                .background(pillShape == shape ? Color.blue : Color(uiColor: .tertiarySystemGroupedBackground))
+                                .background(pillShape == shape ? Color.brand : Color(uiColor: .tertiarySystemGroupedBackground))
                                 .clipShape(RoundedRectangle(cornerRadius: 10))
                         }
                         .buttonStyle(.plain)
@@ -1005,7 +1005,7 @@ struct AddMedicationView: View {
                                 .frame(width: 40, height: 40)
                                 .overlay(
                                     Circle()
-                                        .stroke(pillColor == color ? Color.blue : Color.clear, lineWidth: 3)
+                                        .stroke(pillColor == color ? Color.brand : Color.clear, lineWidth: 3)
                                 )
                                 .overlay(
                                     Circle()
@@ -1063,7 +1063,7 @@ struct AddMedicationView: View {
                                         .fontWeight(.medium)
                                         .padding(.horizontal, 12)
                                         .padding(.vertical, 8)
-                                        .background(scheduleFreq == freq ? Color.blue : Color(uiColor: .tertiarySystemGroupedBackground))
+                                        .background(scheduleFreq == freq ? Color.brand : Color(uiColor: .tertiarySystemGroupedBackground))
                                         .foregroundStyle(scheduleFreq == freq ? .white : .primary)
                                         .clipShape(Capsule())
                                 }
@@ -1077,7 +1077,7 @@ struct AddMedicationView: View {
                 if scheduleFreq != .asNeeded {
                     HStack {
                         Image(systemName: "clock.fill")
-                            .foregroundStyle(.blue)
+                            .foregroundStyle(.brand)
                         DatePicker(
                             selectedLanguage == .spanish ? "Hora" : "Time",
                             selection: $scheduleTime,

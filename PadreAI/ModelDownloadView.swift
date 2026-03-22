@@ -53,7 +53,7 @@ struct ModelDownloadView: View {
                 // Icon
                 Image(systemName: "heart.text.square.fill")
                     .font(.system(size: 80))
-                    .foregroundStyle(.blue)
+                    .foregroundStyle(.brand)
                     .padding(.top, 40)
                 
                 // Title
@@ -162,7 +162,7 @@ struct ModelDownloadView: View {
                         .foregroundStyle(.white)
                         .frame(maxWidth: .infinity)
                         .padding()
-                        .background(Color.blue)
+                        .background(Color.brand)
                         .clipShape(RoundedRectangle(cornerRadius: 12))
                 }
                 .padding(.bottom, 20)
@@ -204,7 +204,7 @@ struct ModelDownloadView: View {
             VStack(spacing: 16) {
                 HStack {
                     Image(systemName: "info.circle.fill")
-                        .foregroundStyle(.blue)
+                        .foregroundStyle(.brand)
                     Text(selectedLanguage == .spanish ? 
                          "Información del Modelo" : 
                          "Model Information")
@@ -237,7 +237,7 @@ struct ModelDownloadView: View {
                 VStack(spacing: 12) {
                     ProgressView(value: modelService.modelDownloadProgress)
                         .progressViewStyle(.linear)
-                        .tint(.blue)
+                        .tint(.brand)
                     
                     Text("\(Int(modelService.modelDownloadProgress * 100))%")
                         .font(.caption)
@@ -287,7 +287,7 @@ struct ModelDownloadView: View {
                         .foregroundStyle(.white)
                         .frame(maxWidth: .infinity)
                         .padding()
-                        .background(hasEnoughSpace ? Color.blue : Color.gray)
+                        .background(hasEnoughSpace ? Color.brand : Color.gray)
                         .clipShape(RoundedRectangle(cornerRadius: 12))
                     }
                     .disabled(!hasEnoughSpace)
@@ -340,7 +340,7 @@ struct ModelDownloadView: View {
                     RoundedRectangle(cornerRadius: 6)
                         .fill(Color.secondary.opacity(0.2))
                     RoundedRectangle(cornerRadius: 6)
-                        .fill(hasEnoughSpace ? Color.blue : Color.orange)
+                        .fill(hasEnoughSpace ? Color.brand : Color.orange)
                         .frame(width: max(0, min(geo.size.width, geo.size.width * (1 - availableSpaceGB / max(availableSpaceGB + 20, 1)))))
                 }
             }
@@ -431,7 +431,7 @@ struct FeatureRow: View {
     var body: some View {
         HStack(spacing: 12) {
             Image(systemName: icon)
-                .foregroundStyle(.blue)
+                .foregroundStyle(.brand)
                 .frame(width: 24)
             Text(text)
                 .font(.subheadline)

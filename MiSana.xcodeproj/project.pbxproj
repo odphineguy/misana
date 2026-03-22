@@ -267,7 +267,7 @@
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_KEY_CFBundleDisplayName = MiSana;
 				INFOPLIST_KEY_NSCameraUsageDescription = "MiSana necesita acceso a la cámara para escanear etiquetas de medicinas y recetas.";
-				INFOPLIST_KEY_NSHealthShareUsageDescription = "MiSana usa tus datos de salud para darte recomendaciones personalizadas. Tus datos nunca salen de tu dispositivo.";
+				INFOPLIST_KEY_NSHealthShareUsageDescription = "MiSana lee tus pasos, sueno, ritmo cardiaco, presion arterial, oxigeno en sangre y peso de Apple Salud para darte informacion personalizada. Solo lectura — nunca modificamos tus datos. Todo se procesa en tu dispositivo con IA local, nada se envia a internet.";
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
@@ -304,7 +304,7 @@
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_KEY_CFBundleDisplayName = MiSana;
 				INFOPLIST_KEY_NSCameraUsageDescription = "MiSana necesita acceso a la cámara para escanear etiquetas de medicinas y recetas.";
-				INFOPLIST_KEY_NSHealthShareUsageDescription = "MiSana usa tus datos de salud para darte recomendaciones personalizadas. Tus datos nunca salen de tu dispositivo.";
+				INFOPLIST_KEY_NSHealthShareUsageDescription = "MiSana lee tus pasos, sueno, ritmo cardiaco, presion arterial, oxigeno en sangre y peso de Apple Salud para darte informacion personalizada. Solo lectura — nunca modificamos tus datos. Todo se procesa en tu dispositivo con IA local, nada se envia a internet.";
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";

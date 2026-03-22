@@ -54,16 +54,19 @@ struct SymptomCheckerView: View {
                         VStack(spacing: 20) {
                             symptomCategory(
                                 title: selectedLanguage == .spanish ? "Comunes" : "Common",
+                                icon: "heart.text.square.fill",
                                 symptoms: filteredSymptoms(commonSymptoms)
                             )
 
                             symptomCategory(
                                 title: selectedLanguage == .spanish ? "Respiratorios" : "Respiratory",
+                                icon: "lungs.fill",
                                 symptoms: filteredSymptoms(respiratorySymptoms)
                             )
 
                             symptomCategory(
                                 title: selectedLanguage == .spanish ? "Digestivos" : "Digestive",
+                                icon: "cross.case.fill",
                                 symptoms: filteredSymptoms(digestiveSymptoms)
                             )
                         }
@@ -76,6 +79,7 @@ struct SymptomCheckerView: View {
                     }
                     .padding(.top, 8)
                 }
+                .background(Color(uiColor: .systemGroupedBackground))
 
                 // Floating CTA
                 if !selectedSymptoms.isEmpty {
@@ -94,7 +98,7 @@ struct SymptomCheckerView: View {
                         .foregroundStyle(.white)
                         .frame(maxWidth: .infinity)
                         .padding(.vertical, 14)
-                        .background(Color.red)
+                        .background(Color.red.gradient)
                         .clipShape(RoundedRectangle(cornerRadius: 14))
                     }
                     .padding(.horizontal)
@@ -121,12 +125,16 @@ struct SymptomCheckerView: View {
         }
     }
 
-    private func symptomCategory(title: String, symptoms: [Symptom]) -> some View {
+    private func symptomCategory(title: String, icon: String, symptoms: [Symptom]) -> some View {
         Group {
             if !symptoms.isEmpty {
                 VStack(alignment: .leading, spacing: 10) {
-                    Text(title)
-                        .font(.headline)
+                    HStack(spacing: 8) {
+                        Image(systemName: icon)
+                            .foregroundStyle(.red)
+                        Text(title)
+                            .font(.headline)
+                    }
 
                     LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible())], spacing: 10) {
                         ForEach(symptoms) { symptom in
@@ -218,10 +226,13 @@ struct SymptomChip: View {
 
     var body: some View {
         Button(action: action) {
-            HStack(spacing: 8) {
+            HStack(spacing: 10) {
                 Image(systemName: symptom.icon)
                     .font(.system(size: 16))
-                    .foregroundStyle(isSelected ? .white : .primary)
+                    .foregroundStyle(isSelected ? .white : .red)
+                    .frame(width: 32, height: 32)
+                    .background(isSelected ? Color.red : Color.red.opacity(0.12))
+                    .clipShape(RoundedRectangle(cornerRadius: 8))
 
                 Text(symptom.name(for: selectedLanguage))
                     .font(.caption)
@@ -232,8 +243,7 @@ struct SymptomChip: View {
 
                 Spacer()
             }
-            .padding(.horizontal, 12)
-            .padding(.vertical, 10)
+            .padding(10)
             .background(isSelected ? Color.red : Color(uiColor: .secondarySystemGroupedBackground))
             .clipShape(RoundedRectangle(cornerRadius: 12))
         }

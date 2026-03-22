@@ -95,27 +95,20 @@ struct AppointmentPrepView: View {
     // MARK: - Header
 
     private var headerSection: some View {
-        VStack(spacing: 8) {
-            Image(systemName: "list.clipboard.fill")
-                .font(.system(size: 48))
-                .foregroundStyle(.green)
-                .padding(.bottom, 4)
-
+        VStack(alignment: .leading, spacing: 4) {
             Text(selectedLanguage == .spanish ?
                  "Preparate para tu cita" :
                  "Get ready for your visit")
-                .font(.title2)
-                .fontWeight(.bold)
+                .font(.system(size: 28, weight: .bold))
 
             Text(selectedLanguage == .spanish ?
                  "Elige el tipo de cita y MiSana te ayuda a prepararte." :
                  "Choose your appointment type and MiSana helps you prepare.")
                 .font(.subheadline)
                 .foregroundStyle(.secondary)
-                .multilineTextAlignment(.center)
-                .padding(.horizontal, 32)
         }
-        .padding(.top, 8)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .padding(.horizontal)
     }
 
     // MARK: - Appointment Type Grid
@@ -134,9 +127,9 @@ struct AppointmentPrepView: View {
                         HStack(spacing: 10) {
                             Image(systemName: type.icon)
                                 .font(.body)
-                                .foregroundStyle(selectedAppointmentType == type ? .white : .green)
+                                .foregroundStyle(selectedAppointmentType == type ? .white : .brand)
                                 .frame(width: 32, height: 32)
-                                .background(selectedAppointmentType == type ? Color.green : Color.green.opacity(0.12))
+                                .background(selectedAppointmentType == type ? Color.brand : Color.brand.opacity(0.12))
                                 .clipShape(RoundedRectangle(cornerRadius: 8))
 
                             Text(type.name(for: selectedLanguage))
@@ -150,7 +143,7 @@ struct AppointmentPrepView: View {
                             Spacer()
                         }
                         .padding(10)
-                        .background(selectedAppointmentType == type ? Color.green : Color(uiColor: .secondarySystemGroupedBackground))
+                        .background(selectedAppointmentType == type ? Color.brand : Color(uiColor: .secondarySystemGroupedBackground))
                         .clipShape(RoundedRectangle(cornerRadius: 12))
                     }
                     .buttonStyle(.plain)
@@ -189,7 +182,7 @@ struct AppointmentPrepView: View {
                 }
                 .foregroundStyle(.white)
                 .padding(14)
-                .background(Color.green.gradient)
+                .background(Color.brand.gradient)
                 .clipShape(RoundedRectangle(cornerRadius: 14))
             }
 
@@ -200,7 +193,7 @@ struct AppointmentPrepView: View {
                 HStack(spacing: 10) {
                     Image(systemName: "list.bullet")
                         .font(.body)
-                        .foregroundStyle(.green)
+                        .foregroundStyle(.brand)
                     VStack(alignment: .leading, spacing: 2) {
                         Text(selectedLanguage == .spanish ?
                              "Usar preguntas sugeridas" :
@@ -231,7 +224,7 @@ struct AppointmentPrepView: View {
                 HStack(spacing: 10) {
                     Image(systemName: "plus.circle.fill")
                         .font(.body)
-                        .foregroundStyle(.green)
+                        .foregroundStyle(.brand)
                     Text(selectedLanguage == .spanish ?
                          "Agregar mi propia pregunta" :
                          "Add my own question")
@@ -255,7 +248,7 @@ struct AppointmentPrepView: View {
             // Appointment type badge
             HStack(spacing: 8) {
                 Image(systemName: selectedAppointmentType.icon)
-                    .foregroundStyle(.green)
+                    .foregroundStyle(.brand)
                 Text(selectedAppointmentType.name(for: selectedLanguage))
                     .font(.subheadline)
                     .fontWeight(.medium)
@@ -263,10 +256,10 @@ struct AppointmentPrepView: View {
                 Text("\(questions.filter(\.isAsked).count)/\(questions.count)")
                     .font(.caption)
                     .fontWeight(.bold)
-                    .foregroundStyle(.green)
+                    .foregroundStyle(.brand)
                     .padding(.horizontal, 10)
                     .padding(.vertical, 4)
-                    .background(Color.green.opacity(0.12))
+                    .background(Color.brand.opacity(0.12))
                     .clipShape(Capsule())
             }
             .padding(.horizontal)
@@ -326,7 +319,7 @@ struct AppointmentPrepView: View {
                 .foregroundStyle(.white)
                 .frame(maxWidth: .infinity)
                 .padding(12)
-                .background(Color.green.gradient)
+                .background(Color.brand.gradient)
                 .clipShape(RoundedRectangle(cornerRadius: 12))
             }
             .padding(.horizontal)
@@ -506,7 +499,7 @@ struct QuestionRowView: View {
             Button(action: onToggle) {
                 Image(systemName: question.isAsked ? "checkmark.circle.fill" : "circle")
                     .font(.title3)
-                    .foregroundStyle(question.isAsked ? .green : .secondary)
+                    .foregroundStyle(question.isAsked ? .brand : .secondary)
             }
             .buttonStyle(.plain)
 
@@ -565,7 +558,7 @@ struct AddQuestionView: View {
                         .foregroundStyle(.white)
                         .frame(maxWidth: .infinity)
                         .padding()
-                        .background(questionText.trimmingCharacters(in: .whitespaces).isEmpty ? Color.gray : Color.green)
+                        .background(questionText.trimmingCharacters(in: .whitespaces).isEmpty ? Color.gray : Color.brand)
                         .clipShape(RoundedRectangle(cornerRadius: 12))
                 }
                 .disabled(questionText.trimmingCharacters(in: .whitespaces).isEmpty)

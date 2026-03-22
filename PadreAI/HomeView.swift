@@ -28,14 +28,7 @@ struct HomeView: View {
                             .scaledToFit()
                             .frame(height: 44)
                         Spacer()
-                        HStack(spacing: 12) {
-                            // Profile image
-                            Image(systemName: "person.crop.circle.fill")
-                                .font(.system(size: 32))
-                                .foregroundStyle(.secondary)
-
-                            settingsMenu
-                        }
+                        settingsMenu
                     }
                     .padding(.horizontal)
                     .padding(.top, 8)
@@ -70,7 +63,7 @@ struct HomeView: View {
                             NavigationLink(destination: MedicationView(selectedLanguage: selectedLanguage)) {
                                 ActionCard(
                                     icon: "camera.viewfinder",
-                                    iconColor: .blue,
+                                    iconColor: .brand,
                                     title: selectedLanguage == .spanish ? "Escanear Receta" : "Scan Prescription",
                                     subtitle: selectedLanguage == .spanish ?
                                         "Escanea la etiqueta para agregarla automaticamente." :
@@ -94,7 +87,7 @@ struct HomeView: View {
                             NavigationLink(destination: AppointmentPrepView(selectedLanguage: selectedLanguage)) {
                                 ActionCard(
                                     icon: "list.clipboard.fill",
-                                    iconColor: .green,
+                                    iconColor: .brand,
                                     title: selectedLanguage == .spanish ? "Preparar Cita" : "Prepare Appointment",
                                     subtitle: selectedLanguage == .spanish ?
                                         "Organiza tus preguntas para tu proxima cita." :
@@ -171,7 +164,7 @@ struct HomeView: View {
                             HStack(spacing: 6) {
                                 Image(systemName: "figure.walk")
                                     .font(.caption)
-                                    .foregroundStyle(.blue)
+                                    .foregroundStyle(.brand)
                                 Text(selectedLanguage == .spanish ? "PASOS" : "STEPS")
                                     .font(.system(size: 10, weight: .semibold))
                                     .foregroundStyle(.secondary)
@@ -184,7 +177,7 @@ struct HomeView: View {
                         }
                         .frame(maxWidth: .infinity, alignment: .leading)
                         .padding()
-                        .background(Color.blue.opacity(0.08))
+                        .background(Color.brand.opacity(0.08))
                         .clipShape(RoundedRectangle(cornerRadius: 16))
                     }
                     .buttonStyle(.plain)
@@ -264,7 +257,7 @@ struct HomeView: View {
                 HStack {
                     Image(systemName: "heart.text.square.fill")
                         .font(.title2)
-                        .foregroundStyle(.blue)
+                        .foregroundStyle(.brand)
                     VStack(alignment: .leading, spacing: 2) {
                         Text(selectedLanguage == .spanish ? "Conectar datos de salud" : "Connect health data")
                             .font(.headline)
@@ -286,14 +279,14 @@ struct HomeView: View {
                         .foregroundStyle(.white)
                         .frame(maxWidth: .infinity)
                         .padding(.vertical, 10)
-                        .background(Color.blue)
+                        .background(Color.brand)
                         .clipShape(RoundedRectangle(cornerRadius: 10))
                 }
             }
             .padding()
             .background(
                 RoundedRectangle(cornerRadius: 16)
-                    .fill(Color.blue.opacity(0.05))
+                    .fill(Color.brand.opacity(0.05))
             )
         }
     }
@@ -352,7 +345,7 @@ struct HealthDetailView: View {
                     trendSection(
                         title: selectedLanguage == .spanish ? "Pasos" : "Steps",
                         icon: "figure.walk",
-                        color: .blue,
+                        color: .brand,
                         samples: summary.steps,
                         format: { "\(Int($0))" }
                     )

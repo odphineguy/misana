@@ -162,11 +162,11 @@ struct SleepDetailView: View {
                     HStack(spacing: 12) {
                         InsightCard(
                             icon: "star.fill",
-                            iconColor: .blue,
+                            iconColor: .brand,
                             title: selectedLanguage == .spanish ? "Calidad de sueno" : "Sleep Quality",
                             value: "\(Int(summary.sleepQuality))%",
                             progress: summary.sleepQuality / 100,
-                            progressColor: .blue
+                            progressColor: .brand
                         )
 
                         let avgDeep = summary.deepSleep.isEmpty ? 0 :
@@ -192,7 +192,7 @@ struct SleepDetailView: View {
                         let bM = Int((avgInBed - Double(bH)) * 60)
                         HighlightRow(
                             icon: "bed.double.fill",
-                            iconBgColor: .blue,
+                            iconBgColor: .brand,
                             title: selectedLanguage == .spanish ? "Tiempo en cama" : "Time in Bed",
                             subtitle: selectedLanguage == .spanish ? "Promedio semanal" : "Weekly average",
                             value: "\(bH)h \(bM)m"
@@ -316,11 +316,11 @@ struct HeartRateDetailView: View {
                         if let minVal = summary.heartRateMin.last {
                             HighlightRow(
                                 icon: "arrow.down.circle.fill",
-                                iconBgColor: .blue,
+                                iconBgColor: .brand,
                                 title: selectedLanguage == .spanish ? "Minimo hoy" : "Today's Low",
                                 subtitle: selectedLanguage == .spanish ? "Ritmo mas bajo" : "Lowest rate",
                                 value: "\(Int(minVal.value)) BPM",
-                                valueColor: .blue
+                                valueColor: .brand
                             )
                         }
 
@@ -401,9 +401,9 @@ struct StepsDetailView: View {
                 .foregroundStyle(.secondary)
             Text("\(summary.avgSteps)")
                 .font(.system(size: 40, weight: .bold))
-                .foregroundStyle(.blue)
+                .foregroundStyle(.brand)
             if !summary.steps.isEmpty {
-                WeeklyBarChart(samples: summary.steps, color: .blue, selectedLanguage: selectedLanguage)
+                WeeklyBarChart(samples: summary.steps, color: .brand, selectedLanguage: selectedLanguage)
                     .padding(.top, 8)
             }
         }
@@ -416,7 +416,7 @@ struct StepsDetailView: View {
         HStack(spacing: 12) {
             InsightCard(
                 icon: "figure.walk",
-                iconColor: .blue,
+                iconColor: .brand,
                 title: selectedLanguage == .spanish ? "Distancia diaria" : "Daily Distance",
                 value: String(format: "%.1f km", avgDistKm)
             )
@@ -444,7 +444,7 @@ struct StepsDetailView: View {
 
             HighlightRow(
                 icon: "shoe.fill",
-                iconBgColor: .blue,
+                iconBgColor: .brand,
                 title: selectedLanguage == .spanish ? "Pasos hoy" : "Today's Steps",
                 subtitle: selectedLanguage == .spanish ? "Conteo actual" : "Current count",
                 value: "\(summary.todaySteps)"
