@@ -253,12 +253,11 @@
 
 <script>
 function setLang(lang) {
-    document.querySelectorAll('[lang="es"], [lang="en"]').forEach(el => {
+    document.querySelectorAll('div[lang="es"], div[lang="en"]').forEach(el => {
         el.style.display = el.getAttribute('lang') === lang ? 'block' : 'none';
     });
     document.getElementById('btn-es').classList.toggle('active', lang === 'es');
     document.getElementById('btn-en').classList.toggle('active', lang === 'en');
-    document.documentElement.lang = lang;
 }
 </script>
 </body>
