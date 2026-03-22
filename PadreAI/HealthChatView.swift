@@ -189,18 +189,18 @@ struct HealthChatView: View {
             Hola! Soy MiSana, tu asistente de salud personal.
 
             En que puedo ayudarte hoy? Puedo asistirte con:
-            \u{2022} Chequear tus sintomas / Check symptoms
-            \u{2022} Explicar tus medicinas / Explain meds
-            \u{2022} Preparar citas medicas / Prep appointments
+            \u{2022} Chequear tus sintomas
+            \u{2022} Explicar tus medicinas
+            \u{2022} Preparar citas medicas
             """
         } else {
             welcomeText = """
             Hello! I'm MiSana, your personal health assistant.
 
             How can I help you today? I can assist with:
-            \u{2022} Check your symptoms / Chequear sintomas
-            \u{2022} Explain your medications / Explicar medicinas
-            \u{2022} Prepare doctor appointments / Preparar citas
+            \u{2022} Check your symptoms
+            \u{2022} Explain your medications
+            \u{2022} Prepare doctor appointments
             """
         }
 
