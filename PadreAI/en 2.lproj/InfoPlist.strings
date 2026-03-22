@@ -1,0 +1,2 @@
+NSCameraUsageDescription = "MiSana needs camera access to scan medication labels and barcodes.";
+NSHealthShareUsageDescription = "MiSana reads your steps, sleep, heart rate, blood pressure, blood oxygen, and weight from Apple Health to give you personalized information. Read-only — we never modify your data. Everything is processed on your device with local AI, nothing is sent to the internet.";
