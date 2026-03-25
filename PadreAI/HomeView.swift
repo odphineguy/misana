@@ -16,6 +16,9 @@ struct HomeView: View {
     @State private var showStepsDetail = false
     @State private var showHeartDetail = false
     @State private var showSleepDetail = false
+    @State private var showAboutSources = false
+    @State private var showPrivacyPolicy = false
+    @State private var showTermsOfService = false
 
     var body: some View {
         NavigationStack {
@@ -103,6 +106,15 @@ struct HomeView: View {
                 }
             }
             .navigationBarHidden(true)
+            .sheet(isPresented: $showAboutSources) {
+                AboutHealthSourcesView(selectedLanguage: selectedLanguage)
+            }
+            .sheet(isPresented: $showPrivacyPolicy) {
+                PrivacyPolicyView(selectedLanguage: selectedLanguage)
+            }
+            .sheet(isPresented: $showTermsOfService) {
+                TermsOfServiceView(selectedLanguage: selectedLanguage)
+            }
         }
     }
 
@@ -126,6 +138,42 @@ struct HomeView: View {
                         Text("English")
                         if selectedLanguage == .english { Image(systemName: "checkmark") }
                     }
+                }
+            }
+
+            Section(selectedLanguage == .spanish ? "Informacion" : "Information") {
+                Button {
+                    showAboutSources = true
+                } label: {
+                    Label(selectedLanguage == .spanish ?
+                          "Sobre la informacion de salud" :
+                          "About health information",
+                          systemImage: "book.closed")
+                }
+            }
+
+            Section(selectedLanguage == .spanish ? "Legal" : "Legal") {
+                Button {
+                    showPrivacyPolicy = true
+                } label: {
+                    Label(selectedLanguage == .spanish ?
+                          "Política de privacidad" :
+                          "Privacy Policy",
+                          systemImage: "lock.shield")
+                }
+                Button {
+                    showTermsOfService = true
+                } label: {
+                    Label(selectedLanguage == .spanish ?
+                          "Términos de servicio" :
+                          "Terms of Service",
+                          systemImage: "doc.text")
+                }
+                Link(destination: URL(string: "mailto:misana.app.privacy@gmail.com")!) {
+                    Label(selectedLanguage == .spanish ?
+                          "Contactar soporte" :
+                          "Contact Support",
+                          systemImage: "envelope")
                 }
             }
 

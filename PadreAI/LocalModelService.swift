@@ -43,19 +43,19 @@ class LocalModelService: ObservableObject {
     Eres MiSana, un compañero de salud bilingüe para familias hispanas. Hablas como una tía o abuela cariñosa que sabe de salud — en español mexicano claro, con calidez y respeto.
 
     TU TONO:
-    - Cálido y familiar, como alguien de la familia que se preocupa de verdad. Puedes decir "mijo/mija" o "no te apures".
-    - Usa un español mexicano natural y sencillo, pero NO uses jerga excesiva ni modismos de adolescente. Nada de "qué chido", "qué onda", "pa' nada", ni expresiones que suenen informales o despreocupadas.
-    - Siempre toma en serio lo que la persona siente. NUNCA minimices los síntomas ni el malestar del usuario. Si alguien dice que le duele algo, responde con empatía: "Ay mijo, siento que te sientas así" — nunca con indiferencia.
-    - Explicas todo en palabras sencillas. Si usas un término médico, lo explicas al momento.
+    - Cálido pero DIRECTO. La empatía va en UNA clausula corta al inicio, luego ve directo a la informacion util. Ejemplo CORRECTO: "Ay mijo, tos y garganta pueden ser por un resfriado o gripe." Ejemplo INCORRECTO: "Ay mijo, qué bueno que me cuentas cómo te sientes. Una garganta y tos, eso puede ser molesto, no te apures."
+    - Español mexicano natural y sencillo. Puedes decir "mijo/mija". NO uses jerga como "qué chido", "qué onda", "pa' nada".
+    - Toma en serio lo que la persona siente. NUNCA minimices síntomas.
+    - Explica términos médicos en palabras sencillas.
 
     LARGO DE RESPUESTA:
-    - MAXIMO 4-5 oraciones por respuesta. Esto es obligatorio, sin excepciones.
-    - Si el tema necesita mas detalle, da un resumen corto y pregunta "Quieres que te explique mas sobre alguno de estos puntos?"
-    - No des listas largas. Maximo 3 puntos con viñetas si es necesario.
-    - Nunca respondas con parrafos largos. Corto, claro, directo.
+    - MAXIMO 3 oraciones por respuesta. Esto es OBLIGATORIO, sin excepciones.
+    - Si necesitas listar algo, maximo 3 puntos cortos.
+    - Si el tema necesita mas detalle, pregunta "¿Quieres que te explique mas?"
+    - NUNCA escribas mas de 3 oraciones. Corto, claro, directo.
 
     CÓMO RESPONDES:
-    - Para síntomas: primero muestra empatía, luego haz 1-2 preguntas antes de opinar. No brinques a conclusiones.
+    - Para síntomas: empatía en una clausula, luego la informacion util. Haz 1 pregunta si necesitas mas contexto.
     - Para medicamentos: explica para qué sirve y qué vigilar. Como si se lo explicaras a tu abuelita.
     - Para remedios caseros: valídalos cuando son seguros (manzanilla, sábila, caldo de pollo), pero di claro cuándo NO alcanza y hay que ir al doctor.
     - Para preparar citas: ayuda a organizar síntomas y preguntas para el doctor.
@@ -67,7 +67,15 @@ class LocalModelService: ObservableObject {
     - Nunca recomiendes ejercicio o actividad física cuando alguien reporta dolor. Primero que vea al doctor.
     - Nunca diagnostiques. Eres un compañero que educa y apoya, no un doctor.
     - Nunca uses un tono despreocupado, burlón o que minimice el dolor o la preocupación de la persona.
-    - Si alguien tiene síntomas graves (dolor de pecho, fiebre alta en bebés, sangrado, dificultad para respirar), SIEMPRE dices que vayan al doctor o emergencias. Sin rodeos.
+    - NUNCA comentes sobre el peso, cuerpo, apariencia fisica, o contextura del usuario. No hagas suposiciones sobre si alguien esta flaco, gordo, o necesita comer mas o menos. Esto aplica aunque tengas datos de HealthKit — los datos son solo para contexto medico, NO para opinar sobre el cuerpo.
+    - Si alguien reporta dolor de pecho, dificultad para respirar, sangrado fuerte, o fiebre alta en bebes, tu PRIMERA oracion debe ser: "Ve a urgencias o llama al 911 ahora." Sin rodeos, sin preguntas, sin "quieres que te explique mas".
+
+    FUENTES:
+    - Si recibes contexto con fuentes verificadas, basa tu respuesta en esa informacion.
+    - Si NO recibes contexto de fuentes, responde con consejos generales de bienestar o di que consulten a su doctor.
+    - NUNCA inventes informacion medica.
+    - NUNCA incluyas links, URLs, ni nombres de fuentes en tu respuesta. Las fuentes se muestran automaticamente.
+    - NUNCA interpretes datos de salud (frecuencia cardiaca, oxigeno, presion) sin fuentes verificadas.
     """
     
     // MARK: - Initialization
@@ -153,7 +161,7 @@ class LocalModelService: ObservableObject {
 
         // Initialize LLM.swift with the model and chat template
         // init? is failable; maxTokenCount is set at init time (private let)
-        guard let model = LLM(from: modelPath, template: .gemma(systemPrompt), historyLimit: 10, maxTokenCount: 1024) else {
+        guard let model = LLM(from: modelPath, template: .gemma(systemPrompt), historyLimit: 6, maxTokenCount: 2048) else {
             throw ModelError.modelNotLoaded
         }
 
@@ -172,27 +180,40 @@ class LocalModelService: ObservableObject {
     // MARK: - Inference
     
     /// Generate a response from the model
-    func generateResponse(userMessage: String, conversationHistory: [ChatMessage], healthContext: String? = nil) async throws -> String {
+    func generateResponse(userMessage: String, conversationHistory: [ChatMessage], healthContext: String? = nil, sourceContext: String? = nil) async throws -> String {
         guard isModelLoaded, let llm = llm else {
             throw ModelError.modelNotLoaded
         }
 
         print("🤖 Generating response...")
 
-        // Prepend health context if available
-        let prompt: String
-        if let context = healthContext {
-            prompt = "Datos de salud recientes del usuario: \(context). El usuario pregunta: \(userMessage)"
-        } else {
-            prompt = userMessage
+        // Build prompt: source context + user message (keep it short for the 4B model)
+        let trimmedMessage = String(userMessage.prefix(500))
+        var prompt = trimmedMessage
+
+        if let source = sourceContext, !source.isEmpty {
+            prompt = "\(source)\n\n\(trimmedMessage)"
         }
 
-        // LLM.swift manages history and prompt formatting via the template.
-        // respond(to:) is async, returns Void, and populates llm.output.
+        // LLM.swift manages conversation history internally (historyLimit: 6).
+        // Do NOT call llm.reset() — it fires a non-awaited Task that races with respond().
         await llm.respond(to: prompt)
 
-        let response = llm.output
+        print("🤖 Model done, output: \(llm.output.prefix(100))")
+
+        var response = llm.output
             .trimmingCharacters(in: .whitespacesAndNewlines)
+
+        // Check for empty or garbage responses
+        print("🔍 Raw output (\(response.count) chars): \(String(response.prefix(200)))")
+        if response.isEmpty || response == "..." || response.count < 3 {
+            print("⚠️ Empty or garbage response, resetting conversation")
+            llm.reset()
+            throw ModelError.inferenceError
+        }
+
+        // Post-process: enforce max 3 sentences (small models ignore prompt-based length constraints)
+        response = truncateToSentences(response, max: 3)
 
         print("✅ Response generated (\(response.count) chars)")
         return response
@@ -245,6 +266,22 @@ class LocalModelService: ObservableObject {
             }
         }
         return result
+    }
+
+    // MARK: - Response Post-Processing
+
+    /// Truncate response to a max number of sentences to enforce length constraints
+    private func truncateToSentences(_ text: String, max: Int) -> String {
+        var count = 0
+        for (i, char) in text.enumerated() {
+            if char == "." || char == "?" || char == "!" {
+                count += 1
+                if count >= max {
+                    return String(text.prefix(i + 1))
+                }
+            }
+        }
+        return text
     }
 
     // MARK: - Conversation Management

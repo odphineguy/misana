@@ -1,2 +1,5 @@
-NSCameraUsageDescription = "MiSana necesita acceso a la camara para escanear etiquetas de medicinas y codigos de barras.";
-NSHealthShareUsageDescription = "MiSana lee tus pasos, sueno, ritmo cardiaco, presion arterial, oxigeno en sangre y peso de Apple Salud para darte informacion personalizada. Solo lectura — nunca modificamos tus datos. Todo se procesa en tu dispositivo con IA local, nada se envia a internet.";
+/* Localización en español para permisos */
+
+"NSCameraUsageDescription" = "MiSana necesita acceso a la cámara para escanear etiquetas de medicinas y recetas.";
+
+"NSHealthShareUsageDescription" = "MiSana lee tus pasos, sueño, ritmo cardíaco, presión arterial, oxígeno en sangre y peso de Apple Salud para darte información personalizada. Solo lectura — nunca modificamos tus datos. Todo se procesa en tu dispositivo con IA local, nada se envía a internet.";

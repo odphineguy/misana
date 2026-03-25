@@ -46,6 +46,7 @@ class DrugLookupService: ObservableObject {
     @Published var searchResults: [DrugSearchResult] = []
     @Published var isSearching = false
     @Published var interactions: [DrugInteraction] = []
+    @Published var interactionCheckFailed = false
 
     private var cache: [String: CachedDrugInfo] = [:]
     private var searchTask: Task<Void, Never>?
@@ -204,8 +205,10 @@ class DrugLookupService: ObservableObject {
 
         do {
             let (data, _) = try await URLSession.shared.data(from: url)
+            interactionCheckFailed = false
             return parseInteractionResponse(data)
         } catch {
+            interactionCheckFailed = true
             return []
         }
     }

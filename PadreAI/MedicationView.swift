@@ -319,6 +319,32 @@ struct MedicationView: View {
                     .padding(.horizontal)
                 }
 
+                // Network Error Banner
+                if drugService.interactionCheckFailed && medications.count >= 2 {
+                    HStack(spacing: 8) {
+                        Image(systemName: "wifi.exclamationmark")
+                            .foregroundStyle(.orange)
+                        Text(selectedLanguage == .spanish ?
+                             "No se pudo verificar interacciones. Revisa tu conexión." :
+                             "Could not check interactions. Check your connection.")
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
+                        Spacer()
+                        Button {
+                            refreshInteractions()
+                        } label: {
+                            Text(selectedLanguage == .spanish ? "Reintentar" : "Retry")
+                                .font(.caption)
+                                .fontWeight(.semibold)
+                                .foregroundStyle(.brand)
+                        }
+                    }
+                    .padding(12)
+                    .background(Color.orange.opacity(0.08))
+                    .clipShape(RoundedRectangle(cornerRadius: 12))
+                    .padding(.horizontal)
+                }
+
                 // Medication Cards
                 ForEach(medications) { medication in
                     NavigationLink {

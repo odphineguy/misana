@@ -19,6 +19,12 @@ struct HealthChatView: View {
     @FocusState private var isInputFocused: Bool
     @State private var showDownloadSheet = false
     @State private var hassentInitialContext = false
+    @State private var lastFailedMessage: String?
+    @State private var citations: [String: [HealthCitation]] = [:] // messageID -> citations
+    @State private var lastSourceContext: String = ""      // carry forward for follow-ups like "Si"
+    @State private var lastCitations: [HealthCitation] = []
+    @State private var showEmergencyBanner = false
+    private let citationService = HealthCitationService()
 
     var body: some View {
         NavigationStack {
@@ -32,11 +38,20 @@ struct HealthChatView: View {
                 ScrollViewReader { proxy in
                     ScrollView {
                         LazyVStack(spacing: 16) {
+                            // Health info banner at top
+                            HealthInfoBanner(selectedLanguage: selectedLanguage)
+
                             ForEach(messages) { message in
                                 ChatBubbleView(
                                     message: message,
-                                    selectedLanguage: selectedLanguage
+                                    selectedLanguage: selectedLanguage,
+                                    citations: citations[message.id.uuidString] ?? []
                                 )
+                            }
+
+                            // Emergency 911 banner
+                            if showEmergencyBanner {
+                                EmergencyBannerView(selectedLanguage: selectedLanguage)
                             }
 
                             // Thinking indicator
@@ -60,6 +75,60 @@ struct HealthChatView: View {
                                     }
                                     Spacer()
                                 }
+                                .padding(.horizontal)
+                            }
+
+                            // Retry button when response fails
+                            if let failedMsg = lastFailedMessage, !isGenerating {
+                                HStack(spacing: 10) {
+                                    Image(systemName: "exclamationmark.triangle.fill")
+                                        .foregroundStyle(.orange)
+                                    VStack(alignment: .leading, spacing: 2) {
+                                        Text(selectedLanguage == .spanish ?
+                                             "No se pudo generar una respuesta." :
+                                             "Could not generate a response.")
+                                            .font(.caption)
+                                            .foregroundStyle(.secondary)
+                                    }
+                                    Spacer()
+                                    Button {
+                                        lastFailedMessage = nil
+                                        isGenerating = true
+                                        let msg = failedMsg
+                                        Task {
+                                            let lang = selectedLanguage == .spanish ? "es" : "en"
+                                            let retrieval = await citationService.retrieveSources(for: msg, language: lang)
+                                            do {
+                                                let response = try await modelService.generateResponse(
+                                                    userMessage: msg,
+                                                    conversationHistory: [],
+                                                    healthContext: healthKitService.summary.generateContextString(),
+                                                    sourceContext: retrieval.sourceContext
+                                                )
+                                                let responseMsg = ChatMessage(text: response, isUser: false)
+                                                messages.append(responseMsg)
+                                                if !retrieval.citations.isEmpty {
+                                                    citations[responseMsg.id.uuidString] = retrieval.citations
+                                                }
+                                            } catch {
+                                                lastFailedMessage = msg
+                                            }
+                                            isGenerating = false
+                                        }
+                                    } label: {
+                                        Text(selectedLanguage == .spanish ? "Reintentar" : "Retry")
+                                            .font(.caption)
+                                            .fontWeight(.semibold)
+                                            .foregroundStyle(.white)
+                                            .padding(.horizontal, 12)
+                                            .padding(.vertical, 6)
+                                            .background(Color.brand)
+                                            .clipShape(Capsule())
+                                    }
+                                }
+                                .padding(12)
+                                .background(Color.orange.opacity(0.08))
+                                .clipShape(RoundedRectangle(cornerRadius: 12))
                                 .padding(.horizontal)
                             }
                         }
@@ -125,7 +194,6 @@ struct HealthChatView: View {
                 )
             }
             .onAppear {
-                modelService.resetConversation()
                 initializeMessages()
                 checkModelStatus()
             }
@@ -210,7 +278,38 @@ struct HealthChatView: View {
     private func clearMessages() {
         messages.removeAll()
         modelService.resetConversation()
+        showEmergencyBanner = false
         addWelcomeMessage()
+    }
+
+    /// Detect emergency symptoms that require immediate 911 guidance
+    private func detectEmergency(_ message: String) -> Bool {
+        let lowered = message.lowercased()
+        let emergencyPhrases = [
+            // Chest pain / heart
+            "dolor de pecho", "chest pain", "dolor en el pecho",
+            "heart attack", "ataque al corazón", "ataque cardiaco", "infarto",
+            // Breathing
+            "no puedo respirar", "can't breathe", "cannot breathe",
+            "dificultad para respirar", "difficulty breathing", "trouble breathing",
+            "me ahogo", "me estoy ahogando", "choking",
+            // Stroke
+            "stroke", "derrame cerebral", "embolia",
+            // Suicide / self-harm
+            "quiero morir", "want to die", "suicidarme", "kill myself",
+            "no quiero vivir", "matarme", "hacerme daño",
+            // Severe bleeding
+            "mucha sangre", "no para de sangrar", "bleeding a lot", "won't stop bleeding",
+            // Baby/infant emergency
+            "fiebre alta en bebe", "fiebre alta en bebé", "baby high fever",
+            "mi bebe no respira", "mi bebé no respira", "baby not breathing",
+            // Overdose / poisoning
+            "sobredosis", "overdose", "envenenamiento", "poisoning", "se tomo veneno",
+            // Loss of consciousness
+            "no responde", "unconscious", "inconsciente", "se desmayo", "se desmayó",
+            "unresponsive"
+        ]
+        return emergencyPhrases.contains { lowered.contains($0) }
     }
 
     private func checkModelStatus() {
@@ -235,13 +334,24 @@ struct HealthChatView: View {
         hassentInitialContext = true
         messages.append(ChatMessage(text: context, isUser: true))
         isGenerating = true
+
+        // STEP 1: Retrieve verified sources BEFORE generating
+        let lang = selectedLanguage == .spanish ? "es" : "en"
+        let retrieval = await citationService.retrieveSources(for: context, language: lang)
+
         do {
+            // STEP 2: Generate with source context
             let response = try await modelService.generateResponse(
                 userMessage: context,
                 conversationHistory: messages,
-                healthContext: healthKitService.summary.generateContextString()
+                healthContext: healthKitService.summary.generateContextString(),
+                sourceContext: retrieval.sourceContext
             )
-            messages.append(ChatMessage(text: response, isUser: false))
+            let responseMsg = ChatMessage(text: response, isUser: false)
+            messages.append(responseMsg)
+            if !retrieval.citations.isEmpty {
+                citations[responseMsg.id.uuidString] = retrieval.citations
+            }
         } catch {
             let errorText = selectedLanguage == .spanish ?
                 "Lo siento, hubo un error. Por favor intenta de nuevo." :
@@ -257,28 +367,49 @@ struct HealthChatView: View {
 
         messages.append(ChatMessage(text: messageText, isUser: true))
         inputText = ""
+
+        // Check for emergency symptoms BEFORE generating — banner appears immediately
+        showEmergencyBanner = detectEmergency(messageText)
+
         isGenerating = true
 
         Task {
+            // STEP 1: Retrieve verified sources BEFORE generating response
+            let lang = selectedLanguage == .spanish ? "es" : "en"
+            let retrieval = await citationService.retrieveSources(for: messageText, language: lang)
+
+            // For short follow-ups ("Si", "Yes", "Tell me more"), carry forward previous sources
+            let sourceContext = retrieval.hasVerifiedSources ? retrieval.sourceContext : lastSourceContext
+            let activeCitations = retrieval.hasVerifiedSources ? retrieval.citations : lastCitations
+
             do {
+                // STEP 2: Generate response with source context
                 let response = try await modelService.generateResponse(
                     userMessage: messageText,
                     conversationHistory: messages,
-                    healthContext: healthKitService.summary.generateContextString()
+                    healthContext: healthKitService.summary.generateContextString(),
+                    sourceContext: sourceContext
                 )
 
+                // STEP 3: Display response with retrieved citations
                 await MainActor.run {
-                    messages.append(ChatMessage(text: response, isUser: false))
+                    lastFailedMessage = nil
+                    let responseMsg = ChatMessage(text: response, isUser: false)
+                    messages.append(responseMsg)
+                    if !activeCitations.isEmpty {
+                        citations[responseMsg.id.uuidString] = activeCitations
+                    }
+                    // Store successful retrieval for future follow-ups
+                    if retrieval.hasVerifiedSources {
+                        lastSourceContext = retrieval.sourceContext
+                        lastCitations = retrieval.citations
+                    }
                     isGenerating = false
                 }
 
             } catch {
-                let errorResponse = selectedLanguage == .spanish ?
-                    "Lo siento, hubo un error al procesar tu mensaje. Por favor intenta de nuevo." :
-                    "Sorry, there was an error processing your message. Please try again."
-
                 await MainActor.run {
-                    messages.append(ChatMessage(text: errorResponse, isUser: false))
+                    lastFailedMessage = messageText
                     isGenerating = false
                 }
             }
@@ -291,6 +422,7 @@ struct HealthChatView: View {
 struct ChatBubbleView: View {
     let message: ChatMessage
     let selectedLanguage: AppLanguage
+    var citations: [HealthCitation] = []
 
     var body: some View {
         HStack(alignment: .top, spacing: 8) {
@@ -330,6 +462,41 @@ struct ChatBubbleView: View {
                     .foregroundStyle(message.isUser ? .white : .primary)
                     .clipShape(RoundedRectangle(cornerRadius: 16))
 
+                // Topic-specific citations for AI responses
+                if !message.isUser && !citations.isEmpty {
+                    VStack(alignment: .leading, spacing: 4) {
+                        Text(selectedLanguage == .spanish ? "Fuentes:" : "Sources:")
+                            .font(.system(size: 9, weight: .semibold))
+                            .foregroundStyle(.secondary)
+                        ForEach(citations) { citation in
+                            Link(destination: citation.url) {
+                                HStack(spacing: 4) {
+                                    Image(systemName: "link")
+                                        .font(.system(size: 8))
+                                    Text("\(citation.title) — \(citation.source)")
+                                        .font(.system(size: 9))
+                                        .lineLimit(1)
+                                }
+                                .foregroundStyle(.brand)
+                            }
+                        }
+                        Text(selectedLanguage == .spanish ?
+                             "Siempre consulta a tu doctor." :
+                             "Always consult your doctor.")
+                            .font(.system(size: 9))
+                            .foregroundStyle(.tertiary)
+                    }
+                    .padding(.top, 2)
+                } else if !message.isUser {
+                    // Fallback when no specific citations found
+                    Text(selectedLanguage == .spanish ?
+                         "Info educativa. Consulta a tu doctor. Fuente: MedlinePlus.gov" :
+                         "Educational info. Consult your doctor. Source: MedlinePlus.gov")
+                        .font(.system(size: 9))
+                        .foregroundStyle(.tertiary)
+                        .padding(.top, 2)
+                }
+
                 if message.isUser {
                     HStack(spacing: 4) {
                         Text(selectedLanguage == .spanish ? "TU" : "YOU")
@@ -350,6 +517,208 @@ struct ChatBubbleView: View {
             }
         }
         .padding(.horizontal)
+    }
+}
+
+// MARK: - Health Info Banner
+
+struct HealthInfoBanner: View {
+    let selectedLanguage: AppLanguage
+
+    var body: some View {
+        HStack(spacing: 10) {
+            Image(systemName: "info.circle.fill")
+                .foregroundStyle(.brand)
+                .font(.subheadline)
+            Text(selectedLanguage == .spanish ?
+                 "La informacion de salud de MiSana es solo educativa, basada en fuentes como MedlinePlus (NIH) y guias del CDC. No reemplaza a tu doctor." :
+                 "MiSana's health info is educational only, based on sources like MedlinePlus (NIH) and CDC guidelines. It does not replace your doctor.")
+                .font(.system(size: 11))
+                .foregroundStyle(.secondary)
+        }
+        .padding(10)
+        .background(Color.brand.opacity(0.06))
+        .clipShape(RoundedRectangle(cornerRadius: 10))
+        .padding(.horizontal)
+    }
+}
+
+// MARK: - Emergency 911 Banner
+
+struct EmergencyBannerView: View {
+    let selectedLanguage: AppLanguage
+
+    var body: some View {
+        VStack(spacing: 12) {
+            HStack(spacing: 8) {
+                Image(systemName: "exclamationmark.triangle.fill")
+                    .font(.title2)
+                    .foregroundStyle(.white)
+                Text(selectedLanguage == .spanish ?
+                     "Esto suena como una emergencia." :
+                     "This sounds like an emergency.")
+                    .font(.subheadline)
+                    .fontWeight(.bold)
+                    .foregroundStyle(.white)
+                Spacer()
+            }
+
+            Text(selectedLanguage == .spanish ?
+                 "Si tu o alguien cerca de ti esta en peligro, llama al 911 ahora." :
+                 "If you or someone near you is in danger, call 911 now.")
+                .font(.caption)
+                .foregroundStyle(.white.opacity(0.9))
+                .frame(maxWidth: .infinity, alignment: .leading)
+
+            Link(destination: URL(string: "tel://911")!) {
+                HStack(spacing: 8) {
+                    Image(systemName: "phone.fill")
+                        .font(.headline)
+                    Text(selectedLanguage == .spanish ? "Llamar al 911" : "Call 911")
+                        .font(.headline)
+                        .fontWeight(.bold)
+                }
+                .foregroundStyle(.red)
+                .frame(maxWidth: .infinity)
+                .padding(.vertical, 14)
+                .background(.white)
+                .clipShape(RoundedRectangle(cornerRadius: 12))
+            }
+
+            Text(selectedLanguage == .spanish ?
+                 "Linea de crisis y suicidio: 988" :
+                 "Suicide & Crisis Lifeline: 988")
+                .font(.caption2)
+                .foregroundStyle(.white.opacity(0.8))
+        }
+        .padding(16)
+        .background(Color.red)
+        .clipShape(RoundedRectangle(cornerRadius: 16))
+        .padding(.horizontal)
+    }
+}
+
+// MARK: - About Health Sources View
+
+struct AboutHealthSourcesView: View {
+    let selectedLanguage: AppLanguage
+    @Environment(\.dismiss) private var dismiss
+
+    var body: some View {
+        NavigationStack {
+            List {
+                Section {
+                    Text(selectedLanguage == .spanish ?
+                         "MiSana utiliza un modelo de inteligencia artificial que funciona en tu dispositivo para proporcionar informacion educativa general sobre salud. Esta informacion NO reemplaza el consejo medico profesional." :
+                         "MiSana uses an on-device AI model to provide general educational health information. This information does NOT replace professional medical advice.")
+                        .font(.subheadline)
+                        .foregroundStyle(.secondary)
+                }
+
+                Section(selectedLanguage == .spanish ? "Fuentes de referencia" : "Reference sources") {
+                    Link(destination: URL(string: selectedLanguage == .spanish ?
+                        "https://medlineplus.gov/spanish/" :
+                        "https://medlineplus.gov/")!) {
+                        HStack {
+                            VStack(alignment: .leading, spacing: 2) {
+                                Text("MedlinePlus")
+                                    .font(.subheadline)
+                                    .fontWeight(.medium)
+                                Text(selectedLanguage == .spanish ?
+                                     "Biblioteca Nacional de Medicina de EE.UU. (NIH)" :
+                                     "U.S. National Library of Medicine (NIH)")
+                                    .font(.caption)
+                                    .foregroundStyle(.secondary)
+                            }
+                            Spacer()
+                            Image(systemName: "safari")
+                                .foregroundStyle(.brand)
+                        }
+                    }
+
+                    Link(destination: URL(string: "https://www.cdc.gov/")!) {
+                        HStack {
+                            VStack(alignment: .leading, spacing: 2) {
+                                Text("CDC")
+                                    .font(.subheadline)
+                                    .fontWeight(.medium)
+                                Text(selectedLanguage == .spanish ?
+                                     "Centros para el Control y Prevencion de Enfermedades" :
+                                     "Centers for Disease Control and Prevention")
+                                    .font(.caption)
+                                    .foregroundStyle(.secondary)
+                            }
+                            Spacer()
+                            Image(systemName: "safari")
+                                .foregroundStyle(.brand)
+                        }
+                    }
+
+                    Link(destination: URL(string: "https://www.who.int/")!) {
+                        HStack {
+                            VStack(alignment: .leading, spacing: 2) {
+                                Text(selectedLanguage == .spanish ? "OMS" : "WHO")
+                                    .font(.subheadline)
+                                    .fontWeight(.medium)
+                                Text(selectedLanguage == .spanish ?
+                                     "Organizacion Mundial de la Salud" :
+                                     "World Health Organization")
+                                    .font(.caption)
+                                    .foregroundStyle(.secondary)
+                            }
+                            Spacer()
+                            Image(systemName: "safari")
+                                .foregroundStyle(.brand)
+                        }
+                    }
+
+                    Link(destination: URL(string: "https://rxnav.nlm.nih.gov/")!) {
+                        HStack {
+                            VStack(alignment: .leading, spacing: 2) {
+                                Text("RxNorm (NIH)")
+                                    .font(.subheadline)
+                                    .fontWeight(.medium)
+                                Text(selectedLanguage == .spanish ?
+                                     "Base de datos de medicamentos del NIH" :
+                                     "NIH drug database for medication lookup")
+                                    .font(.caption)
+                                    .foregroundStyle(.secondary)
+                            }
+                            Spacer()
+                            Image(systemName: "safari")
+                                .foregroundStyle(.brand)
+                        }
+                    }
+                }
+
+                Section(selectedLanguage == .spanish ? "Importante" : "Important") {
+                    VStack(alignment: .leading, spacing: 8) {
+                        Label(selectedLanguage == .spanish ?
+                              "MiSana NO es un doctor" :
+                              "MiSana is NOT a doctor",
+                              systemImage: "exclamationmark.triangle.fill")
+                            .font(.subheadline)
+                            .fontWeight(.semibold)
+                            .foregroundStyle(.orange)
+
+                        Text(selectedLanguage == .spanish ?
+                             "Siempre consulta con un profesional de salud certificado para diagnosticos, tratamientos o decisiones medicas. En emergencias, llama al 911." :
+                             "Always consult a certified healthcare professional for diagnoses, treatments, or medical decisions. In emergencies, call 911.")
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
+                    }
+                }
+            }
+            .navigationTitle(selectedLanguage == .spanish ?
+                             "Sobre la informacion de salud" :
+                             "About health information")
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .cancellationAction) {
+                    Button(selectedLanguage == .spanish ? "Cerrar" : "Close") { dismiss() }
+                }
+            }
+        }
     }
 }
 

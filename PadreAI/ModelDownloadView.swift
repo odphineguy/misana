@@ -31,7 +31,7 @@ struct ModelDownloadView: View {
             }
             .navigationTitle(selectedLanguage == .spanish ? "Configuración" : "Setup")
             .navigationBarTitleDisplayMode(.inline)
-            .alert("Error de Descarga", isPresented: $showErrorAlert) {
+            .alert(selectedLanguage == .spanish ? "Error de Descarga" : "Download Error", isPresented: $showErrorAlert) {
                 Button("OK", role: .cancel) {
                     modelService.downloadError = nil
                 }
@@ -67,9 +67,9 @@ struct ModelDownloadView: View {
                         .fontWeight(.bold)
                         .multilineTextAlignment(.center)
                     
-                    Text(selectedLanguage == .spanish ? 
-                         "Tu doctor de bolsillo" : 
-                         "Your pocket doctor")
+                    Text(selectedLanguage == .spanish ?
+                         "Tu compañero de salud familiar" :
+                         "Your family health companion")
                         .font(.title3)
                         .foregroundStyle(.secondary)
                 }
