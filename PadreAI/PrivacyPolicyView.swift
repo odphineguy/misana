@@ -195,7 +195,7 @@ struct PrivacyPolicyView: View {
                          "For privacy questions, contact us at:")
                         .font(.subheadline)
                         .foregroundStyle(.secondary)
-                    Text("misana.app.privacy@gmail.com")
+                    Text("support@misana.app")
                         .font(.subheadline)
                         .fontWeight(.semibold)
                         .foregroundStyle(.brand)

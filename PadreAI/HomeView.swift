@@ -169,7 +169,7 @@ struct HomeView: View {
                           "Terms of Service",
                           systemImage: "doc.text")
                 }
-                Link(destination: URL(string: "mailto:misana.app.privacy@gmail.com")!) {
+                Link(destination: URL(string: "mailto:support@misana.app")!) {
                     Label(selectedLanguage == .spanish ?
                           "Contactar soporte" :
                           "Contact Support",

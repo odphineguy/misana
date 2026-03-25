@@ -188,7 +188,7 @@ struct TermsOfServiceView: View {
                          "For questions about these terms, contact us at:")
                         .font(.subheadline)
                         .foregroundStyle(.secondary)
-                    Text("misana.app.privacy@gmail.com")
+                    Text("support@misana.app")
                         .font(.subheadline)
                         .fontWeight(.semibold)
                         .foregroundStyle(.brand)
