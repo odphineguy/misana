@@ -25,13 +25,15 @@ struct HomeView: View {
             ScrollView {
                 VStack(spacing: 28) {
                     // Logo + Settings row
-                    HStack {
+                    ZStack {
                         Image(colorScheme == .dark ? "MiSanaLogoDark" : "MiSanaLogo")
                             .resizable()
                             .scaledToFit()
                             .frame(height: 44)
-                        Spacer()
-                        settingsMenu
+                        HStack {
+                            Spacer()
+                            settingsMenu
+                        }
                     }
                     .padding(.horizontal)
                     .padding(.top, 8)
@@ -225,8 +227,7 @@ struct HomeView: View {
                         }
                         .frame(maxWidth: .infinity, alignment: .leading)
                         .padding()
-                        .background(Color.brand.opacity(0.08))
-                        .clipShape(RoundedRectangle(cornerRadius: 16))
+                        .liquidGlass(cornerRadius: 16, tint: .brand)
                     }
                     .buttonStyle(.plain)
 
@@ -253,8 +254,7 @@ struct HomeView: View {
                             }
                             .frame(maxWidth: .infinity, alignment: .leading)
                             .padding(10)
-                            .background(Color.red.opacity(0.08))
-                            .clipShape(RoundedRectangle(cornerRadius: 12))
+                            .liquidGlass(cornerRadius: 12, tint: .red)
                         }
                         .buttonStyle(.plain)
 
@@ -283,8 +283,7 @@ struct HomeView: View {
                             }
                             .frame(maxWidth: .infinity, alignment: .leading)
                             .padding(10)
-                            .background(Color.indigo.opacity(0.08))
-                            .clipShape(RoundedRectangle(cornerRadius: 12))
+                            .liquidGlass(cornerRadius: 12, tint: .indigo)
                         }
                         .buttonStyle(.plain)
                     }
@@ -334,7 +333,7 @@ struct HomeView: View {
             .padding()
             .background(
                 RoundedRectangle(cornerRadius: 16)
-                    .fill(Color.brand.opacity(0.05))
+                    .fill(Color.brand.opacity(0.12))
             )
         }
     }
@@ -376,6 +375,10 @@ struct ActionCard: View {
         .padding(14)
         .background(Color(uiColor: .secondarySystemGroupedBackground))
         .clipShape(RoundedRectangle(cornerRadius: 16))
+        .overlay(
+            RoundedRectangle(cornerRadius: 16)
+                .stroke(Color.primary.opacity(0.1), lineWidth: 1)
+        )
     }
 }
 

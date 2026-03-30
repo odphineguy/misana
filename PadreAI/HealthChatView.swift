@@ -146,8 +146,6 @@ struct HealthChatView: View {
                     }
                 }
 
-                Divider()
-
                 // Input area
                 HStack(spacing: 10) {
                     TextField(
@@ -176,6 +174,7 @@ struct HealthChatView: View {
                 }
                 .padding(.horizontal)
                 .padding(.vertical, 10)
+                .liquidGlass(cornerRadii: .init(topLeading: 16, topTrailing: 16))
             }
             .navigationTitle(selectedLanguage == .spanish ? "Pregunta a MiSana" : "Ask MiSana")
             .toolbar {
@@ -484,17 +483,32 @@ struct ChatBubbleView: View {
                              "Siempre consulta a tu doctor." :
                              "Always consult your doctor.")
                             .font(.system(size: 9))
-                            .foregroundStyle(.tertiary)
+                            .foregroundStyle(.secondary)
                     }
                     .padding(.top, 2)
                 } else if !message.isUser {
                     // Fallback when no specific citations found
-                    Text(selectedLanguage == .spanish ?
-                         "Info educativa. Consulta a tu doctor. Fuente: MedlinePlus.gov" :
-                         "Educational info. Consult your doctor. Source: MedlinePlus.gov")
-                        .font(.system(size: 9))
-                        .foregroundStyle(.tertiary)
-                        .padding(.top, 2)
+                    VStack(alignment: .leading, spacing: 2) {
+                        Text(selectedLanguage == .spanish ?
+                             "Info educativa. Consulta a tu doctor." :
+                             "Educational info. Consult your doctor.")
+                            .font(.system(size: 9))
+                            .foregroundStyle(.secondary)
+                        Link(destination: URL(string: selectedLanguage == .spanish ?
+                            "https://medlineplus.gov/spanish/healthtopics.html" :
+                            "https://medlineplus.gov/healthtopics.html")!) {
+                            HStack(spacing: 4) {
+                                Image(systemName: "link")
+                                    .font(.system(size: 8))
+                                Text(selectedLanguage == .spanish ?
+                                     "Fuente: MedlinePlus (NIH)" :
+                                     "Source: MedlinePlus (NIH)")
+                                    .font(.system(size: 9))
+                            }
+                            .foregroundStyle(.brand)
+                        }
+                    }
+                    .padding(.top, 2)
                 }
 
                 if message.isUser {
@@ -537,7 +551,7 @@ struct HealthInfoBanner: View {
                 .foregroundStyle(.secondary)
         }
         .padding(10)
-        .background(Color.brand.opacity(0.06))
+        .background(Color.brand.opacity(0.12))
         .clipShape(RoundedRectangle(cornerRadius: 10))
         .padding(.horizontal)
     }
@@ -585,11 +599,14 @@ struct EmergencyBannerView: View {
                 .clipShape(RoundedRectangle(cornerRadius: 12))
             }
 
-            Text(selectedLanguage == .spanish ?
-                 "Linea de crisis y suicidio: 988" :
-                 "Suicide & Crisis Lifeline: 988")
-                .font(.caption2)
-                .foregroundStyle(.white.opacity(0.8))
+            Link(destination: URL(string: "tel:988")!) {
+                Text(selectedLanguage == .spanish ?
+                     "Linea de crisis y suicidio: 988" :
+                     "Suicide & Crisis Lifeline: 988")
+                    .font(.caption2)
+                    .foregroundStyle(.white.opacity(0.8))
+                    .underline()
+            }
         }
         .padding(16)
         .background(Color.red)
@@ -691,6 +708,44 @@ struct AboutHealthSourcesView: View {
                     }
                 }
 
+                Section(selectedLanguage == .spanish ? "Datos que se envían" : "Data sent from this app") {
+                    VStack(alignment: .leading, spacing: 4) {
+                        Label(selectedLanguage == .spanish ? "Conversaciones de IA" : "AI conversations",
+                              systemImage: "brain.head.profile")
+                            .font(.subheadline)
+                            .fontWeight(.medium)
+                        Text(selectedLanguage == .spanish ?
+                             "Se procesan completamente en tu dispositivo usando Gemma 3. Ninguna conversación, dato de salud o información personal se envía a ningún servidor o servicio de IA de terceros." :
+                             "Processed entirely on your device using Gemma 3. No conversations, health data, or personal information are sent to any server or third-party AI service.")
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
+                    }
+
+                    VStack(alignment: .leading, spacing: 4) {
+                        Label(selectedLanguage == .spanish ? "Búsqueda de medicamentos" : "Medication lookups",
+                              systemImage: "pill.fill")
+                            .font(.subheadline)
+                            .fontWeight(.medium)
+                        Text(selectedLanguage == .spanish ?
+                             "Al buscar o escanear un medicamento, solo el nombre del medicamento o código de barras se envía a RxNorm y MedlinePlus (Biblioteca Nacional de Medicina de EE.UU. / NIH). No se incluyen datos personales ni de salud." :
+                             "When you search or scan a medication, only the drug name or barcode number is sent to RxNorm and MedlinePlus (U.S. National Library of Medicine / NIH). No personal or health data is included.")
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
+                    }
+
+                    VStack(alignment: .leading, spacing: 4) {
+                        Label(selectedLanguage == .spanish ? "Datos de salud (Apple Health)" : "Health data (Apple Health)",
+                              systemImage: "heart.fill")
+                            .font(.subheadline)
+                            .fontWeight(.medium)
+                        Text(selectedLanguage == .spanish ?
+                             "Se leen localmente en tu dispositivo. Nunca se transmiten a ningún lugar." :
+                             "Read locally on your device only. Never transmitted anywhere.")
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
+                    }
+                }
+
                 Section(selectedLanguage == .spanish ? "Importante" : "Important") {
                     VStack(alignment: .leading, spacing: 8) {
                         Label(selectedLanguage == .spanish ?
@@ -725,4 +780,5 @@ struct AboutHealthSourcesView: View {
 #Preview {
     HealthChatView(selectedLanguage: .spanish)
         .environmentObject(LocalModelService())
+        .environmentObject(HealthKitService())
 }

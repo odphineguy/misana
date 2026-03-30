@@ -206,17 +206,21 @@ struct MedicationView: View {
             }
             .overlay {
                 if isProcessingScan {
-                    VStack(spacing: 16) {
-                        ProgressView()
-                            .controlSize(.large)
-                        Text(selectedLanguage == .spanish ?
-                             "Analizando etiqueta..." :
-                             "Analyzing label...")
-                            .font(.subheadline)
-                            .foregroundStyle(.secondary)
+                    ZStack {
+                        Color.black.opacity(0.15)
+                            .ignoresSafeArea()
+                        VStack(spacing: 16) {
+                            ProgressView()
+                                .controlSize(.large)
+                            Text(selectedLanguage == .spanish ?
+                                 "Analizando etiqueta..." :
+                                 "Analyzing label...")
+                                .font(.subheadline)
+                                .foregroundStyle(.secondary)
+                        }
+                        .padding(32)
+                        .liquidGlass(cornerRadius: 20)
                     }
-                    .frame(maxWidth: .infinity, maxHeight: .infinity)
-                    .background(.ultraThinMaterial)
                 }
             }
             .onAppear { loadMedications() }
@@ -311,6 +315,17 @@ struct MedicationView: View {
                                 .font(.caption)
                                 .foregroundStyle(.white.opacity(0.9))
                                 .lineLimit(2)
+                        }
+                        Link(destination: URL(string: "https://rxnav.nlm.nih.gov/")!) {
+                            HStack(spacing: 4) {
+                                Image(systemName: "link")
+                                    .font(.system(size: 9))
+                                Text(selectedLanguage == .spanish ?
+                                     "Fuente: RxNorm (NIH)" :
+                                     "Source: RxNorm (NIH)")
+                                    .font(.system(size: 10))
+                            }
+                            .foregroundStyle(.white.opacity(0.8))
                         }
                     }
                     .padding()
@@ -943,10 +958,23 @@ struct AddMedicationView: View {
                 }
 
                 if let rxcui = selectedRxcui {
-                    HStack {
-                        Image(systemName: "checkmark.circle.fill").foregroundStyle(.brand)
-                        Text(selectedLanguage == .spanish ? "Verificada (RxCUI: \(rxcui))" : "Verified (RxCUI: \(rxcui))")
-                            .font(.caption).foregroundStyle(.secondary)
+                    VStack(alignment: .leading, spacing: 4) {
+                        HStack {
+                            Image(systemName: "checkmark.circle.fill").foregroundStyle(.brand)
+                            Text(selectedLanguage == .spanish ? "Verificada (RxCUI: \(rxcui))" : "Verified (RxCUI: \(rxcui))")
+                                .font(.caption).foregroundStyle(.secondary)
+                        }
+                        Link(destination: URL(string: "https://rxnav.nlm.nih.gov/")!) {
+                            HStack(spacing: 4) {
+                                Image(systemName: "link")
+                                    .font(.system(size: 9))
+                                Text(selectedLanguage == .spanish ?
+                                     "Fuente: RxNorm — NIH" :
+                                     "Source: RxNorm — NIH")
+                                    .font(.system(size: 10))
+                            }
+                            .foregroundStyle(.brand)
+                        }
                     }
                 }
             }

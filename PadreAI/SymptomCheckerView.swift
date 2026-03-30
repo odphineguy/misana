@@ -83,6 +83,12 @@ struct SymptomCheckerView: View {
 
                 // Floating CTA
                 if !selectedSymptoms.isEmpty {
+                    VStack(spacing: 6) {
+                    Text(selectedLanguage == .spanish ?
+                         "Informacion educativa, no un diagnostico." :
+                         "Educational information, not a diagnosis.")
+                        .font(.system(size: 10))
+                        .foregroundStyle(.secondary)
                     Button {
                         navigateToChat = true
                     } label: {
@@ -101,8 +107,12 @@ struct SymptomCheckerView: View {
                         .background(Color.red.gradient)
                         .clipShape(RoundedRectangle(cornerRadius: 14))
                     }
+                    }
                     .padding(.horizontal)
-                    .padding(.bottom, 8)
+                    .padding(.vertical, 10)
+                    .frame(maxWidth: .infinity)
+                    .liquidGlass(cornerRadius: 20)
+                    .padding(.bottom, 4)
                     .transition(.move(edge: .bottom).combined(with: .opacity))
                     .animation(.spring(response: 0.3), value: selectedSymptoms.isEmpty)
                 }

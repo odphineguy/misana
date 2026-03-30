@@ -262,10 +262,11 @@
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_ENTITLEMENTS = PadreAI/PadreAI.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 5;
+				CURRENT_PROJECT_VERSION = 6;
 				DEVELOPMENT_TEAM = K5BU9QZMNW;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_ITSAppUsesNonExemptEncryption = NO;
 				INFOPLIST_KEY_CFBundleDisplayName = MiSana;
 				INFOPLIST_KEY_NSCameraUsageDescription = "MiSana necesita acceso a la cámara para escanear etiquetas de medicinas y recetas.";
 				INFOPLIST_KEY_NSHealthShareUsageDescription = "MiSana lee tus pasos, sueno, ritmo cardiaco, presion arterial, oxigeno en sangre y peso de Apple Salud para darte informacion personalizada. Solo lectura — nunca modificamos tus datos. Todo se procesa en tu dispositivo con IA local, nada se envia a internet.";
@@ -300,10 +301,11 @@
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_ENTITLEMENTS = PadreAI/PadreAIRelease.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 5;
+				CURRENT_PROJECT_VERSION = 6;
 				DEVELOPMENT_TEAM = K5BU9QZMNW;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_ITSAppUsesNonExemptEncryption = NO;
 				INFOPLIST_KEY_CFBundleDisplayName = MiSana;
 				INFOPLIST_KEY_NSCameraUsageDescription = "MiSana necesita acceso a la cámara para escanear etiquetas de medicinas y recetas.";
 				INFOPLIST_KEY_NSHealthShareUsageDescription = "MiSana lee tus pasos, sueno, ritmo cardiaco, presion arterial, oxigeno en sangre y peso de Apple Salud para darte informacion personalizada. Solo lectura — nunca modificamos tus datos. Todo se procesa en tu dispositivo con IA local, nada se envia a internet.";

@@ -18,6 +18,36 @@ extension ShapeStyle where Self == Color {
     static var brand: Color { .brand }
 }
 
+// MARK: - Liquid Glass
+
+extension View {
+    @ViewBuilder
+    func liquidGlass(cornerRadius: CGFloat, tint: Color = .clear) -> some View {
+        if #available(iOS 26.0, *) {
+            self
+                .glassEffect(.regular, in: .rect(cornerRadius: cornerRadius))
+                .overlay(
+                    RoundedRectangle(cornerRadius: cornerRadius)
+                        .fill(tint.opacity(0.1))
+                        .allowsHitTesting(false)
+                )
+        } else {
+            self
+                .background(tint.opacity(0.1), in: RoundedRectangle(cornerRadius: cornerRadius))
+                .background(.ultraThinMaterial, in: RoundedRectangle(cornerRadius: cornerRadius))
+        }
+    }
+
+    @ViewBuilder
+    func liquidGlass(cornerRadii: RectangleCornerRadii) -> some View {
+        if #available(iOS 26.0, *) {
+            self.glassEffect(.regular, in: .rect(cornerRadii: cornerRadii))
+        } else {
+            self.background(.ultraThinMaterial, in: UnevenRoundedRectangle(cornerRadii: cornerRadii))
+        }
+    }
+}
+
 enum AppTheme: String, CaseIterable {
     case system
     case light

@@ -293,6 +293,17 @@ struct ModelDownloadView: View {
                     }
                     .disabled(!hasEnoughSpace)
 
+                    HStack(spacing: 6) {
+                        Image(systemName: "wifi")
+                            .font(.caption2)
+                            .foregroundStyle(.secondary)
+                        Text(selectedLanguage == .spanish ?
+                             "Recomendamos usar Wi-Fi para la descarga." :
+                             "We recommend using Wi-Fi for the download.")
+                            .font(.caption2)
+                            .foregroundStyle(.secondary)
+                    }
+
                     Button {
                         dismiss()
                     } label: {

@@ -24,32 +24,38 @@
 <a class="back" href="index.html">&larr; Volver</a>
 <h1>Politica de Privacidad de MiSana</h1>
 <p class="subtitle">Tu salud es privada. Asi la protegemos.</p>
-<div class="highlight"><p><strong>Lo mas importante:</strong> MiSana procesa toda tu informacion directamente en tu dispositivo. Nunca se envian datos a internet. No recopilamos, almacenamos ni compartimos tus datos de salud.</p></div>
+<div class="highlight"><p><strong>Lo mas importante:</strong> La IA de MiSana procesa todas tus conversaciones de salud directamente en tu dispositivo. Para funciones de medicamentos, solo se envian nombres de medicamentos o codigos de barras a bases de datos de salud del gobierno de EE.UU. (RxNorm y MedlinePlus, operadas por NIH/NLM). Nunca se transmiten datos personales, historial de salud ni informacion identificable.</p></div>
 <h2>1. Que datos leemos de Apple Salud</h2>
 <p>Con tu permiso explicito, MiSana lee (solo lectura) los siguientes datos de HealthKit para darte informacion personalizada:</p>
 <ul><li>Pasos diarios y distancia caminada</li><li>Ritmo cardiaco y ritmo cardiaco en reposo</li><li>Energia activa quemada</li><li>Datos de sueno (duracion, etapas)</li><li>Presion arterial (sistolica/diastolica)</li><li>Oxigeno en sangre (SpO2)</li><li>Peso corporal</li><li>Pisos subidos</li></ul>
 <p><strong>MiSana nunca escribe ni modifica tus datos en Apple Salud.</strong> El acceso es estrictamente de solo lectura.</p>
 <h2>2. Como procesamos tus datos</h2>
-<p>MiSana utiliza un modelo de inteligencia artificial que funciona completamente en tu iPhone. Esto significa:</p>
-<ul><li>Tus datos de salud nunca salen de tu dispositivo</li><li>No hay servidores, no hay nube, no hay conexion a internet requerida</li><li>El procesamiento de IA ocurre localmente usando el chip de tu iPhone</li><li>Nadie — ni siquiera nosotros — puede acceder a tus datos de salud</li></ul>
-<h2>3. Uso de la camara</h2>
-<p>MiSana solicita acceso a la camara unicamente para escanear codigos de barras de medicamentos. Las imagenes de la camara se procesan en el momento y no se almacenan, guardan ni transmiten.</p>
-<h2>4. Lo que NO hacemos</h2>
-<ul><li><strong>No recopilamos</strong> datos personales ni de salud</li><li><strong>No almacenamos</strong> datos en servidores ni en la nube</li><li><strong>No compartimos</strong> datos con terceros, anunciantes ni intermediarios de datos</li><li><strong>No usamos</strong> datos de salud para publicidad ni mineria de datos</li><li><strong>No creamos</strong> cuentas de usuario ni perfiles</li><li><strong>No usamos</strong> herramientas de analisis o rastreo de terceros</li><li><strong>No almacenamos</strong> informacion personal de salud en iCloud</li></ul>
-<h2>5. Almacenamiento local</h2>
+<p>MiSana utiliza un modelo de inteligencia artificial (Gemma 3) que funciona completamente en tu iPhone. Todas las conversaciones de IA y datos de salud se procesan localmente. Esto significa:</p>
+<ul><li>Tus conversaciones de salud y datos de HealthKit nunca salen de tu dispositivo</li><li>El procesamiento de IA ocurre localmente usando el chip de tu iPhone — no se usan servicios de IA de terceros</li><li>Nadie — ni siquiera nosotros — puede acceder a tus conversaciones de salud ni datos de HealthKit</li></ul>
+<h2>3. Servicios de busqueda de medicamentos</h2>
+<p>Cuando buscas un medicamento por nombre, escaneas un codigo de barras o verificas interacciones entre medicamentos, MiSana envia unicamente el nombre del medicamento o numero de codigo de barras a las siguientes bases de datos del gobierno de EE.UU.:</p>
+<ul><li><strong>RxNorm</strong> (Biblioteca Nacional de Medicina / NIH) — para verificacion de medicamentos y revision de interacciones</li><li><strong>MedlinePlus</strong> (Biblioteca Nacional de Medicina / NIH) — para informacion de medicamentos y citas de temas de salud</li></ul>
+<p>Solo se transmiten nombres de medicamentos o codigos de barras. Nunca se envia informacion personal, historial de salud, datos de HealthKit, conversaciones ni identificadores del dispositivo. Estos servicios son operados por los Institutos Nacionales de Salud de EE.UU. (NIH) y no son terceros comerciales.</p>
+<p>MiSana tambien incluye una base de datos local de mas de 3,000 temas de salud para citas. Los servicios en linea se usan solo cuando no hay una coincidencia local disponible o para busquedas especificas de medicamentos.</p>
+<p>Sin conexion a internet, las funciones de busqueda de medicamentos e interacciones devuelven resultados limitados. El asistente de IA continua funcionando completamente sin internet.</p>
+<h2>4. Uso de la camara</h2>
+<p>MiSana solicita acceso a la camara unicamente para escanear codigos de barras de medicamentos. Las imagenes de la camara se procesan en el momento y no se almacenan, guardan ni transmiten. Si se detecta un codigo de barras, el numero extraido se envia a RxNorm (NIH) para identificar el medicamento. No se transmiten imagenes.</p>
+<h2>5. Lo que NO hacemos</h2>
+<ul><li><strong>No recopilamos</strong> datos personales ni de salud</li><li><strong>No almacenamos</strong> datos en servidores ni en la nube</li><li><strong>No compartimos</strong> datos con terceros comerciales, anunciantes ni intermediarios de datos (los nombres de medicamentos enviados a bases de datos gubernamentales del NIH son la unica excepcion, como se describe en la Seccion 3)</li><li><strong>No usamos</strong> datos de salud para publicidad ni mineria de datos</li><li><strong>No creamos</strong> cuentas de usuario ni perfiles</li><li><strong>No usamos</strong> herramientas de analisis o rastreo de terceros</li><li><strong>No almacenamos</strong> informacion personal de salud en iCloud</li></ul>
+<h2>6. Almacenamiento local</h2>
 <p>Las listas de medicamentos y notas que crees dentro de MiSana se guardan localmente en tu dispositivo usando almacenamiento estandar de la aplicacion. Estos datos nunca se transmiten fuera de tu iPhone.</p>
-<h2>6. Como revocar permisos</h2>
+<h2>7. Como revocar permisos</h2>
 <p>Puedes revocar el acceso de MiSana a tus datos de Apple Salud en cualquier momento:</p>
 <p><strong>Ajustes &gt; Salud &gt; Acceso a Datos y Dispositivos &gt; MiSana</strong></p>
 <p>Revocar el acceso no elimina datos ya almacenados por Apple Salud — solo detiene a MiSana de leerlos.</p>
-<h2>7. Aviso medico</h2>
+<h2>8. Aviso medico</h2>
 <p>MiSana no es un profesional medico. La aplicacion proporciona informacion educativa general y no debe usarse para diagnosticar, tratar ni manejar condiciones medicas. Siempre consulta con un profesional de salud calificado.</p>
-<h2>8. Privacidad de menores</h2>
+<h2>9. Privacidad de menores</h2>
 <p>MiSana no esta disenada para menores de 13 anos. No recopilamos informacion de ninos de ninguna manera.</p>
-<h2>9. Cambios a esta politica</h2>
+<h2>10. Cambios a esta politica</h2>
 <p>Si actualizamos esta politica, publicaremos los cambios en esta pagina con la fecha actualizada. Cambios significativos seran comunicados mediante una actualizacion de la aplicacion.</p>
-<h2>10. Contacto</h2>
+<h2>11. Contacto</h2>
 <p>Para preguntas sobre privacidad, contactanos en: <strong>support@misana.app</strong></p>
-<p class="effective">Fecha efectiva: 21 de marzo de 2026</p>
+<p class="effective">Fecha efectiva: 29 de marzo de 2026</p>
 </body>
 </html>

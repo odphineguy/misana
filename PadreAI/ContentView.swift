@@ -8,7 +8,7 @@
 import SwiftUI
 
 struct ContentView: View {
-    @State private var selectedLanguage: AppLanguage = .spanish
+    @AppStorage("selectedLanguage") private var selectedLanguage: AppLanguage = .spanish
     @State private var selectedTab: Tab = .home
     @AppStorage("hasAcceptedDisclaimer") private var hasAcceptedDisclaimer = false
     @AppStorage("appTheme") private var appTheme: AppTheme = .system
@@ -152,8 +152,12 @@ struct HealthDisclaimerView: View {
                                "100% private — everything is processed on your device")
                     featureRow(icon: "wifi.slash", color: .green,
                                text: selectedLanguage == .spanish ?
-                               "Funciona sin internet" :
-                               "Works without internet")
+                               "La IA funciona sin internet" :
+                               "AI works without internet")
+                    featureRow(icon: "building.columns.fill", color: .blue,
+                               text: selectedLanguage == .spanish ?
+                               "Medicinas consultan bases de datos del NIH (RxNorm/MedlinePlus) — solo se envían nombres de medicamentos, sin datos personales" :
+                               "Medications use NIH databases (RxNorm/MedlinePlus) — only drug names are sent, no personal data")
                     featureRow(icon: "dollarsign.circle", color: .orange,
                                text: selectedLanguage == .spanish ?
                                "Sin costo por uso" :
