@@ -143,8 +143,27 @@ struct AppointmentPrepView: View {
                             Spacer()
                         }
                         .padding(10)
-                        .background(selectedAppointmentType == type ? Color.brand : Color(uiColor: .secondarySystemGroupedBackground))
+                        .background {
+                            if selectedAppointmentType == type {
+                                RoundedRectangle(cornerRadius: 12)
+                                    .fill(Color.brand.gradient)
+                            } else {
+                                ZStack {
+                                    RoundedRectangle(cornerRadius: 12)
+                                        .fill(Color(uiColor: .secondarySystemGroupedBackground))
+                                    RoundedRectangle(cornerRadius: 12)
+                                        .fill(
+                                            LinearGradient(
+                                                colors: [Color.brand.opacity(0.08), .clear],
+                                                startPoint: .leading,
+                                                endPoint: .trailing
+                                            )
+                                        )
+                                }
+                            }
+                        }
                         .clipShape(RoundedRectangle(cornerRadius: 12))
+                        .shadow(color: selectedAppointmentType == type ? Color.brand.opacity(0.3) : .black.opacity(0.06), radius: 6, y: 3)
                     }
                     .buttonStyle(.plain)
                 }
@@ -184,6 +203,7 @@ struct AppointmentPrepView: View {
                 .padding(14)
                 .background(Color.brand.gradient)
                 .clipShape(RoundedRectangle(cornerRadius: 14))
+                .shadow(color: Color.brand.opacity(0.4), radius: 8, y: 4)
             }
 
             // Secondary: Quick questions
@@ -212,8 +232,22 @@ struct AppointmentPrepView: View {
                         .foregroundStyle(.tertiary)
                 }
                 .padding(14)
-                .background(Color(uiColor: .secondarySystemGroupedBackground))
+                .background {
+                    ZStack {
+                        RoundedRectangle(cornerRadius: 14)
+                            .fill(Color(uiColor: .secondarySystemGroupedBackground))
+                        RoundedRectangle(cornerRadius: 14)
+                            .fill(
+                                LinearGradient(
+                                    colors: [Color.brand.opacity(0.10), .clear],
+                                    startPoint: .leading,
+                                    endPoint: .trailing
+                                )
+                            )
+                    }
+                }
                 .clipShape(RoundedRectangle(cornerRadius: 14))
+                .shadow(color: .black.opacity(0.08), radius: 8, y: 4)
             }
             .buttonStyle(.plain)
 
@@ -233,8 +267,22 @@ struct AppointmentPrepView: View {
                     Spacer()
                 }
                 .padding(14)
-                .background(Color(uiColor: .secondarySystemGroupedBackground))
+                .background {
+                    ZStack {
+                        RoundedRectangle(cornerRadius: 14)
+                            .fill(Color(uiColor: .secondarySystemGroupedBackground))
+                        RoundedRectangle(cornerRadius: 14)
+                            .fill(
+                                LinearGradient(
+                                    colors: [Color.brand.opacity(0.10), .clear],
+                                    startPoint: .leading,
+                                    endPoint: .trailing
+                                )
+                            )
+                    }
+                }
                 .clipShape(RoundedRectangle(cornerRadius: 14))
+                .shadow(color: .black.opacity(0.08), radius: 8, y: 4)
             }
             .buttonStyle(.plain)
         }
@@ -275,8 +323,15 @@ struct AppointmentPrepView: View {
                     .foregroundStyle(.secondary)
             }
             .padding(12)
-            .background(Color.yellow.opacity(0.08))
+            .background(
+                LinearGradient(
+                    colors: [Color.yellow.opacity(0.15), Color.yellow.opacity(0.05)],
+                    startPoint: .leading,
+                    endPoint: .trailing
+                )
+            )
             .clipShape(RoundedRectangle(cornerRadius: 10))
+            .shadow(color: Color.yellow.opacity(0.12), radius: 6, y: 3)
             .padding(.horizontal)
 
             // Questions
@@ -321,6 +376,7 @@ struct AppointmentPrepView: View {
                 .padding(12)
                 .background(Color.brand.gradient)
                 .clipShape(RoundedRectangle(cornerRadius: 12))
+                .shadow(color: Color.brand.opacity(0.4), radius: 8, y: 4)
             }
             .padding(.horizontal)
         }
@@ -511,8 +567,22 @@ struct QuestionRowView: View {
             Spacer()
         }
         .padding(12)
-        .background(Color(uiColor: .secondarySystemGroupedBackground))
+        .background {
+            ZStack {
+                RoundedRectangle(cornerRadius: 12)
+                    .fill(Color(uiColor: .secondarySystemGroupedBackground))
+                RoundedRectangle(cornerRadius: 12)
+                    .fill(
+                        LinearGradient(
+                            colors: [Color.brand.opacity(question.isAsked ? 0.04 : 0.08), .clear],
+                            startPoint: .leading,
+                            endPoint: .trailing
+                        )
+                    )
+            }
+        }
         .clipShape(RoundedRectangle(cornerRadius: 12))
+        .shadow(color: .black.opacity(0.06), radius: 6, y: 3)
         .contextMenu {
             if let onDelete {
                 Button(role: .destructive, action: onDelete) {

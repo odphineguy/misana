@@ -48,6 +48,7 @@ struct SymptomCheckerView: View {
                         .padding(12)
                         .background(Color(uiColor: .secondarySystemGroupedBackground))
                         .clipShape(RoundedRectangle(cornerRadius: 12))
+                        .shadow(color: .black.opacity(0.06), radius: 6, y: 3)
                         .padding(.horizontal)
 
                         // Symptom Categories
@@ -104,7 +105,7 @@ struct SymptomCheckerView: View {
                         .foregroundStyle(.white)
                         .frame(maxWidth: .infinity)
                         .padding(.vertical, 14)
-                        .background(Color.red.gradient)
+                        .background(Color.brand.gradient)
                         .clipShape(RoundedRectangle(cornerRadius: 14))
                     }
                     }
@@ -141,7 +142,7 @@ struct SymptomCheckerView: View {
                 VStack(alignment: .leading, spacing: 10) {
                     HStack(spacing: 8) {
                         Image(systemName: icon)
-                            .foregroundStyle(.red)
+                            .foregroundStyle(.brand)
                         Text(title)
                             .font(.headline)
                     }
@@ -239,9 +240,9 @@ struct SymptomChip: View {
             HStack(spacing: 10) {
                 Image(systemName: symptom.icon)
                     .font(.system(size: 16))
-                    .foregroundStyle(isSelected ? .white : .red)
+                    .foregroundStyle(isSelected ? .white : .brand)
                     .frame(width: 32, height: 32)
-                    .background(isSelected ? Color.red : Color.red.opacity(0.12))
+                    .background(isSelected ? Color.brand : Color.brand.opacity(0.12))
                     .clipShape(RoundedRectangle(cornerRadius: 8))
 
                 Text(symptom.name(for: selectedLanguage))
@@ -254,8 +255,27 @@ struct SymptomChip: View {
                 Spacer()
             }
             .padding(10)
-            .background(isSelected ? Color.red : Color(uiColor: .secondarySystemGroupedBackground))
+            .background {
+                if isSelected {
+                    RoundedRectangle(cornerRadius: 12)
+                        .fill(Color.brand.gradient)
+                } else {
+                    ZStack {
+                        RoundedRectangle(cornerRadius: 12)
+                            .fill(Color(uiColor: .secondarySystemGroupedBackground))
+                        RoundedRectangle(cornerRadius: 12)
+                            .fill(
+                                LinearGradient(
+                                    colors: [Color.brand.opacity(0.08), .clear],
+                                    startPoint: .leading,
+                                    endPoint: .trailing
+                                )
+                            )
+                    }
+                }
+            }
             .clipShape(RoundedRectangle(cornerRadius: 12))
+            .shadow(color: isSelected ? Color.brand.opacity(0.3) : .black.opacity(0.06), radius: 6, y: 3)
         }
         .buttonStyle(.plain)
     }

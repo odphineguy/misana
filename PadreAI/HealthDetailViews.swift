@@ -20,8 +20,15 @@ struct WeeklyBarChart: View {
             ForEach(samples) { sample in
                 VStack(spacing: 6) {
                     RoundedRectangle(cornerRadius: 6)
-                        .fill(color.gradient)
+                        .fill(
+                            LinearGradient(
+                                colors: [color, color.opacity(0.6)],
+                                startPoint: .top,
+                                endPoint: .bottom
+                            )
+                        )
                         .frame(height: max(8, CGFloat(sample.value / maxVal) * 140))
+                        .shadow(color: color.opacity(0.25), radius: 4, y: 3)
                     Text(dayAbbrev(sample.date))
                         .font(.system(size: 10, weight: .bold))
                         .foregroundStyle(.secondary)
@@ -66,7 +73,7 @@ struct InsightCard: View {
                             .fill(Color(uiColor: .systemGray5))
                             .frame(height: 6)
                         RoundedRectangle(cornerRadius: 3)
-                            .fill(progressColor)
+                            .fill(progressColor.gradient)
                             .frame(width: geo.size.width * min(progress, 1.0), height: 6)
                     }
                 }
@@ -77,8 +84,22 @@ struct InsightCard: View {
         .padding()
         .frame(maxWidth: .infinity, alignment: .leading)
         .frame(height: 140)
-        .background(Color(uiColor: .secondarySystemGroupedBackground))
+        .background {
+            ZStack {
+                RoundedRectangle(cornerRadius: 16)
+                    .fill(Color(uiColor: .secondarySystemGroupedBackground))
+                RoundedRectangle(cornerRadius: 16)
+                    .fill(
+                        LinearGradient(
+                            colors: [iconColor.opacity(0.08), .clear],
+                            startPoint: .topLeading,
+                            endPoint: .bottomTrailing
+                        )
+                    )
+            }
+        }
         .clipShape(RoundedRectangle(cornerRadius: 16))
+        .shadow(color: iconColor.opacity(0.10), radius: 8, y: 4)
     }
 }
 
@@ -94,10 +115,17 @@ struct HighlightRow: View {
         HStack(spacing: 14) {
             Image(systemName: icon)
                 .font(.body)
-                .foregroundStyle(iconBgColor)
+                .foregroundStyle(.white)
                 .frame(width: 40, height: 40)
-                .background(iconBgColor.opacity(0.12))
+                .background(
+                    LinearGradient(
+                        colors: [iconBgColor, iconBgColor.opacity(0.7)],
+                        startPoint: .topLeading,
+                        endPoint: .bottomTrailing
+                    )
+                )
                 .clipShape(Circle())
+                .shadow(color: iconBgColor.opacity(0.3), radius: 4, y: 2)
 
             VStack(alignment: .leading, spacing: 2) {
                 Text(title)
@@ -115,8 +143,22 @@ struct HighlightRow: View {
                 .foregroundStyle(valueColor)
         }
         .padding(14)
-        .background(Color(uiColor: .secondarySystemGroupedBackground))
+        .background {
+            ZStack {
+                RoundedRectangle(cornerRadius: 16)
+                    .fill(Color(uiColor: .secondarySystemGroupedBackground))
+                RoundedRectangle(cornerRadius: 16)
+                    .fill(
+                        LinearGradient(
+                            colors: [iconBgColor.opacity(0.05), .clear],
+                            startPoint: .leading,
+                            endPoint: .trailing
+                        )
+                    )
+            }
+        }
         .clipShape(RoundedRectangle(cornerRadius: 16))
+        .shadow(color: .black.opacity(0.06), radius: 6, y: 3)
     }
 }
 
@@ -155,8 +197,22 @@ struct SleepDetailView: View {
                         }
                     }
                     .padding()
-                    .background(Color(uiColor: .secondarySystemGroupedBackground))
+                    .background {
+                        ZStack {
+                            RoundedRectangle(cornerRadius: 20)
+                                .fill(Color(uiColor: .secondarySystemGroupedBackground))
+                            RoundedRectangle(cornerRadius: 20)
+                                .fill(
+                                    LinearGradient(
+                                        colors: [.indigo.opacity(0.08), .clear, .indigo.opacity(0.04)],
+                                        startPoint: .topLeading,
+                                        endPoint: .bottomTrailing
+                                    )
+                                )
+                        }
+                    }
                     .clipShape(RoundedRectangle(cornerRadius: 20))
+                    .shadow(color: .indigo.opacity(0.12), radius: 10, y: 5)
 
                     // Bento: Quality + Deep Sleep
                     HStack(spacing: 12) {
@@ -276,8 +332,22 @@ struct HeartRateDetailView: View {
                         }
                     }
                     .padding()
-                    .background(Color(uiColor: .secondarySystemGroupedBackground))
+                    .background {
+                        ZStack {
+                            RoundedRectangle(cornerRadius: 20)
+                                .fill(Color(uiColor: .secondarySystemGroupedBackground))
+                            RoundedRectangle(cornerRadius: 20)
+                                .fill(
+                                    LinearGradient(
+                                        colors: [.red.opacity(0.08), .clear, .red.opacity(0.04)],
+                                        startPoint: .topLeading,
+                                        endPoint: .bottomTrailing
+                                    )
+                                )
+                        }
+                    }
                     .clipShape(RoundedRectangle(cornerRadius: 20))
+                    .shadow(color: .red.opacity(0.12), radius: 10, y: 5)
 
                     // Bento: Resting HR + Range
                     HStack(spacing: 12) {
@@ -408,8 +478,22 @@ struct StepsDetailView: View {
             }
         }
         .padding()
-        .background(Color(uiColor: .secondarySystemGroupedBackground))
+        .background {
+            ZStack {
+                RoundedRectangle(cornerRadius: 20)
+                    .fill(Color(uiColor: .secondarySystemGroupedBackground))
+                RoundedRectangle(cornerRadius: 20)
+                    .fill(
+                        LinearGradient(
+                            colors: [Color.brand.opacity(0.08), .clear, Color.brand.opacity(0.04)],
+                            startPoint: .topLeading,
+                            endPoint: .bottomTrailing
+                        )
+                    )
+            }
+        }
         .clipShape(RoundedRectangle(cornerRadius: 20))
+        .shadow(color: Color.brand.opacity(0.12), radius: 10, y: 5)
     }
 
     private var stepsBentoCards: some View {

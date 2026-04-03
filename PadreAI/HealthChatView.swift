@@ -416,12 +416,74 @@ struct HealthChatView: View {
     }
 }
 
+// MARK: - iMessage Bubble Shape
+
+struct MessageBubbleShape: Shape {
+    let isFromUser: Bool
+
+    func path(in rect: CGRect) -> Path {
+        let r: CGFloat = 18
+        var path = Path()
+
+        if isFromUser {
+            // Tail on bottom-right
+            path.move(to: CGPoint(x: rect.minX + r, y: rect.minY))
+            path.addLine(to: CGPoint(x: rect.maxX - r, y: rect.minY))
+            path.addArc(center: CGPoint(x: rect.maxX - r, y: rect.minY + r),
+                        radius: r, startAngle: .degrees(-90), endAngle: .degrees(0), clockwise: false)
+            path.addLine(to: CGPoint(x: rect.maxX, y: rect.maxY - r))
+            path.addCurve(
+                to: CGPoint(x: rect.maxX + 6, y: rect.maxY),
+                control1: CGPoint(x: rect.maxX, y: rect.maxY - 4),
+                control2: CGPoint(x: rect.maxX, y: rect.maxY)
+            )
+            path.addCurve(
+                to: CGPoint(x: rect.maxX - r, y: rect.maxY - 2),
+                control1: CGPoint(x: rect.maxX + 6, y: rect.maxY),
+                control2: CGPoint(x: rect.maxX - 2, y: rect.maxY - 2)
+            )
+            path.addLine(to: CGPoint(x: rect.minX + r, y: rect.maxY - 2))
+            path.addArc(center: CGPoint(x: rect.minX + r, y: rect.maxY - 2 - r),
+                        radius: r, startAngle: .degrees(90), endAngle: .degrees(180), clockwise: false)
+            path.addLine(to: CGPoint(x: rect.minX, y: rect.minY + r))
+            path.addArc(center: CGPoint(x: rect.minX + r, y: rect.minY + r),
+                        radius: r, startAngle: .degrees(180), endAngle: .degrees(270), clockwise: false)
+        } else {
+            // Tail on bottom-left
+            path.move(to: CGPoint(x: rect.maxX - r, y: rect.minY))
+            path.addLine(to: CGPoint(x: rect.minX + r, y: rect.minY))
+            path.addArc(center: CGPoint(x: rect.minX + r, y: rect.minY + r),
+                        radius: r, startAngle: .degrees(-90), endAngle: .degrees(180), clockwise: true)
+            path.addLine(to: CGPoint(x: rect.minX, y: rect.maxY - r))
+            path.addCurve(
+                to: CGPoint(x: rect.minX - 6, y: rect.maxY),
+                control1: CGPoint(x: rect.minX, y: rect.maxY - 4),
+                control2: CGPoint(x: rect.minX, y: rect.maxY)
+            )
+            path.addCurve(
+                to: CGPoint(x: rect.minX + r, y: rect.maxY - 2),
+                control1: CGPoint(x: rect.minX - 6, y: rect.maxY),
+                control2: CGPoint(x: rect.minX + 2, y: rect.maxY - 2)
+            )
+            path.addLine(to: CGPoint(x: rect.maxX - r, y: rect.maxY - 2))
+            path.addArc(center: CGPoint(x: rect.maxX - r, y: rect.maxY - 2 - r),
+                        radius: r, startAngle: .degrees(90), endAngle: .degrees(0), clockwise: true)
+            path.addLine(to: CGPoint(x: rect.maxX, y: rect.minY + r))
+            path.addArc(center: CGPoint(x: rect.maxX - r, y: rect.minY + r),
+                        radius: r, startAngle: .degrees(0), endAngle: .degrees(-90), clockwise: true)
+        }
+        path.closeSubpath()
+        return path
+    }
+}
+
 // MARK: - Chat Bubble View
 
 struct ChatBubbleView: View {
     let message: ChatMessage
     let selectedLanguage: AppLanguage
     var citations: [HealthCitation] = []
+    @Environment(\.colorScheme) private var colorScheme
 
     var body: some View {
         HStack(alignment: .top, spacing: 8) {
@@ -457,9 +519,13 @@ struct ChatBubbleView: View {
                      (try? AttributedString(markdown: message.text)) ?? AttributedString(message.text))
                     .font(.subheadline)
                     .padding(12)
-                    .background(message.isUser ? Color.brand : Color(uiColor: .secondarySystemGroupedBackground))
+                    .padding(message.isUser ? .trailing : .leading, 4)
                     .foregroundStyle(message.isUser ? .white : .primary)
-                    .clipShape(RoundedRectangle(cornerRadius: 16))
+                    .background(
+                        MessageBubbleShape(isFromUser: message.isUser)
+                            .fill(message.isUser ? Color.brand :
+                                    (colorScheme == .light ? Color(uiColor: .systemGray6) : Color(uiColor: .secondarySystemGroupedBackground)))
+                    )
 
                 // Topic-specific citations for AI responses
                 if !message.isUser && !citations.isEmpty {

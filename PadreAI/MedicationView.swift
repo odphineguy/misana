@@ -259,8 +259,9 @@ struct MedicationView: View {
                     .fontWeight(.semibold)
                     .foregroundStyle(.white)
                     .padding()
-                    .background(Color.brand)
+                    .background(Color.brand.gradient)
                     .clipShape(RoundedRectangle(cornerRadius: 12))
+                    .shadow(color: Color.brand.opacity(0.4), radius: 6, y: 3)
                 }
 
                 Button {
@@ -275,8 +276,9 @@ struct MedicationView: View {
                     .fontWeight(.semibold)
                     .foregroundStyle(.brand)
                     .padding()
-                    .background(Color.brand.opacity(0.12))
+                    .background(Color.brand.opacity(0.15))
                     .clipShape(RoundedRectangle(cornerRadius: 12))
+                    .shadow(color: Color.brand.opacity(0.12), radius: 6, y: 3)
                 }
             }
             .padding(.top, 8)
@@ -672,8 +674,22 @@ struct MedicationCardView: View {
                 .foregroundStyle(.tertiary)
         }
         .padding(14)
-        .background(Color(uiColor: .secondarySystemGroupedBackground))
+        .background {
+            ZStack {
+                RoundedRectangle(cornerRadius: 16)
+                    .fill(Color(uiColor: .secondarySystemGroupedBackground))
+                RoundedRectangle(cornerRadius: 16)
+                    .fill(
+                        LinearGradient(
+                            colors: [(medication.pillColor?.color ?? .brand).opacity(0.10), .clear],
+                            startPoint: .leading,
+                            endPoint: .trailing
+                        )
+                    )
+            }
+        }
         .clipShape(RoundedRectangle(cornerRadius: 16))
+        .shadow(color: .black.opacity(0.08), radius: 8, y: 4)
     }
 }
 

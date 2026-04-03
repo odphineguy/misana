@@ -49,6 +49,18 @@ struct HomeView: View {
                             .foregroundStyle(.secondary)
                     }
                     .frame(maxWidth: .infinity, alignment: .leading)
+                    .padding()
+                    .background {
+                        RoundedRectangle(cornerRadius: 20)
+                            .fill(
+                                LinearGradient(
+                                    colors: [Color.brand.opacity(0.18), Color.brand.opacity(0.08), .clear],
+                                    startPoint: .topLeading,
+                                    endPoint: .bottomTrailing
+                                )
+                            )
+                    }
+                    .clipShape(RoundedRectangle(cornerRadius: 20))
                     .padding(.horizontal)
 
                     // Health Dashboard
@@ -80,7 +92,7 @@ struct HomeView: View {
                             NavigationLink(destination: SymptomCheckerView(selectedLanguage: selectedLanguage)) {
                                 ActionCard(
                                     icon: "stethoscope",
-                                    iconColor: .red,
+                                    iconColor: .brand,
                                     title: selectedLanguage == .spanish ? "Revisar Sintomas" : "Check Symptoms",
                                     subtitle: selectedLanguage == .spanish ?
                                         "Revisa lo que sientes con tu asistente de IA." :
@@ -198,6 +210,7 @@ struct HomeView: View {
                 .frame(width: 36, height: 36)
                 .background(Color(uiColor: .secondarySystemGroupedBackground))
                 .clipShape(Circle())
+                .shadow(color: .black.opacity(0.10), radius: 4, y: 2)
         }
     }
 
@@ -326,15 +339,23 @@ struct HomeView: View {
                         .foregroundStyle(.white)
                         .frame(maxWidth: .infinity)
                         .padding(.vertical, 10)
-                        .background(Color.brand)
+                        .background(Color.brand.gradient)
                         .clipShape(RoundedRectangle(cornerRadius: 10))
+                        .shadow(color: Color.brand.opacity(0.4), radius: 6, y: 3)
                 }
             }
             .padding()
             .background(
                 RoundedRectangle(cornerRadius: 16)
-                    .fill(Color.brand.opacity(0.12))
+                    .fill(
+                        LinearGradient(
+                            colors: [Color.brand.opacity(0.22), Color.brand.opacity(0.10)],
+                            startPoint: .topLeading,
+                            endPoint: .bottomTrailing
+                        )
+                    )
             )
+            .shadow(color: Color.brand.opacity(0.18), radius: 10, y: 5)
         }
     }
 }
@@ -353,8 +374,15 @@ struct ActionCard: View {
                 .font(.system(size: 22))
                 .foregroundStyle(.white)
                 .frame(width: 48, height: 48)
-                .background(iconColor)
+                .background(
+                    LinearGradient(
+                        colors: [iconColor, iconColor.opacity(0.7)],
+                        startPoint: .topLeading,
+                        endPoint: .bottomTrailing
+                    )
+                )
                 .clipShape(RoundedRectangle(cornerRadius: 12))
+                .shadow(color: iconColor.opacity(0.4), radius: 6, y: 3)
 
             VStack(alignment: .leading, spacing: 3) {
                 Text(title)
@@ -373,12 +401,22 @@ struct ActionCard: View {
                 .foregroundStyle(.tertiary)
         }
         .padding(14)
-        .background(Color(uiColor: .secondarySystemGroupedBackground))
+        .background {
+            ZStack {
+                RoundedRectangle(cornerRadius: 16)
+                    .fill(Color(uiColor: .secondarySystemGroupedBackground))
+                RoundedRectangle(cornerRadius: 16)
+                    .fill(
+                        LinearGradient(
+                            colors: [iconColor.opacity(0.15), .clear],
+                            startPoint: .leading,
+                            endPoint: .trailing
+                        )
+                    )
+            }
+        }
         .clipShape(RoundedRectangle(cornerRadius: 16))
-        .overlay(
-            RoundedRectangle(cornerRadius: 16)
-                .stroke(Color.primary.opacity(0.1), lineWidth: 1)
-        )
+        .shadow(color: .black.opacity(0.10), radius: 10, y: 5)
     }
 }
 
