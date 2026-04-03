@@ -72,14 +72,10 @@ class BarcodeScannerViewController: UIViewController, AVCaptureMetadataOutputObj
         if captureSession.canAddOutput(metadataOutput) {
             captureSession.addOutput(metadataOutput)
             metadataOutput.setMetadataObjectsDelegate(self, queue: .main)
-            // Pharmacy barcode types: Code 128, Code 39, DataMatrix, UPC-A, EAN-13
+            // Restrict to standard retail/pharmacy barcodes to avoid picking up catalog codes
             metadataOutput.metadataObjectTypes = [
-                .code128,
-                .code39,
-                .dataMatrix,
-                .upce,
-                .ean13,
-                .ean8
+                .ean13,  // EAN-13 (includes UPC-A as subset)
+                .upce    // UPC-E (compact format)
             ]
         }
 

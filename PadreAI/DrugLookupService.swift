@@ -153,6 +153,39 @@ class DrugLookupService: ObservableObject {
         }
     }
 
+    // MARK: - OpenFDA UPC Lookup (fallback for OTC products RxNorm misses)
+
+    /// Look up a drug by its UPC barcode via OpenFDA drug label API.
+    /// Works for OTC products that RxNorm's NDC database doesn't cover.
+    func lookupByUPC(barcode: String) async -> DrugSearchResult? {
+        let cleaned = barcode.filter(\.isNumber)
+        let encoded = cleaned.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? cleaned
+        let urlString = "https://api.fda.gov/drug/label.json?search=openfda.upc:%22\(encoded)%22&limit=1"
+        guard let url = URL(string: urlString) else { return nil }
+
+        do {
+            let (data, _) = try await URLSession.shared.data(from: url)
+            guard let json = try? JSONSerialization.jsonObject(with: data) as? [String: Any],
+                  let results = json["results"] as? [[String: Any]],
+                  let first = results.first,
+                  let openfda = first["openfda"] as? [String: Any] else { return nil }
+
+            // Get brand name, fall back to generic
+            let brandNames = openfda["brand_name"] as? [String]
+            let genericNames = openfda["generic_name"] as? [String]
+            let name = brandNames?.first ?? genericNames?.first ?? ""
+            guard !name.isEmpty else { return nil }
+
+            // Get RxCUI if available
+            let rxcuis = openfda["rxcui"] as? [String]
+            let rxcui = rxcuis?.first ?? ""
+
+            return DrugSearchResult(rxcui: rxcui, name: name)
+        } catch {
+            return nil
+        }
+    }
+
     // MARK: - MedlinePlus Spanish Drug Info
 
     func fetchSpanishInfo(rxcui: String) async -> SpanishDrugInfo? {

@@ -157,15 +157,15 @@ struct MedicationView: View {
                 }
             }
             .confirmationDialog(
-                selectedLanguage == .spanish ? "Escanear con cámara" : "Scan with camera",
+                selectedLanguage == .spanish ? "Escanear medicamento" : "Scan medication",
                 isPresented: $showingScanChoice,
                 titleVisibility: .visible
             ) {
-                Button(selectedLanguage == .spanish ? "Escanear código de barras" : "Scan barcode") {
-                    showingBarcodeScanner = true
-                }
                 Button(selectedLanguage == .spanish ? "Escanear etiqueta con cámara" : "Scan label with camera") {
                     showingDocumentScanner = true
+                }
+                Button(selectedLanguage == .spanish ? "Escanear código de barras" : "Scan barcode") {
+                    showingBarcodeScanner = true
                 }
             }
             .fullScreenCover(isPresented: $showingDocumentScanner) {
@@ -390,7 +390,7 @@ struct MedicationView: View {
         }
     }
 
-    // MARK: - OCR
+    // MARK: - OCR / Vision
 
     private func processScannedImages(_ images: [UIImage]) async {
         isProcessingScan = true
@@ -423,6 +423,7 @@ struct MedicationView: View {
 
         // Step 2: LLM extraction
         let extracted = await modelService.extractMedicationFromOCR(ocrText)
+        scannedText = ocrText
 
         // Step 3: NDC → RxCUI lookup (if NDC found)
         var rxcui: String?
@@ -449,7 +450,6 @@ struct MedicationView: View {
 
         // Step 4: Auto-fill form
         await MainActor.run {
-            scannedText = ocrText
             prefillName = extracted.name
             prefillDosage = extracted.dosage
             prefillRxcui = rxcui
@@ -481,7 +481,23 @@ struct MedicationView: View {
             }
         }
 
-        // No NDC matched — show barcode for manual entry
+        // NDC didn't match RxNorm — try OpenFDA UPC lookup (better for OTC products)
+        if let result = await drugService.lookupByUPC(barcode: barcode) {
+            await MainActor.run {
+                scannedText = ""
+                prefillName = result.name
+                prefillDosage = ""
+                prefillRxcui = result.rxcui.isEmpty ? nil : result.rxcui
+                if !result.rxcui.isEmpty {
+                    drugService.cacheSearchResult(result)
+                }
+                isProcessingScan = false
+                showingAddSheet = true
+            }
+            return
+        }
+
+        // No match anywhere — show barcode for manual entry
         await MainActor.run {
             scannedText = "Barcode: \(barcode)"
             prefillName = ""

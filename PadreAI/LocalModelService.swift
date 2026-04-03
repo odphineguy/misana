@@ -27,7 +27,7 @@ class LocalModelService: ObservableObject {
             return nil
         }
         
-        return documentsPath.appendingPathComponent("google_gemma-3-4b-it-Q4_K_M.gguf")
+        return documentsPath.appendingPathComponent("Qwen_Qwen3-4B-Q4_K_M.gguf")
     }
     
     private var downloadTask: URLSessionDownloadTask?
@@ -39,8 +39,13 @@ class LocalModelService: ObservableObject {
     
     // MARK: - System Prompt
     
-    private let systemPrompt = """
-    Eres MiSana, un compañero de salud bilingüe para familias hispanas. Hablas como una tía o abuela cariñosa que sabe de salud — en español mexicano claro, con calidez y respeto.
+    private var systemPrompt: String {
+        let isEnglish = UserDefaults.standard.string(forKey: "selectedLanguage") == "en"
+        return isEnglish ? Self.englishSystemPrompt : Self.spanishSystemPrompt
+    }
+
+    private static let spanishSystemPrompt = """
+    Eres MiSana, un compañero de salud bilingüe para familias hispanas. Hablas como una tía o abuela cariñosa que sabe de salud — en español mexicano claro, con calidez y respeto. Responde directamente sin explicar tu proceso de pensamiento.
 
     TU TONO:
     - Cálido pero DIRECTO. La empatía va en UNA clausula corta al inicio, luego ve directo a la informacion util. Ejemplo CORRECTO: "Ay mijo, tos y garganta pueden ser por un resfriado o gripe." Ejemplo INCORRECTO: "Ay mijo, qué bueno que me cuentas cómo te sientes. Una garganta y tos, eso puede ser molesto, no te apures."
@@ -77,6 +82,42 @@ class LocalModelService: ObservableObject {
     - NUNCA incluyas links, URLs, ni nombres de fuentes en tu respuesta. Las fuentes se muestran automaticamente.
     - NUNCA interpretes datos de salud (frecuencia cardiaca, oxigeno, presion) sin fuentes verificadas.
     """
+
+    private static let englishSystemPrompt = """
+    You are MiSana, a friendly health companion. You are warm, caring, and knowledgeable about health topics. Respond directly without explaining your thinking process.
+
+    YOUR TONE:
+    - Warm but DIRECT. Brief empathy first, then useful information. Example: "Sorry to hear that — a sore throat and fever are often caused by a cold or flu."
+    - Take symptoms seriously. NEVER minimize what someone is feeling.
+    - Explain medical terms in simple words.
+
+    RESPONSE LENGTH:
+    - MAXIMUM 3 sentences per response. This is MANDATORY, no exceptions.
+    - If you need to list things, maximum 3 short bullet points.
+    - If the topic needs more detail, ask "Would you like me to explain more?"
+    - NEVER write more than 3 sentences. Short, clear, direct.
+
+    HOW YOU RESPOND:
+    - For symptoms: brief empathy, then useful info. Ask 1 follow-up question if needed.
+    - For medications: explain what it's for and what to watch for, in plain language.
+    - For home remedies: validate safe ones (chamomile tea, honey, chicken soup), but be clear when someone needs to see a doctor.
+    - For appointment prep: help organize symptoms and questions for the doctor.
+
+    NEVER DO THIS:
+    - Never mention serious diseases (cancer, tumors, etc.) unless the person mentions them first.
+    - Never recommend exercise or physical activity when someone reports pain. See a doctor first.
+    - Never diagnose. You are a companion that educates and supports, not a doctor.
+    - Never be dismissive or minimize someone's pain or concern.
+    - NEVER comment on weight, body, physical appearance, or build. Even with HealthKit data — that data is for medical context only, NOT for body commentary.
+    - If someone reports chest pain, difficulty breathing, heavy bleeding, or high fever in babies, your FIRST sentence must be: "Go to the ER or call 911 now." No hesitation.
+
+    SOURCES:
+    - If you receive verified source context, base your response on that information.
+    - If you do NOT receive source context, respond with general wellness advice or tell them to consult their doctor.
+    - NEVER make up medical information.
+    - NEVER include links, URLs, or source names in your response. Sources are shown automatically.
+    - NEVER interpret health data (heart rate, oxygen, blood pressure) without verified sources.
+    """
     
     // MARK: - Initialization
     
@@ -105,7 +146,7 @@ class LocalModelService: ObservableObject {
             throw ModelError.invalidPath
         }
         
-        let modelURL = URL(string: "https://huggingface.co/bartowski/google_gemma-3-4b-it-GGUF/resolve/main/google_gemma-3-4b-it-Q4_K_M.gguf?download=true")!
+        let modelURL = URL(string: "https://huggingface.co/bartowski/Qwen_Qwen3-4B-GGUF/resolve/main/Qwen_Qwen3-4B-Q4_K_M.gguf?download=true")!
         
         print("📡 Attempting download from: \(modelURL.absoluteString)")
         print("📁 Saving to: \(modelPath.path)")
@@ -159,9 +200,7 @@ class LocalModelService: ObservableObject {
 
         print("📦 Loading model from: \(modelPath.path)")
 
-        // Initialize LLM.swift with the model and chat template
-        // init? is failable; maxTokenCount is set at init time (private let)
-        guard let model = LLM(from: modelPath, template: .gemma(systemPrompt), historyLimit: 6, maxTokenCount: 2048) else {
+        guard let model = LLM(from: modelPath, template: .chatML(systemPrompt), historyLimit: 6, maxTokenCount: 2048) else {
             throw ModelError.modelNotLoaded
         }
 
@@ -203,6 +242,9 @@ class LocalModelService: ObservableObject {
 
         var response = llm.output
             .trimmingCharacters(in: .whitespacesAndNewlines)
+
+        // Strip <think>...</think> reasoning blocks (Qwen 3.5 thinking mode)
+        response = stripThinkingTags(response)
 
         // Check for empty or garbage responses
         print("🔍 Raw output (\(response.count) chars): \(String(response.prefix(200)))")
@@ -246,7 +288,8 @@ class LocalModelService: ObservableObject {
         """
 
         await llm.respond(to: prompt)
-        let response = llm.output.trimmingCharacters(in: .whitespacesAndNewlines)
+        var response = llm.output.trimmingCharacters(in: .whitespacesAndNewlines)
+        response = stripThinkingTags(response)
         llm.reset()
 
         return parseExtraction(response)
@@ -269,6 +312,43 @@ class LocalModelService: ObservableObject {
     }
 
     // MARK: - Response Post-Processing
+
+    /// Strip <think>...</think> reasoning blocks from Qwen 3.5 output.
+    /// If stripping leaves nothing, extract the last useful sentence from the thinking block.
+    private func stripThinkingTags(_ text: String) -> String {
+        // Case 1: Complete <think>...</think> with answer after
+        if let thinkEnd = text.range(of: "</think>") {
+            let afterThink = String(text[thinkEnd.upperBound...]).trimmingCharacters(in: .whitespacesAndNewlines)
+            if afterThink.count >= 3 {
+                return afterThink
+            }
+        }
+
+        // Case 2: Only <think> (no closing tag) — model ran out of tokens thinking
+        // Salvage: extract content from inside the thinking block
+        if let thinkStart = text.range(of: "<think>") {
+            let thinkContent = String(text[thinkStart.upperBound...])
+                .replacingOccurrences(of: "**", with: "")
+                .replacingOccurrences(of: "Thinking Process:", with: "")
+                .replacingOccurrences(of: "Analyze the Request:", with: "")
+                .trimmingCharacters(in: .whitespacesAndNewlines)
+
+            // Find the last substantial sentence in the thinking — often contains the answer
+            let sentences = thinkContent.components(separatedBy: CharacterSet(charactersIn: ".!?"))
+                .map { $0.trimmingCharacters(in: .whitespacesAndNewlines) }
+                .filter { $0.count > 10 }
+            if let last = sentences.last {
+                return last + "."
+            }
+            // If no good sentence, return cleaned thinking content
+            if thinkContent.count >= 10 {
+                return truncateToSentences(thinkContent, max: 3)
+            }
+        }
+
+        // Case 3: No thinking tags — return as-is
+        return text.trimmingCharacters(in: .whitespacesAndNewlines)
+    }
 
     /// Truncate response to a max number of sentences to enforce length constraints
     private func truncateToSentences(_ text: String, max: Int) -> String {
