@@ -243,7 +243,7 @@ class LocalModelService: ObservableObject {
         var response = llm.output
             .trimmingCharacters(in: .whitespacesAndNewlines)
 
-        // Strip <think>...</think> reasoning blocks (Qwen 3.5 thinking mode)
+        // Strip <think>...</think> reasoning blocks (model thinking mode)
         response = stripThinkingTags(response)
 
         // Check for empty or garbage responses
@@ -313,7 +313,7 @@ class LocalModelService: ObservableObject {
 
     // MARK: - Response Post-Processing
 
-    /// Strip <think>...</think> reasoning blocks from Qwen 3.5 output.
+    /// Strip <think>...</think> reasoning blocks from model output.
     /// If stripping leaves nothing, extract the last useful sentence from the thinking block.
     private func stripThinkingTags(_ text: String) -> String {
         // Case 1: Complete <think>...</think> with answer after

@@ -781,8 +781,8 @@ struct AboutHealthSourcesView: View {
                             .font(.subheadline)
                             .fontWeight(.medium)
                         Text(selectedLanguage == .spanish ?
-                             "Se procesan completamente en tu dispositivo usando Gemma 3. Ninguna conversación, dato de salud o información personal se envía a ningún servidor o servicio de IA de terceros." :
-                             "Processed entirely on your device using Gemma 3. No conversations, health data, or personal information are sent to any server or third-party AI service.")
+                             "Se procesan completamente en tu dispositivo usando IA en el dispositivo. Ninguna conversación, dato de salud o información personal se envía a ningún servidor o servicio de IA de terceros." :
+                             "Processed entirely on your device using on-device AI. No conversations, health data, or personal information are sent to any server or third-party AI service.")
                             .font(.caption)
                             .foregroundStyle(.secondary)
                     }

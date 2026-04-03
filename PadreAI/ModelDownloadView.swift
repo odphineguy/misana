@@ -194,8 +194,8 @@ struct ModelDownloadView: View {
                     .fontWeight(.bold)
                 
                 Text(selectedLanguage == .spanish ?
-                     "Para usar MiSana sin internet, necesitas descargar el modelo de inteligencia artificial (Qwen 3 4B)." :
-                     "To use MiSana offline, you need to download the AI model (Qwen 3 4B).")
+                     "Para usar MiSana sin internet, necesitas descargar el modelo de inteligencia artificial." :
+                     "To use MiSana offline, you need to download the AI model.")
                     .font(.subheadline)
                     .foregroundStyle(.secondary)
                     .multilineTextAlignment(.center)
@@ -217,7 +217,7 @@ struct ModelDownloadView: View {
                 
                 VStack(alignment: .leading, spacing: 8) {
                     InfoRow(label: selectedLanguage == .spanish ? "Modelo" : "Model",
-                           value: "Qwen 3 4B")
+                           value: selectedLanguage == .spanish ? "IA en el dispositivo" : "On-device AI")
                     InfoRow(label: selectedLanguage == .spanish ? "Tamaño" : "Size",
                            value: "~2.5 GB")
                     InfoRow(label: selectedLanguage == .spanish ? "Idiomas" : "Languages", 
