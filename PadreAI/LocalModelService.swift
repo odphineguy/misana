@@ -123,6 +123,10 @@ class LocalModelService: ObservableObject {
     
     init() {
         checkIfModelExists()
+        // Auto-load if already downloaded (so OCR extraction works without opening chat first)
+        if isModelDownloaded {
+            try? loadModel()
+        }
     }
     
     // MARK: - Model Download
@@ -272,10 +276,12 @@ class LocalModelService: ObservableObject {
     /// Extract structured medication info from raw OCR text using the LLM
     func extractMedicationFromOCR(_ ocrText: String) async -> ExtractedMedication {
         guard isModelLoaded, let llm = llm else {
+            print("⚠️ OCR extraction skipped — model not loaded")
             return ExtractedMedication()
         }
 
-        llm.reset()
+        // Truncate OCR text to avoid overwhelming the model's context
+        let truncatedOCR = String(ocrText.prefix(300))
 
         let prompt = """
         Extract the medication info from this scanned label text. Return ONLY these 3 lines, nothing else:
@@ -284,15 +290,27 @@ class LocalModelService: ObservableObject {
         NDC: [NDC code if found, or NONE]
 
         Scanned text:
-        \(ocrText)
+        \(truncatedOCR)
         """
+
+        print("💊 OCR extraction prompt (\(truncatedOCR.count) chars of OCR text)")
+
+        llm.reset()
+        // Small delay to ensure reset completes
+        try? await Task.sleep(for: .milliseconds(100))
 
         await llm.respond(to: prompt)
         var response = llm.output.trimmingCharacters(in: .whitespacesAndNewlines)
+        print("💊 OCR raw response (\(response.count) chars): \(response.prefix(200))")
+
         response = stripThinkingTags(response)
+        print("💊 After strip: \(response.prefix(200))")
+
         llm.reset()
 
-        return parseExtraction(response)
+        let result = parseExtraction(response)
+        print("💊 Extracted: name='\(result.name)' dosage='\(result.dosage)' ndc='\(result.ndc)'")
+        return result
     }
 
     private func parseExtraction(_ text: String) -> ExtractedMedication {

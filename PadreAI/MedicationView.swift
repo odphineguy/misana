@@ -169,10 +169,11 @@ struct MedicationView: View {
                 }
             }
             .fullScreenCover(isPresented: $showingDocumentScanner) {
-                DocumentScannerView(
-                    onScan: { images in
+                LabelCameraView(
+                    selectedLanguage: selectedLanguage,
+                    onPhoto: { image in
                         showingDocumentScanner = false
-                        Task { await processScannedImages(images) }
+                        Task { await processScannedImages([image]) }
                     },
                     onCancel: { showingDocumentScanner = false }
                 )
@@ -1271,6 +1272,77 @@ struct DocumentScannerView: UIViewControllerRepresentable {
         }
 
         func documentCameraViewController(_ controller: VNDocumentCameraViewController, didFailWithError error: Error) {
+            onCancel()
+        }
+    }
+}
+
+// MARK: - Label Camera (simple photo for OCR)
+
+struct LabelCameraView: UIViewControllerRepresentable {
+    let selectedLanguage: AppLanguage
+    let onPhoto: (UIImage) -> Void
+    let onCancel: () -> Void
+
+    func makeUIViewController(context: Context) -> UIImagePickerController {
+        let picker = UIImagePickerController()
+        picker.sourceType = .camera
+        picker.cameraCaptureMode = .photo
+        picker.delegate = context.coordinator
+
+        // Add instruction overlay
+        let overlay = UIView(frame: UIScreen.main.bounds)
+        overlay.isUserInteractionEnabled = false
+
+        let label = UILabel()
+        label.text = selectedLanguage == .spanish
+            ? "Apunta a la etiqueta del medicamento"
+            : "Point at the medication label"
+        label.textColor = .white
+        label.font = .systemFont(ofSize: 17, weight: .medium)
+        label.textAlignment = .center
+        label.backgroundColor = UIColor.black.withAlphaComponent(0.5)
+        label.layer.cornerRadius = 10
+        label.clipsToBounds = true
+        label.translatesAutoresizingMaskIntoConstraints = false
+        overlay.addSubview(label)
+
+        NSLayoutConstraint.activate([
+            label.centerXAnchor.constraint(equalTo: overlay.centerXAnchor),
+            label.topAnchor.constraint(equalTo: overlay.safeAreaLayoutGuide.topAnchor, constant: 20),
+            label.widthAnchor.constraint(lessThanOrEqualTo: overlay.widthAnchor, constant: -40),
+            label.heightAnchor.constraint(equalToConstant: 40)
+        ])
+
+        picker.cameraOverlayView = overlay
+
+        return picker
+    }
+
+    func updateUIViewController(_ uiViewController: UIImagePickerController, context: Context) {}
+
+    func makeCoordinator() -> Coordinator {
+        Coordinator(onPhoto: onPhoto, onCancel: onCancel)
+    }
+
+    class Coordinator: NSObject, UIImagePickerControllerDelegate, UINavigationControllerDelegate {
+        let onPhoto: (UIImage) -> Void
+        let onCancel: () -> Void
+
+        init(onPhoto: @escaping (UIImage) -> Void, onCancel: @escaping () -> Void) {
+            self.onPhoto = onPhoto
+            self.onCancel = onCancel
+        }
+
+        func imagePickerController(_ picker: UIImagePickerController, didFinishPickingMediaWithInfo info: [UIImagePickerController.InfoKey: Any]) {
+            if let image = info[.originalImage] as? UIImage {
+                onPhoto(image)
+            } else {
+                onCancel()
+            }
+        }
+
+        func imagePickerControllerDidCancel(_ picker: UIImagePickerController) {
             onCancel()
         }
     }
