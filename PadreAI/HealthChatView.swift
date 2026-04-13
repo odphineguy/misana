@@ -11,7 +11,7 @@ import Combine
 struct HealthChatView: View {
     let selectedLanguage: AppLanguage
     var initialContext: String? = nil
-    @EnvironmentObject private var modelService: LocalModelService
+    @EnvironmentObject private var modelService: ModelCoordinator
     @EnvironmentObject private var healthKitService: HealthKitService
     @State private var messages: [ChatMessage] = []
     @State private var isGenerating = false
@@ -845,6 +845,6 @@ struct AboutHealthSourcesView: View {
 
 #Preview {
     HealthChatView(selectedLanguage: .spanish)
-        .environmentObject(LocalModelService())
+        .environmentObject(ModelCoordinator())
         .environmentObject(HealthKitService())
 }

@@ -108,7 +108,7 @@ struct Medication: Identifiable, Codable {
 
 struct MedicationView: View {
     let selectedLanguage: AppLanguage
-    @EnvironmentObject private var modelService: LocalModelService
+    @EnvironmentObject private var modelService: ModelCoordinator
     @State private var medications: [Medication] = []
     @State private var showingScanChoice = false
     @State private var showingAddSheet = false
@@ -119,6 +119,7 @@ struct MedicationView: View {
     @State private var prefillName: String = ""
     @State private var prefillDosage: String = ""
     @State private var prefillRxcui: String?
+    @State private var editingMedication: Medication?
     @StateObject private var drugService = DrugLookupService()
 
     private var medicationsFileURL: URL? {
@@ -128,14 +129,107 @@ struct MedicationView: View {
 
     var body: some View {
         NavigationStack {
-            ZStack {
-                if medications.isEmpty {
-                    emptyStateView
-                } else {
-                    medicationListView
+            ScrollView {
+                VStack(spacing: 20) {
+                    // MARK: - Gradient Header
+                    VStack(alignment: .leading, spacing: 6) {
+                        Text(selectedLanguage == .spanish ?
+                             "Escanear" :
+                             "Scan")
+                            .font(.title2)
+                            .fontWeight(.bold)
+                        Text(selectedLanguage == .spanish ?
+                             "Escanea etiquetas o códigos de barras para agregar tus medicinas." :
+                             "Scan labels or barcodes to add your medications.")
+                            .font(.subheadline)
+                            .foregroundStyle(.primary.opacity(0.7))
+                    }
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .padding()
+                    .background {
+                        RoundedRectangle(cornerRadius: 16)
+                            .fill(
+                                LinearGradient(
+                                    colors: [Color.brand.opacity(0.20), Color.brand.opacity(0.08)],
+                                    startPoint: .topLeading,
+                                    endPoint: .bottomTrailing
+                                )
+                            )
+                            .overlay(
+                                RoundedRectangle(cornerRadius: 16)
+                                    .strokeBorder(Color.brand.opacity(0.15), lineWidth: 1)
+                            )
+                    }
+                    .padding(.horizontal)
+
+                    // MARK: - Scan Action Cards
+                    VStack(spacing: 12) {
+                        // Scan Medication
+                        Button {
+                            showingScanChoice = true
+                        } label: {
+                            HStack(spacing: 14) {
+                                Image(systemName: "pill.fill")
+                                    .font(.title3)
+                                    .foregroundStyle(.white)
+                                    .frame(width: 48, height: 48)
+                                    .background(Color.brand.gradient)
+                                    .clipShape(RoundedRectangle(cornerRadius: 12))
+
+                                VStack(alignment: .leading, spacing: 3) {
+                                    Text(selectedLanguage == .spanish ? "Escanear medicina" : "Scan medication")
+                                        .font(.subheadline)
+                                        .fontWeight(.semibold)
+                                    Text(selectedLanguage == .spanish ?
+                                         "Etiqueta o código de barras" :
+                                         "Label or barcode")
+                                        .font(.caption)
+                                        .foregroundStyle(.secondary)
+                                }
+                                Spacer()
+                                Image(systemName: "camera.fill")
+                                    .foregroundStyle(.brand)
+                            }
+                            .padding(14)
+                            .background(Color(uiColor: .secondarySystemGroupedBackground))
+                            .clipShape(RoundedRectangle(cornerRadius: 16))
+                            .overlay(
+                                RoundedRectangle(cornerRadius: 16)
+                                    .strokeBorder(Color.primary.opacity(0.08), lineWidth: 1)
+                            )
+                        }
+                        .buttonStyle(.plain)
+
+                    }
+                    .padding(.horizontal)
+
+                    // MARK: - My Medications section
+                    if !medications.isEmpty {
+                        VStack(alignment: .leading, spacing: 12) {
+                            HStack(spacing: 12) {
+                                Text(selectedLanguage == .spanish ? "Mis medicinas" : "My medications")
+                                    .font(.subheadline)
+                                    .fontWeight(.semibold)
+                                Spacer()
+                                // Export medication list
+                                ShareLink(item: generateMedExport()) {
+                                    Image(systemName: "square.and.arrow.up")
+                                        .font(.subheadline)
+                                        .foregroundStyle(.brand)
+                                }
+                            }
+                            .padding(.horizontal)
+
+                            medicationListContent
+                        }
+                    } else {
+                        emptyMedicationsNote
+                    }
                 }
+                .padding(.top)
             }
-            .navigationTitle(selectedLanguage == .spanish ? "Medicinas" : "Medications")
+            .navigationTitle(selectedLanguage == .spanish ? "Escanear" : "Scan")
+            .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .automatic) {
                     Button {
@@ -202,6 +296,41 @@ struct MedicationView: View {
                         saveMedications()
                         showingAddSheet = false
                         refreshInteractions()
+                        // Schedule medication reminders
+                        if medication.scheduleFrequency != nil && medication.scheduleFrequency != .asNeeded {
+                            Task {
+                                let lang = UserDefaults.standard.string(forKey: "selectedLanguage") ?? "es"
+                                await MedicationReminderService.shared.requestAuthorization()
+                                MedicationReminderService.shared.scheduleReminders(for: medication, language: lang)
+                            }
+                        }
+                    }
+                )
+            }
+            .sheet(item: $editingMedication) { med in
+                AddMedicationView(
+                    selectedLanguage: selectedLanguage,
+                    scannedText: "",
+                    prefillName: med.name,
+                    prefillDosage: med.dosage,
+                    prefillRxcui: med.rxcui,
+                    drugService: drugService,
+                    editingMedication: med,
+                    onSave: { updated in
+                        if let idx = medications.firstIndex(where: { $0.id == med.id }) {
+                            MedicationReminderService.shared.removeReminders(for: medications[idx])
+                            medications[idx] = updated
+                            saveMedications()
+                            refreshInteractions()
+                            if updated.scheduleFrequency != nil && updated.scheduleFrequency != .asNeeded {
+                                Task {
+                                    let lang = UserDefaults.standard.string(forKey: "selectedLanguage") ?? "es"
+                                    await MedicationReminderService.shared.requestAuthorization()
+                                    MedicationReminderService.shared.scheduleReminders(for: updated, language: lang)
+                                }
+                            }
+                        }
+                        editingMedication = nil
                     }
                 )
             }
@@ -228,69 +357,39 @@ struct MedicationView: View {
         }
     }
 
-    // MARK: - Empty State
+    // MARK: - Empty Medications Note
 
-    private var emptyStateView: some View {
-        VStack(spacing: 16) {
+    private var emptyMedicationsNote: some View {
+        HStack(spacing: 12) {
             Image(systemName: "pill.circle")
-                .font(.system(size: 64))
-                .foregroundStyle(.brand)
-
-            Text(selectedLanguage == .spanish ? "No hay medicinas" : "No medications")
                 .font(.title2)
-                .fontWeight(.semibold)
-
-            Text(selectedLanguage == .spanish ?
-                 "Escanea una receta o añade una medicina manualmente" :
-                 "Scan a prescription or add a medication manually")
-                .font(.subheadline)
-                .foregroundStyle(.secondary)
-                .multilineTextAlignment(.center)
-                .padding(.horizontal, 40)
-
-            HStack(spacing: 12) {
-                Button {
-                    showingScanChoice = true
-                } label: {
-                    Label(
-                        selectedLanguage == .spanish ? "Escanear" : "Scan",
-                        systemImage: "camera.fill"
-                    )
+                .foregroundStyle(.brand)
+            VStack(alignment: .leading, spacing: 2) {
+                Text(selectedLanguage == .spanish ? "No hay medicinas guardadas" : "No saved medications")
                     .font(.subheadline)
-                    .fontWeight(.semibold)
-                    .foregroundStyle(.white)
-                    .padding()
-                    .background(Color.brand.gradient)
-                    .clipShape(RoundedRectangle(cornerRadius: 12))
-                    .shadow(color: Color.brand.opacity(0.4), radius: 6, y: 3)
-                }
-
-                Button {
-                    clearPrefills()
-                    showingAddSheet = true
-                } label: {
-                    Label(
-                        selectedLanguage == .spanish ? "Añadir" : "Add",
-                        systemImage: "plus"
-                    )
-                    .font(.subheadline)
-                    .fontWeight(.semibold)
-                    .foregroundStyle(.brand)
-                    .padding()
-                    .background(Color.brand.opacity(0.15))
-                    .clipShape(RoundedRectangle(cornerRadius: 12))
-                    .shadow(color: Color.brand.opacity(0.12), radius: 6, y: 3)
-                }
+                    .fontWeight(.medium)
+                Text(selectedLanguage == .spanish ?
+                     "Escanea una etiqueta para agregar tu primera medicina." :
+                     "Scan a label to add your first medication.")
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
             }
-            .padding(.top, 8)
+            Spacer()
         }
+        .padding(14)
+        .background(Color(uiColor: .secondarySystemGroupedBackground))
+        .clipShape(RoundedRectangle(cornerRadius: 16))
+        .overlay(
+            RoundedRectangle(cornerRadius: 16)
+                .strokeBorder(Color.primary.opacity(0.08), lineWidth: 1)
+        )
+        .padding(.horizontal)
     }
 
-    // MARK: - Medication List
+    // MARK: - Medication List Content
 
-    private var medicationListView: some View {
-        ScrollView {
-            VStack(spacing: 16) {
+    private var medicationListContent: some View {
+        VStack(spacing: 16) {
                 // Interaction Warning Banner
                 if !drugService.interactions.isEmpty {
                     VStack(alignment: .leading, spacing: 8) {
@@ -376,8 +475,14 @@ struct MedicationView: View {
                     }
                     .buttonStyle(.plain)
                     .contextMenu {
+                        Button {
+                            editingMedication = medication
+                        } label: {
+                            Label(selectedLanguage == .spanish ? "Editar" : "Edit", systemImage: "pencil")
+                        }
                         Button(role: .destructive) {
                             if let idx = medications.firstIndex(where: { $0.id == medication.id }) {
+                                MedicationReminderService.shared.removeReminders(for: medication)
                                 medications.remove(at: idx)
                                 saveMedications()
                                 refreshInteractions()
@@ -389,8 +494,54 @@ struct MedicationView: View {
                 }
                 .padding(.horizontal)
             }
-            .padding(.vertical)
         }
+
+
+    // MARK: - Export
+
+    /// Generate a formatted text summary of all medications for sharing with a doctor
+    private func generateMedExport() -> String {
+        let isSpanish = UserDefaults.standard.string(forKey: "selectedLanguage") != "en"
+        let title = isSpanish ? "Mi Lista de Medicinas — MiSana" : "My Medication List — MiSana"
+        let date = DateFormatter.localizedString(from: Date(), dateStyle: .medium, timeStyle: .none)
+
+        var lines: [String] = []
+        lines.append(title)
+        lines.append(isSpanish ? "Fecha: \(date)" : "Date: \(date)")
+        lines.append(String(repeating: "─", count: 36))
+
+        for (i, med) in medications.enumerated() {
+            lines.append("\n\(i + 1). \(med.name)")
+            if !med.dosage.isEmpty {
+                lines.append("   \(isSpanish ? "Dosis" : "Dosage"): \(med.dosage)")
+            }
+            if !med.frequency.isEmpty {
+                lines.append("   \(isSpanish ? "Frecuencia" : "Frequency"): \(med.frequency)")
+            }
+            if !med.instructions.isEmpty {
+                lines.append("   \(isSpanish ? "Instrucciones" : "Instructions"): \(med.instructions)")
+            }
+            if let type = med.type {
+                lines.append("   \(isSpanish ? "Tipo" : "Type"): \(type.label(for: isSpanish ? .spanish : .english))")
+            }
+        }
+
+        // Interactions
+        if !drugService.interactions.isEmpty {
+            lines.append("\n" + String(repeating: "─", count: 36))
+            lines.append(isSpanish ? "⚠️ ALERTAS DE INTERACCIÓN" : "⚠️ INTERACTION WARNINGS")
+            for interaction in drugService.interactions {
+                lines.append("• \(interaction.drug1Name) + \(interaction.drug2Name): \(interaction.description)")
+            }
+            lines.append(isSpanish ? "Fuente: RxNorm (NIH)" : "Source: RxNorm (NIH)")
+        }
+
+        lines.append("\n" + String(repeating: "─", count: 36))
+        lines.append(isSpanish ?
+            "Generado por MiSana — Lleva esta lista a tu cita médica." :
+            "Generated by MiSana — Bring this list to your doctor's appointment.")
+
+        return lines.joined(separator: "\n")
     }
 
     // MARK: - OCR / Vision
@@ -591,6 +742,9 @@ struct MedicationView: View {
               let loaded = try? JSONDecoder().decode([Medication].self, from: data) else { return }
         medications = loaded
         refreshInteractions()
+        // Sync medication reminders on load
+        let lang = UserDefaults.standard.string(forKey: "selectedLanguage") ?? "es"
+        MedicationReminderService.shared.syncReminders(for: medications, language: lang)
     }
 
     private func refreshInteractions() {
@@ -819,8 +973,11 @@ struct AddMedicationView: View {
     let prefillDosage: String
     let prefillRxcui: String?
     @ObservedObject var drugService: DrugLookupService
+    var editingMedication: Medication? = nil
     let onSave: (Medication) -> Void
     @Environment(\.dismiss) private var dismiss
+
+    private var isEditing: Bool { editingMedication != nil }
 
     // Form state
     @State private var name = ""
@@ -874,7 +1031,9 @@ struct AddMedicationView: View {
                 .padding(.bottom, 32)
             }
             .background(Color(uiColor: .systemGroupedBackground))
-            .navigationTitle(selectedLanguage == .spanish ? "Añadir Medicina" : "Add Medication")
+            .navigationTitle(isEditing ?
+                (selectedLanguage == .spanish ? "Editar Medicina" : "Edit Medication") :
+                (selectedLanguage == .spanish ? "Añadir Medicina" : "Add Medication"))
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
@@ -890,9 +1049,22 @@ struct AddMedicationView: View {
                 if !scannedText.isEmpty { showScannedText = true }
                 if !didApplyPrefill {
                     didApplyPrefill = true
-                    if !prefillName.isEmpty { name = prefillName }
-                    if !prefillDosage.isEmpty { dosage = prefillDosage }
-                    if let rxcui = prefillRxcui { selectedRxcui = rxcui }
+                    if let med = editingMedication {
+                        // Pre-fill all fields from existing medication
+                        name = med.name
+                        dosage = med.dosage
+                        instructions = med.instructions
+                        selectedRxcui = med.rxcui
+                        medType = med.type ?? .tablet
+                        pillShape = med.shape ?? .round
+                        pillColor = med.pillColor ?? .white
+                        scheduleFreq = med.scheduleFrequency ?? .daily
+                        if let time = med.scheduleTime { scheduleTime = time }
+                    } else {
+                        if !prefillName.isEmpty { name = prefillName }
+                        if !prefillDosage.isEmpty { dosage = prefillDosage }
+                        if let rxcui = prefillRxcui { selectedRxcui = rxcui }
+                    }
                 }
             }
         }
@@ -1217,6 +1389,7 @@ struct AddMedicationView: View {
         }
 
         let medication = Medication(
+            id: editingMedication?.id ?? UUID(),
             name: name,
             dosage: dosage,
             frequency: "\(freqLabel)\(timeStr)",

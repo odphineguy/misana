@@ -8,7 +8,7 @@
 import SwiftUI
 
 struct ModelDownloadView: View {
-    @ObservedObject var modelService: LocalModelService
+    @ObservedObject var modelService: ModelCoordinator
     let selectedLanguage: AppLanguage
     @State private var isDownloading = false
     @State private var showDisclaimer = true
@@ -472,7 +472,7 @@ struct InfoRow: View {
 
 #Preview {
     ModelDownloadView(
-        modelService: LocalModelService(),
+        modelService: ModelCoordinator(),
         selectedLanguage: .spanish
     )
 }

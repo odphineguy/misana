@@ -15,10 +15,9 @@ struct ContentView: View {
 
     enum Tab {
         case home
-        case medications
-        case symptoms
-        case appointments
-        case chat
+        case scan
+        case visit
+        case lookup
     }
 
     var body: some View {
@@ -32,31 +31,24 @@ struct ContentView: View {
 
             MedicationView(selectedLanguage: selectedLanguage)
                 .tabItem {
-                    Label(selectedLanguage == .spanish ? "Medicinas" : "Medications",
-                          systemImage: "pill.fill")
+                    Label(selectedLanguage == .spanish ? "Escanear" : "Scan",
+                          systemImage: "camera.viewfinder")
                 }
-                .tag(Tab.medications)
+                .tag(Tab.scan)
 
-            SymptomCheckerView(selectedLanguage: selectedLanguage)
+            MyVisitView(selectedLanguage: selectedLanguage)
                 .tabItem {
-                    Label(selectedLanguage == .spanish ? "Sintomas" : "Symptoms",
-                          systemImage: "heart.text.square.fill")
-                }
-                .tag(Tab.symptoms)
-
-            AppointmentPrepView(selectedLanguage: selectedLanguage)
-                .tabItem {
-                    Label(selectedLanguage == .spanish ? "Citas" : "Appointments",
+                    Label(selectedLanguage == .spanish ? "Mi Cita" : "My Visit",
                           systemImage: "calendar.badge.clock")
                 }
-                .tag(Tab.appointments)
+                .tag(Tab.visit)
 
-            HealthChatView(selectedLanguage: selectedLanguage)
+            LookUpView(selectedLanguage: selectedLanguage)
                 .tabItem {
-                    Label(selectedLanguage == .spanish ? "Pregunta" : "Ask",
-                          systemImage: "message.fill")
+                    Label(selectedLanguage == .spanish ? "Buscar" : "Look Up",
+                          systemImage: "text.magnifyingglass")
                 }
-                .tag(Tab.chat)
+                .tag(Tab.lookup)
         }
         .preferredColorScheme(appTheme.colorScheme)
         .fullScreenCover(isPresented: .constant(!hasAcceptedDisclaimer)) {

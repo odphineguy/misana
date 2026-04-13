@@ -41,90 +41,17 @@ class LocalModelService: ObservableObject {
     
     private var systemPrompt: String {
         let isEnglish = UserDefaults.standard.string(forKey: "selectedLanguage") == "en"
-        return isEnglish ? Self.englishSystemPrompt : Self.spanishSystemPrompt
+        return isEnglish ? ModelPrompts.english : ModelPrompts.spanish
     }
-
-    private static let spanishSystemPrompt = """
-    Eres MiSana, un compañero de salud bilingüe para familias hispanas. Hablas como una tía o abuela cariñosa que sabe de salud — en español mexicano claro, con calidez y respeto. Responde directamente sin explicar tu proceso de pensamiento.
-
-    TU TONO:
-    - Cálido pero DIRECTO. La empatía va en UNA clausula corta al inicio, luego ve directo a la informacion util. Ejemplo CORRECTO: "Ay mijo, tos y garganta pueden ser por un resfriado o gripe." Ejemplo INCORRECTO: "Ay mijo, qué bueno que me cuentas cómo te sientes. Una garganta y tos, eso puede ser molesto, no te apures."
-    - Español mexicano natural y sencillo. Puedes decir "mijo/mija". NO uses jerga como "qué chido", "qué onda", "pa' nada".
-    - Toma en serio lo que la persona siente. NUNCA minimices síntomas.
-    - Explica términos médicos en palabras sencillas.
-
-    LARGO DE RESPUESTA:
-    - MAXIMO 3 oraciones por respuesta. Esto es OBLIGATORIO, sin excepciones.
-    - Si necesitas listar algo, maximo 3 puntos cortos.
-    - Si el tema necesita mas detalle, pregunta "¿Quieres que te explique mas?"
-    - NUNCA escribas mas de 3 oraciones. Corto, claro, directo.
-
-    CÓMO RESPONDES:
-    - Para síntomas: empatía en una clausula, luego la informacion util. Haz 1 pregunta si necesitas mas contexto.
-    - Para medicamentos: explica para qué sirve y qué vigilar. Como si se lo explicaras a tu abuelita.
-    - Para remedios caseros: valídalos cuando son seguros (manzanilla, sábila, caldo de pollo), pero di claro cuándo NO alcanza y hay que ir al doctor.
-    - Para preparar citas: ayuda a organizar síntomas y preguntas para el doctor.
-    - Respetas prácticas culturales (sobador, empacho, mal de ojo). Las validas y orientas con cuidado, sin juzgar.
-    - Manejas Spanglish con naturalidad. Si te hablan mezclando inglés y español, tú también. Si te preguntan en inglés, respondes en inglés.
-
-    NUNCA HAGAS ESTO:
-    - Nunca menciones enfermedades graves (cáncer, tumores, etc.) a menos que la persona las mencione primero.
-    - Nunca recomiendes ejercicio o actividad física cuando alguien reporta dolor. Primero que vea al doctor.
-    - Nunca diagnostiques. Eres un compañero que educa y apoya, no un doctor.
-    - Nunca uses un tono despreocupado, burlón o que minimice el dolor o la preocupación de la persona.
-    - NUNCA comentes sobre el peso, cuerpo, apariencia fisica, o contextura del usuario. No hagas suposiciones sobre si alguien esta flaco, gordo, o necesita comer mas o menos. Esto aplica aunque tengas datos de HealthKit — los datos son solo para contexto medico, NO para opinar sobre el cuerpo.
-    - Si alguien reporta dolor de pecho, dificultad para respirar, sangrado fuerte, o fiebre alta en bebes, tu PRIMERA oracion debe ser: "Ve a urgencias o llama al 911 ahora." Sin rodeos, sin preguntas, sin "quieres que te explique mas".
-
-    FUENTES:
-    - Si recibes contexto con fuentes verificadas, basa tu respuesta en esa informacion.
-    - Si NO recibes contexto de fuentes, responde con consejos generales de bienestar o di que consulten a su doctor.
-    - NUNCA inventes informacion medica.
-    - NUNCA incluyas links, URLs, ni nombres de fuentes en tu respuesta. Las fuentes se muestran automaticamente.
-    - NUNCA interpretes datos de salud (frecuencia cardiaca, oxigeno, presion) sin fuentes verificadas.
-    """
-
-    private static let englishSystemPrompt = """
-    You are MiSana, a friendly health companion. You are warm, caring, and knowledgeable about health topics. Respond directly without explaining your thinking process.
-
-    YOUR TONE:
-    - Warm but DIRECT. Brief empathy first, then useful information. Example: "Sorry to hear that — a sore throat and fever are often caused by a cold or flu."
-    - Take symptoms seriously. NEVER minimize what someone is feeling.
-    - Explain medical terms in simple words.
-
-    RESPONSE LENGTH:
-    - MAXIMUM 3 sentences per response. This is MANDATORY, no exceptions.
-    - If you need to list things, maximum 3 short bullet points.
-    - If the topic needs more detail, ask "Would you like me to explain more?"
-    - NEVER write more than 3 sentences. Short, clear, direct.
-
-    HOW YOU RESPOND:
-    - For symptoms: brief empathy, then useful info. Ask 1 follow-up question if needed.
-    - For medications: explain what it's for and what to watch for, in plain language.
-    - For home remedies: validate safe ones (chamomile tea, honey, chicken soup), but be clear when someone needs to see a doctor.
-    - For appointment prep: help organize symptoms and questions for the doctor.
-
-    NEVER DO THIS:
-    - Never mention serious diseases (cancer, tumors, etc.) unless the person mentions them first.
-    - Never recommend exercise or physical activity when someone reports pain. See a doctor first.
-    - Never diagnose. You are a companion that educates and supports, not a doctor.
-    - Never be dismissive or minimize someone's pain or concern.
-    - NEVER comment on weight, body, physical appearance, or build. Even with HealthKit data — that data is for medical context only, NOT for body commentary.
-    - If someone reports chest pain, difficulty breathing, heavy bleeding, or high fever in babies, your FIRST sentence must be: "Go to the ER or call 911 now." No hesitation.
-
-    SOURCES:
-    - If you receive verified source context, base your response on that information.
-    - If you do NOT receive source context, respond with general wellness advice or tell them to consult their doctor.
-    - NEVER make up medical information.
-    - NEVER include links, URLs, or source names in your response. Sources are shown automatically.
-    - NEVER interpret health data (heart rate, oxygen, blood pressure) without verified sources.
-    """
     
     // MARK: - Initialization
     
-    init() {
+    /// When `deferLoading` is true, the model file existence is checked but
+    /// the model is NOT loaded into memory. Use this when another engine
+    /// (e.g. Foundation Models) is active to avoid blocking the main thread.
+    init(deferLoading: Bool = false) {
         checkIfModelExists()
-        // Auto-load if already downloaded (so OCR extraction works without opening chat first)
-        if isModelDownloaded {
+        if !deferLoading && isModelDownloaded {
             try? loadModel()
         }
     }
@@ -248,7 +175,7 @@ class LocalModelService: ObservableObject {
             .trimmingCharacters(in: .whitespacesAndNewlines)
 
         // Strip <think>...</think> reasoning blocks (model thinking mode)
-        response = stripThinkingTags(response)
+        response = ModelPostProcessor.stripThinkingTags(response)
 
         // Check for empty or garbage responses
         print("🔍 Raw output (\(response.count) chars): \(String(response.prefix(200)))")
@@ -259,19 +186,13 @@ class LocalModelService: ObservableObject {
         }
 
         // Post-process: enforce max 3 sentences (small models ignore prompt-based length constraints)
-        response = truncateToSentences(response, max: 3)
+        response = ModelPostProcessor.truncateToSentences(response, max: 3)
 
         print("✅ Response generated (\(response.count) chars)")
         return response
     }
     
     // MARK: - Medication Extraction
-
-    struct ExtractedMedication {
-        var name: String = ""
-        var dosage: String = ""
-        var ndc: String = ""
-    }
 
     /// Extract structured medication info from raw OCR text using the LLM
     func extractMedicationFromOCR(_ ocrText: String) async -> ExtractedMedication {
@@ -303,84 +224,17 @@ class LocalModelService: ObservableObject {
         var response = llm.output.trimmingCharacters(in: .whitespacesAndNewlines)
         print("💊 OCR raw response (\(response.count) chars): \(response.prefix(200))")
 
-        response = stripThinkingTags(response)
+        response = ModelPostProcessor.stripThinkingTags(response)
         print("💊 After strip: \(response.prefix(200))")
 
         llm.reset()
 
-        let result = parseExtraction(response)
+        let result = ModelPostProcessor.parseExtraction(response)
         print("💊 Extracted: name='\(result.name)' dosage='\(result.dosage)' ndc='\(result.ndc)'")
         return result
     }
 
-    private func parseExtraction(_ text: String) -> ExtractedMedication {
-        var result = ExtractedMedication()
-        for line in text.components(separatedBy: .newlines) {
-            let trimmed = line.trimmingCharacters(in: .whitespaces)
-            if trimmed.uppercased().hasPrefix("DRUG:") {
-                result.name = trimmed.dropFirst(5).trimmingCharacters(in: .whitespaces)
-            } else if trimmed.uppercased().hasPrefix("DOSAGE:") {
-                result.dosage = trimmed.dropFirst(7).trimmingCharacters(in: .whitespaces)
-            } else if trimmed.uppercased().hasPrefix("NDC:") {
-                let val = trimmed.dropFirst(4).trimmingCharacters(in: .whitespaces)
-                if val.uppercased() != "NONE" { result.ndc = val }
-            }
-        }
-        return result
-    }
-
-    // MARK: - Response Post-Processing
-
-    /// Strip <think>...</think> reasoning blocks from model output.
-    /// If stripping leaves nothing, extract the last useful sentence from the thinking block.
-    private func stripThinkingTags(_ text: String) -> String {
-        // Case 1: Complete <think>...</think> with answer after
-        if let thinkEnd = text.range(of: "</think>") {
-            let afterThink = String(text[thinkEnd.upperBound...]).trimmingCharacters(in: .whitespacesAndNewlines)
-            if afterThink.count >= 3 {
-                return afterThink
-            }
-        }
-
-        // Case 2: Only <think> (no closing tag) — model ran out of tokens thinking
-        // Salvage: extract content from inside the thinking block
-        if let thinkStart = text.range(of: "<think>") {
-            let thinkContent = String(text[thinkStart.upperBound...])
-                .replacingOccurrences(of: "**", with: "")
-                .replacingOccurrences(of: "Thinking Process:", with: "")
-                .replacingOccurrences(of: "Analyze the Request:", with: "")
-                .trimmingCharacters(in: .whitespacesAndNewlines)
-
-            // Find the last substantial sentence in the thinking — often contains the answer
-            let sentences = thinkContent.components(separatedBy: CharacterSet(charactersIn: ".!?"))
-                .map { $0.trimmingCharacters(in: .whitespacesAndNewlines) }
-                .filter { $0.count > 10 }
-            if let last = sentences.last {
-                return last + "."
-            }
-            // If no good sentence, return cleaned thinking content
-            if thinkContent.count >= 10 {
-                return truncateToSentences(thinkContent, max: 3)
-            }
-        }
-
-        // Case 3: No thinking tags — return as-is
-        return text.trimmingCharacters(in: .whitespacesAndNewlines)
-    }
-
-    /// Truncate response to a max number of sentences to enforce length constraints
-    private func truncateToSentences(_ text: String, max: Int) -> String {
-        var count = 0
-        for (i, char) in text.enumerated() {
-            if char == "." || char == "?" || char == "!" {
-                count += 1
-                if count >= max {
-                    return String(text.prefix(i + 1))
-                }
-            }
-        }
-        return text
-    }
+    // Post-processing methods are now in ModelPostProcessor (shared with Foundation Models)
 
     // MARK: - Conversation Management
 

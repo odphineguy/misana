@@ -9,7 +9,7 @@ import SwiftUI
 
 @main
 struct MiSanaApp: App {
-    @StateObject private var modelService = LocalModelService()
+    @StateObject private var modelService = ModelCoordinator()
     @StateObject private var healthKitService = HealthKitService()
     @State private var showSplash = true
 

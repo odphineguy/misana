@@ -9,7 +9,7 @@ import Foundation
 import SwiftUI
 import Combine
 
-/// ViewModel that manages chat conversation state and coordinates with LocalModelService
+/// ViewModel that manages chat conversation state and coordinates with ModelCoordinator
 @MainActor
 class ChatViewModel: ObservableObject {
     
@@ -21,11 +21,11 @@ class ChatViewModel: ObservableObject {
     
     // MARK: - Dependencies
     
-    private let modelService: LocalModelService
-    
+    private let modelService: ModelCoordinator
+
     // MARK: - Initialization
-    
-    init(modelService: LocalModelService) {
+
+    init(modelService: ModelCoordinator) {
         self.modelService = modelService
         addWelcomeMessage()
     }

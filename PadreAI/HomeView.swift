@@ -11,6 +11,7 @@ import HealthKit
 struct HomeView: View {
     @Binding var selectedLanguage: AppLanguage
     @EnvironmentObject private var healthKitService: HealthKitService
+    @EnvironmentObject private var modelService: ModelCoordinator
     @AppStorage("appTheme") private var appTheme: AppTheme = .system
     @Environment(\.colorScheme) private var colorScheme
     @State private var showStepsDetail = false
@@ -39,14 +40,14 @@ struct HomeView: View {
                     .padding(.top, 8)
 
                     // Welcome Header
-                    VStack(alignment: .leading, spacing: 4) {
+                    VStack(alignment: .leading, spacing: 6) {
                         Text(selectedLanguage == .spanish ? "Hola!" : "Hello!")
                             .font(.system(size: 28, weight: .bold))
                         Text(selectedLanguage == .spanish ?
-                             "Bienvenido a tu santuario de salud." :
-                             "Welcome back to your health sanctuary.")
+                             "Tu puente de salud familiar." :
+                             "Your family health bridge.")
                             .font(.subheadline)
-                            .foregroundStyle(.secondary)
+                            .foregroundStyle(.primary.opacity(0.7))
                     }
                     .frame(maxWidth: .infinity, alignment: .leading)
                     .padding()
@@ -54,10 +55,14 @@ struct HomeView: View {
                         RoundedRectangle(cornerRadius: 20)
                             .fill(
                                 LinearGradient(
-                                    colors: [Color.brand.opacity(0.18), Color.brand.opacity(0.08), .clear],
+                                    colors: [Color.brand.opacity(0.20), Color.brand.opacity(0.08)],
                                     startPoint: .topLeading,
                                     endPoint: .bottomTrailing
                                 )
+                            )
+                            .overlay(
+                                RoundedRectangle(cornerRadius: 20)
+                                    .strokeBorder(Color.brand.opacity(0.15), lineWidth: 1)
                             )
                     }
                     .clipShape(RoundedRectangle(cornerRadius: 20))
@@ -69,46 +74,50 @@ struct HomeView: View {
                             .padding(.horizontal)
                     }
 
-                    // Quick Actions
+                    // Quick Actions (2x2 grid)
                     VStack(alignment: .leading, spacing: 12) {
-                        Text(selectedLanguage == .spanish ? "Acciones" : "Quick Actions")
+                        Text(selectedLanguage == .spanish ? "¿Qué necesitas?" : "What do you need?")
                             .font(.headline)
                             .foregroundStyle(.secondary)
                             .padding(.horizontal)
 
-                        VStack(spacing: 12) {
+                        LazyVGrid(columns: [GridItem(.flexible(), spacing: 12), GridItem(.flexible(), spacing: 12)], spacing: 12) {
                             NavigationLink(destination: MedicationView(selectedLanguage: selectedLanguage)) {
-                                ActionCard(
+                                QuickActionTile(
                                     icon: "camera.viewfinder",
                                     iconColor: .brand,
-                                    title: selectedLanguage == .spanish ? "Escanear Receta" : "Scan Prescription",
-                                    subtitle: selectedLanguage == .spanish ?
-                                        "Escanea la etiqueta para agregarla automaticamente." :
-                                        "Scan your medication label to add it automatically."
+                                    title: selectedLanguage == .spanish ? "Escanear\nmedicina" : "Scan\nmedication",
+                                    selectedLanguage: selectedLanguage
                                 )
                             }
                             .buttonStyle(.plain)
 
-                            NavigationLink(destination: SymptomCheckerView(selectedLanguage: selectedLanguage)) {
-                                ActionCard(
-                                    icon: "stethoscope",
+                            NavigationLink(destination: MyVisitView(selectedLanguage: selectedLanguage)) {
+                                QuickActionTile(
+                                    icon: "calendar.badge.clock",
                                     iconColor: .brand,
-                                    title: selectedLanguage == .spanish ? "Revisar Sintomas" : "Check Symptoms",
-                                    subtitle: selectedLanguage == .spanish ?
-                                        "Revisa lo que sientes con tu asistente de IA." :
-                                        "Check what you are feeling with your AI assistant."
+                                    title: selectedLanguage == .spanish ? "Preparar\nmi cita" : "Prepare\nmy visit",
+                                    selectedLanguage: selectedLanguage
                                 )
                             }
                             .buttonStyle(.plain)
 
-                            NavigationLink(destination: AppointmentPrepView(selectedLanguage: selectedLanguage)) {
-                                ActionCard(
+                            NavigationLink(destination: LookUpView(selectedLanguage: selectedLanguage)) {
+                                QuickActionTile(
+                                    icon: "text.magnifyingglass",
+                                    iconColor: .brand,
+                                    title: selectedLanguage == .spanish ? "Buscar\ncondición" : "Look up\ncondition",
+                                    selectedLanguage: selectedLanguage
+                                )
+                            }
+                            .buttonStyle(.plain)
+
+                            NavigationLink(destination: SymptomLogView(selectedLanguage: selectedLanguage)) {
+                                QuickActionTile(
                                     icon: "list.clipboard.fill",
                                     iconColor: .brand,
-                                    title: selectedLanguage == .spanish ? "Preparar Cita" : "Prepare Appointment",
-                                    subtitle: selectedLanguage == .spanish ?
-                                        "Organiza tus preguntas para tu proxima cita." :
-                                        "Organize your questions for your next doctor visit."
+                                    title: selectedLanguage == .spanish ? "Registrar\nsíntomas" : "Log\nsymptoms",
+                                    selectedLanguage: selectedLanguage
                                 )
                             }
                             .buttonStyle(.plain)
@@ -152,6 +161,28 @@ struct HomeView: View {
                         Text("English")
                         if selectedLanguage == .english { Image(systemName: "checkmark") }
                     }
+                }
+            }
+
+            Section(selectedLanguage == .spanish ? "Modelo de IA" : "AI Model") {
+                ForEach(ModelCoordinator.ModelEngine.allCases) { engine in
+                    Button {
+                        modelService.activeEngine = engine
+                    } label: {
+                        HStack {
+                            Text(engine.rawValue)
+                            if engine == .foundation && !modelService.isFoundationAvailable {
+                                Text(selectedLanguage == .spanish ? "(No disponible)" : "(Not available)")
+                                    .font(.caption2)
+                                    .foregroundStyle(.secondary)
+                            }
+                            Spacer()
+                            if modelService.activeEngine == engine {
+                                Image(systemName: "checkmark")
+                            }
+                        }
+                    }
+                    .disabled(engine == .foundation && !modelService.isFoundationAvailable)
                 }
             }
 
@@ -360,7 +391,53 @@ struct HomeView: View {
     }
 }
 
-// MARK: - Action Card (Stitch-inspired)
+// MARK: - Quick Action Tile (2x2 grid)
+
+struct QuickActionTile: View {
+    let icon: String
+    let iconColor: Color
+    let title: String
+    let selectedLanguage: AppLanguage
+
+    var body: some View {
+        VStack(spacing: 12) {
+            Image(systemName: icon)
+                .font(.system(size: 28))
+                .foregroundStyle(.white)
+                .frame(width: 56, height: 56)
+                .background(
+                    LinearGradient(
+                        colors: [iconColor, iconColor.opacity(0.7)],
+                        startPoint: .topLeading,
+                        endPoint: .bottomTrailing
+                    )
+                )
+                .clipShape(RoundedRectangle(cornerRadius: 14))
+                .shadow(color: iconColor.opacity(0.4), radius: 6, y: 3)
+
+            Text(title)
+                .font(.caption)
+                .fontWeight(.semibold)
+                .multilineTextAlignment(.center)
+                .lineLimit(2)
+                .fixedSize(horizontal: false, vertical: true)
+        }
+        .frame(maxWidth: .infinity)
+        .padding(.vertical, 16)
+        .background {
+            RoundedRectangle(cornerRadius: 16)
+                .fill(Color(uiColor: .secondarySystemGroupedBackground))
+        }
+        .clipShape(RoundedRectangle(cornerRadius: 16))
+        .overlay(
+            RoundedRectangle(cornerRadius: 16)
+                .strokeBorder(Color.primary.opacity(0.08), lineWidth: 1)
+        )
+        .shadow(color: .black.opacity(0.08), radius: 8, y: 4)
+    }
+}
+
+// MARK: - Action Card (used by sub-views)
 
 struct ActionCard: View {
     let icon: String
