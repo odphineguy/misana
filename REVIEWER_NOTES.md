@@ -28,8 +28,8 @@ MiSana is a free, privacy-first, bilingual (Spanish/English) educational health 
 
 The app uses two on-device AI engines selected automatically by `ModelCoordinator`:
 
-**Path A — iOS 26+ test devices (recommended for review):**
-The app uses Apple Foundation Models. No download is required. AI features work immediately. This is the path most users will experience going forward.
+**Path A — iOS 26+ test devices with Apple Intelligence enabled (recommended for review):**
+The app uses Apple Foundation Models. No download is required. AI features work immediately. If Apple Intelligence is not enabled on the device, the app automatically falls back to Path B (Qwen download). This is the path most users will experience going forward.
 
 **Path B — iOS 18-25 test devices:**
 The app downloads a 2.5 GB Qwen 3 4B model from Hugging Face the first time the user opens the AI chat. Please use Wi-Fi and allow 5–10 minutes for the download. The app shows a progress bar and a clear error/retry banner if the network fails. After download, all AI features work fully offline.
@@ -87,7 +87,7 @@ If camera or HealthKit permission is denied, the app continues to function with 
 - Required-reason APIs declared:
   - `NSPrivacyAccessedAPICategoryUserDefaults` (1C8F.1)
   - `NSPrivacyAccessedAPICategoryDiskSpace` (85F4.1) — for free-space check before model download
-  - `NSPrivacyAccessedAPICategoryFileTimestamp` (C617.1) — for file existence checks
+  - `NSPrivacyAccessedAPICategoryFileTimestamp` (C617.1) — defensive declaration; kept as a hedge
 
 ---
 
@@ -113,7 +113,7 @@ All endpoints are HTTPS, public, government-operated.
 - No social features or user-to-user content
 - No deep links, universal links, widgets, app extensions, or background modes
 - No HealthKit writes (read-only)
-- No vision/multimodal AI input — chat is text-only
+- No image input to the AI model — chat is text-only (camera is used for barcode scanning and OCR label reading via Apple Vision, not for AI model input)
 
 ---
 

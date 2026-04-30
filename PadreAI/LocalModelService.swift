@@ -225,10 +225,8 @@ class LocalModelService: ObservableObject {
         print("💊 OCR extraction prompt (\(truncatedOCR.count) chars of OCR text)")
         #endif
 
-        llm.reset()
-        // Small delay to ensure reset completes
-        try? await Task.sleep(for: .milliseconds(100))
-
+        // LLM.swift manages conversation history internally (historyLimit: 6).
+        // Do NOT call llm.reset() — it fires a non-awaited Task that races with respond().
         await llm.respond(to: prompt)
         var response = llm.output.trimmingCharacters(in: .whitespacesAndNewlines)
         #if DEBUG
@@ -239,8 +237,6 @@ class LocalModelService: ObservableObject {
         #if DEBUG
         print("💊 After strip: \(response.prefix(200))")
         #endif
-
-        llm.reset()
 
         let result = ModelPostProcessor.parseExtraction(response)
         #if DEBUG

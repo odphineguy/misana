@@ -103,8 +103,8 @@ struct PrivacyPolicyView: View {
                                   "3. Uso de la camara" :
                                   "3. Camera usage")
                     Text(selectedLanguage == .spanish ?
-                         "MiSana solicita acceso a la camara unicamente para escanear codigos de barras de medicamentos. Las imagenes de la camara se procesan en el momento y no se almacenan, guardan ni transmiten." :
-                         "MiSana requests camera access solely for scanning medication barcodes. Camera images are processed in the moment and are not stored, saved, or transmitted.")
+                         "MiSana solicita acceso a la camara para escanear codigos de barras de medicamentos y leer texto en etiquetas de medicamentos usando reconocimiento de texto en el dispositivo (Apple Vision). Las imagenes de la camara se procesan en el momento y no se almacenan ni se transmiten." :
+                         "MiSana requests camera access to scan medication barcodes and read text on medication labels using on-device text recognition (Apple Vision). Camera images are processed in the moment and are not stored or transmitted.")
                         .font(.subheadline)
                         .foregroundStyle(.secondary)
 
