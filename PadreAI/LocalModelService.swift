@@ -184,8 +184,11 @@ class LocalModelService: ObservableObject {
         print("🔍 Raw output (\(response.count) chars): \(String(response.prefix(200)))")
         #endif
         if response.isEmpty || response == "..." || response.count < 3 {
-            print("⚠️ Empty or garbage response, resetting conversation")
-            llm.reset()
+            #if DEBUG
+            print("⚠️ Empty or garbage response, throwing inference error")
+            #endif
+            // Do not call llm.reset() here — it races with respond() per the comment above.
+            // The internal history will roll out naturally on next turn (historyLimit: 6).
             throw ModelError.inferenceError
         }
 

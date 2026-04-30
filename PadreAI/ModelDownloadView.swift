@@ -112,16 +112,16 @@ struct ModelDownloadView: View {
                     
                     FeatureRow(
                         icon: "stethoscope",
-                        text: selectedLanguage == .spanish ? 
-                            "Orientación sobre síntomas" : 
-                            "Symptom guidance"
+                        text: selectedLanguage == .spanish ?
+                            "Organizar lo que sientes para tu doctor" :
+                            "Organize what you feel for your doctor"
                     )
-                    
+
                     FeatureRow(
                         icon: "leaf.fill",
-                        text: selectedLanguage == .spanish ? 
-                            "Validación de remedios caseros" : 
-                            "Home remedy validation"
+                        text: selectedLanguage == .spanish ?
+                            "Información sobre remedios caseros comunes" :
+                            "Information about common home remedies"
                     )
                     
                     FeatureRow(
