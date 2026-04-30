@@ -105,12 +105,16 @@ class FoundationModelService: ObservableObject {
             }
         }
 
+        #if DEBUG
         print("🍎 Foundation raw (\(response.count) chars): \(response.prefix(300))")
+        #endif
 
         // Post-process: enforce max 4 sentences
         response = ModelPostProcessor.truncateToSentences(response, max: 4)
 
+        #if DEBUG
         print("🍎 After truncation (\(response.count) chars): \(response.prefix(300))")
+        #endif
 
         return response
     }

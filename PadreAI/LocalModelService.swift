@@ -169,7 +169,9 @@ class LocalModelService: ObservableObject {
         // Do NOT call llm.reset() — it fires a non-awaited Task that races with respond().
         await llm.respond(to: prompt)
 
+        #if DEBUG
         print("🤖 Model done, output: \(llm.output.prefix(100))")
+        #endif
 
         var response = llm.output
             .trimmingCharacters(in: .whitespacesAndNewlines)
@@ -177,8 +179,10 @@ class LocalModelService: ObservableObject {
         // Strip <think>...</think> reasoning blocks (model thinking mode)
         response = ModelPostProcessor.stripThinkingTags(response)
 
+        #if DEBUG
         // Check for empty or garbage responses
         print("🔍 Raw output (\(response.count) chars): \(String(response.prefix(200)))")
+        #endif
         if response.isEmpty || response == "..." || response.count < 3 {
             print("⚠️ Empty or garbage response, resetting conversation")
             llm.reset()
@@ -214,7 +218,9 @@ class LocalModelService: ObservableObject {
         \(truncatedOCR)
         """
 
+        #if DEBUG
         print("💊 OCR extraction prompt (\(truncatedOCR.count) chars of OCR text)")
+        #endif
 
         llm.reset()
         // Small delay to ensure reset completes
@@ -222,15 +228,21 @@ class LocalModelService: ObservableObject {
 
         await llm.respond(to: prompt)
         var response = llm.output.trimmingCharacters(in: .whitespacesAndNewlines)
+        #if DEBUG
         print("💊 OCR raw response (\(response.count) chars): \(response.prefix(200))")
+        #endif
 
         response = ModelPostProcessor.stripThinkingTags(response)
+        #if DEBUG
         print("💊 After strip: \(response.prefix(200))")
+        #endif
 
         llm.reset()
 
         let result = ModelPostProcessor.parseExtraction(response)
+        #if DEBUG
         print("💊 Extracted: name='\(result.name)' dosage='\(result.dosage)' ndc='\(result.ndc)'")
+        #endif
         return result
     }
 

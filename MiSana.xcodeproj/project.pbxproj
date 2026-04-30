@@ -272,9 +272,9 @@
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_KEY_CFBundleDisplayName = MiSana;
 				INFOPLIST_KEY_ITSAppUsesNonExemptEncryption = NO;
-				INFOPLIST_KEY_NSCameraUsageDescription = "MiSana necesita acceso a la cámara para escanear etiquetas de medicinas y recetas.";
-				INFOPLIST_KEY_NSHealthShareUsageDescription = "MiSana lee tus pasos, sueno, ritmo cardiaco, presion arterial, oxigeno en sangre y peso de Apple Salud para darte informacion personalizada. Solo lectura — nunca modificamos tus datos. Todo se procesa en tu dispositivo con IA local, nada se envia a internet.";
-				INFOPLIST_KEY_NSHealthUpdateUsageDescription = "MiSana does not write or modify your Apple Health data. This permission is required by a system framework but is not used by the app.";
+				INFOPLIST_KEY_NSCameraUsageDescription = "MiSana uses the camera to scan medication barcodes and read text on labels and prescription bottles.";
+				INFOPLIST_KEY_NSHealthShareUsageDescription = "MiSana reads your steps, sleep, heart rate, blood pressure, blood oxygen, and weight from Apple Health to give you personalized insights. Read-only — we never modify your data. Health data stays on your device.";
+				INFOPLIST_KEY_NSHealthUpdateUsageDescription = "MiSana does not write or modify your Apple Health data. This permission is required by the system framework but is not used by the app.";
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
@@ -311,9 +311,9 @@
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_KEY_CFBundleDisplayName = MiSana;
 				INFOPLIST_KEY_ITSAppUsesNonExemptEncryption = NO;
-				INFOPLIST_KEY_NSCameraUsageDescription = "MiSana necesita acceso a la cámara para escanear etiquetas de medicinas y recetas.";
-				INFOPLIST_KEY_NSHealthShareUsageDescription = "MiSana lee tus pasos, sueno, ritmo cardiaco, presion arterial, oxigeno en sangre y peso de Apple Salud para darte informacion personalizada. Solo lectura — nunca modificamos tus datos. Todo se procesa en tu dispositivo con IA local, nada se envia a internet.";
-				INFOPLIST_KEY_NSHealthUpdateUsageDescription = "MiSana does not write or modify your Apple Health data. This permission is required by a system framework but is not used by the app.";
+				INFOPLIST_KEY_NSCameraUsageDescription = "MiSana uses the camera to scan medication barcodes and read text on labels and prescription bottles.";
+				INFOPLIST_KEY_NSHealthShareUsageDescription = "MiSana reads your steps, sleep, heart rate, blood pressure, blood oxygen, and weight from Apple Health to give you personalized insights. Read-only — we never modify your data. Health data stays on your device.";
+				INFOPLIST_KEY_NSHealthUpdateUsageDescription = "MiSana does not write or modify your Apple Health data. This permission is required by the system framework but is not used by the app.";
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";

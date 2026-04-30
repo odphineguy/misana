@@ -36,8 +36,8 @@ struct PrivacyPolicyView: View {
                              "The bottom line:")
                             .fontWeight(.bold)
                         Text(selectedLanguage == .spanish ?
-                             "MiSana procesa toda tu informacion directamente en tu dispositivo. Nunca se envian datos a internet. No recopilamos, almacenamos ni compartimos tus datos de salud." :
-                             "MiSana processes all your information directly on your device. No data is ever sent to the internet. We do not collect, store, or share your health data.")
+                             "Tus datos de salud de Apple Health nunca salen de tu dispositivo. Cuando buscas un medicamento o tema de salud, solo se envia el nombre del medicamento o el termino de busqueda a APIs publicas del NIH (sin informacion personal). El modelo de IA se descarga una sola vez (~2.5 GB) y luego funciona sin internet." :
+                             "Your Apple Health data never leaves your device. When you look up a medication or health topic, only the drug name or search term is sent to public NIH APIs (no personal information). The AI model is downloaded once (~2.5 GB) and then runs offline.")
                             .font(.subheadline)
                             .foregroundStyle(.secondary)
                     }
@@ -88,13 +88,15 @@ struct PrivacyPolicyView: View {
                         .foregroundStyle(.secondary)
                     bulletList(selectedLanguage == .spanish ?
                         ["Tus datos de salud nunca salen de tu dispositivo",
-                         "No hay servidores, no hay nube, no hay conexion a internet requerida",
                          "El procesamiento de IA ocurre localmente usando el chip de tu iPhone",
-                         "Nadie — ni siquiera nosotros — puede acceder a tus datos de salud"] :
+                         "Nadie — ni siquiera nosotros — puede acceder a tus datos de salud",
+                         "El modelo de IA se descarga una vez desde Hugging Face y luego funciona sin internet",
+                         "Las busquedas de medicamentos envian solo el nombre del medicamento al NIH (RxNorm, MedlinePlus, openFDA), nunca informacion personal"] :
                         ["Your health data never leaves your device",
-                         "No servers, no cloud, no internet connection required",
                          "AI processing happens locally using your iPhone's chip",
-                         "Nobody — not even us — can access your health data"])
+                         "Nobody — not even us — can access your health data",
+                         "The AI model is downloaded once from Hugging Face, then runs offline",
+                         "Medication lookups send only the drug name to NIH (RxNorm, MedlinePlus, openFDA), never personal information"])
 
                     // Section 3
                     sectionHeader(selectedLanguage == .spanish ?

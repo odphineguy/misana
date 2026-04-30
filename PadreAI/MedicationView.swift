@@ -275,6 +275,7 @@ struct MedicationView: View {
             }
             .fullScreenCover(isPresented: $showingBarcodeScanner) {
                 BarcodeScannerView(
+                    selectedLanguage: selectedLanguage,
                     onBarcodeFound: { barcode in
                         showingBarcodeScanner = false
                         Task { await processBarcodeResult(barcode) }
@@ -436,7 +437,7 @@ struct MedicationView: View {
                     .padding(.horizontal)
                 }
 
-                // Network Error Banner
+                // Network Error Banner — interactions
                 if drugService.interactionCheckFailed && medications.count >= 2 {
                     HStack(spacing: 8) {
                         Image(systemName: "wifi.exclamationmark")
@@ -454,6 +455,30 @@ struct MedicationView: View {
                                 .font(.caption)
                                 .fontWeight(.semibold)
                                 .foregroundStyle(.brand)
+                        }
+                    }
+                    .padding(12)
+                    .background(Color.orange.opacity(0.08))
+                    .clipShape(RoundedRectangle(cornerRadius: 12))
+                    .padding(.horizontal)
+                }
+
+                // Network Error Banner — drug lookup
+                if drugService.lookupFailed {
+                    HStack(spacing: 8) {
+                        Image(systemName: "wifi.exclamationmark")
+                            .foregroundStyle(.orange)
+                        Text(selectedLanguage == .spanish ?
+                             "No se pudo conectar a NIH. Revisa tu conexión." :
+                             "Couldn't reach NIH. Check your connection.")
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
+                        Spacer()
+                        Button {
+                            drugService.lookupFailed = false
+                        } label: {
+                            Image(systemName: "xmark.circle.fill")
+                                .foregroundStyle(.secondary)
                         }
                     }
                     .padding(12)

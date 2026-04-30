@@ -203,9 +203,9 @@ struct SymptomCheckerView: View {
             .joined(separator: ", ")
 
         if selectedLanguage == .spanish {
-            return "Tengo estos sintomas: \(symptomNames). Que me recomiendas? Deberia ir al doctor?"
+            return "Estoy sintiendo: \(symptomNames). Ayudame a organizar lo que le diria al doctor."
         } else {
-            return "I have these symptoms: \(symptomNames). What do you recommend? Should I see a doctor?"
+            return "I'm feeling: \(symptomNames). Help me organize what I'd tell my doctor."
         }
     }
 }

@@ -35,12 +35,13 @@ struct HealthChatView: View {
                 }
 
                 // Messages
+                // Persistent educational disclaimer (always visible)
+                HealthInfoBanner(selectedLanguage: selectedLanguage)
+                    .padding(.top, 4)
+
                 ScrollViewReader { proxy in
                     ScrollView {
                         LazyVStack(spacing: 16) {
-                            // Health info banner at top
-                            HealthInfoBanner(selectedLanguage: selectedLanguage)
-
                             ForEach(messages) { message in
                                 ChatBubbleView(
                                     message: message,
@@ -253,21 +254,25 @@ struct HealthChatView: View {
         let welcomeText: String
         if selectedLanguage == .spanish {
             welcomeText = """
-            Hola! Soy MiSana, tu asistente de salud personal.
+            Hola! Soy MiSana, tu compañera de salud educativa.
 
-            En que puedo ayudarte hoy? Puedo asistirte con:
-            \u{2022} Chequear tus sintomas
+            En que puedo ayudarte hoy? Puedo:
+            \u{2022} Hablar de como te sientes
             \u{2022} Explicar tus medicinas
-            \u{2022} Preparar citas medicas
+            \u{2022} Ayudarte a prepararte para tu cita medica
+
+            Solo informacion educativa — no es un diagnostico.
             """
         } else {
             welcomeText = """
-            Hello! I'm MiSana, your personal health assistant.
+            Hello! I'm MiSana, your educational health companion.
 
-            How can I help you today? I can assist with:
-            \u{2022} Check your symptoms
+            How can I help today? I can:
+            \u{2022} Talk through what you're feeling
             \u{2022} Explain your medications
-            \u{2022} Prepare doctor appointments
+            \u{2022} Help you prepare for your doctor visit
+
+            Information only — not a diagnosis.
             """
         }
 

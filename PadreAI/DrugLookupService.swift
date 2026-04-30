@@ -47,6 +47,7 @@ class DrugLookupService: ObservableObject {
     @Published var isSearching = false
     @Published var interactions: [DrugInteraction] = []
     @Published var interactionCheckFailed = false
+    @Published var lookupFailed = false
 
     private var cache: [String: CachedDrugInfo] = [:]
     private var searchTask: Task<Void, Never>?
@@ -125,6 +126,7 @@ class DrugLookupService: ObservableObject {
 
         do {
             let (data, _) = try await URLSession.shared.data(from: url)
+            lookupFailed = false
             guard let json = try? JSONSerialization.jsonObject(with: data) as? [String: Any],
                   let group = json["idGroup"] as? [String: Any],
                   let rxnormId = group["rxnormId"] as? [String],
@@ -134,6 +136,7 @@ class DrugLookupService: ObservableObject {
             let name = await fetchDrugName(rxcui: rxcui)
             return DrugSearchResult(rxcui: rxcui, name: name ?? cleaned)
         } catch {
+            lookupFailed = true
             return nil
         }
     }
@@ -165,6 +168,7 @@ class DrugLookupService: ObservableObject {
 
         do {
             let (data, _) = try await URLSession.shared.data(from: url)
+            lookupFailed = false
             guard let json = try? JSONSerialization.jsonObject(with: data) as? [String: Any],
                   let results = json["results"] as? [[String: Any]],
                   let first = results.first,
@@ -182,6 +186,7 @@ class DrugLookupService: ObservableObject {
 
             return DrugSearchResult(rxcui: rxcui, name: name)
         } catch {
+            lookupFailed = true
             return nil
         }
     }
