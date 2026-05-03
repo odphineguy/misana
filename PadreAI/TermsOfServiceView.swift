@@ -44,8 +44,8 @@ struct TermsOfServiceView: View {
                                   "2. Descripcion del servicio" :
                                   "2. Description of Service")
                     Text(selectedLanguage == .spanish ?
-                         "MiSana es una aplicacion bilingue de salud que proporciona informacion general de salud, seguimiento de medicamentos, revision de sintomas y herramientas de preparacion para citas medicas. MiSana usa un modelo de IA en el dispositivo para procesar tus consultas localmente en tu iPhone." :
-                         "MiSana is a bilingual health companion app that provides general health information, medication tracking, symptom checking, and appointment preparation tools. MiSana uses an on-device AI model to process your queries locally on your iPhone.")
+                         "MiSana es una aplicación bilingüe de información y organización de salud. Ayuda a los usuarios a organizar notas de salud, buscar información pública de medicamentos en fuentes del NIH/NLM, y preparar preguntas sugeridas para discutir con un profesional de salud. MiSana usa un modelo de IA en el dispositivo para procesar tus consultas localmente en tu iPhone." :
+                         "MiSana is a bilingual health information and organization app. It helps users organize health notes, look up publicly available medication information from NIH/NLM sources, and prepare suggested questions to discuss with a healthcare professional. MiSana uses an on-device AI model to process your queries locally on your iPhone.")
                         .font(.subheadline)
                         .foregroundStyle(.secondary)
 
@@ -54,8 +54,8 @@ struct TermsOfServiceView: View {
                                   "3. No es consejo medico" :
                                   "3. Not Medical Advice")
                     Text(selectedLanguage == .spanish ?
-                         "MiSana NO es un profesional medico, doctor ni proveedor de salud. La aplicacion proporciona contenido educativo e informativo general solamente. MiSana no:" :
-                         "MiSana is NOT a medical professional, doctor, or healthcare provider. The app provides general educational and informational content only. MiSana does not:")
+                         "MiSana NO es un proveedor de atención médica, dispositivo médico, herramienta de diagnóstico, herramienta de tratamiento, herramienta de seguridad de medicamentos ni servicio de emergencia. La aplicación proporciona información educativa general y herramientas de organización únicamente. MiSana no:" :
+                         "MiSana is NOT a healthcare provider, medical device, diagnostic tool, treatment tool, medication safety tool, or emergency service. The app provides general educational information and organization tools only. MiSana does not:")
                         .font(.subheadline)
                         .foregroundStyle(.secondary)
                     bulletList(selectedLanguage == .spanish ?
@@ -124,8 +124,8 @@ struct TermsOfServiceView: View {
                                   "7. Propiedad intelectual" :
                                   "7. Intellectual Property")
                     Text(selectedLanguage == .spanish ?
-                         "MiSana, incluyendo su diseno, codigo y contenido, es propiedad de su desarrollador. Se te otorga una licencia limitada, no exclusiva e intransferible para usar la aplicacion con fines personales y no comerciales." :
-                         "MiSana, including its design, code, and content, is the property of its developer. You are granted a limited, non-exclusive, non-transferable license to use the app for personal, non-commercial purposes.")
+                         "MiSana, incluyendo su diseño, código, contenido, marcas comerciales y materiales relacionados, es propiedad de AbeVision LLC. Se te otorga una licencia limitada, no exclusiva e intransferible para usar la aplicacion con fines personales y no comerciales." :
+                         "MiSana, including its design, code, content, trademarks, and related materials, is owned by AbeVision LLC. You are granted a limited, non-exclusive, non-transferable license to use the app for personal, non-commercial purposes.")
                         .font(.subheadline)
                         .foregroundStyle(.secondary)
 
@@ -134,8 +134,8 @@ struct TermsOfServiceView: View {
                                   "8. Limitacion de responsabilidad" :
                                   "8. Limitation of Liability")
                     Text(selectedLanguage == .spanish ?
-                         "En la medida maxima permitida por la ley, MiSana y su desarrollador no seran responsables de danos directos, indirectos, incidentales, especiales o consecuentes derivados de tu uso de la aplicacion, incluyendo pero no limitado a danos relacionados con decisiones de salud tomadas basandose en informacion proporcionada por la aplicacion." :
-                         "To the maximum extent permitted by law, MiSana and its developer shall not be liable for any direct, indirect, incidental, special, or consequential damages arising from your use of the app, including but not limited to damages related to health decisions made based on information provided by the app.")
+                         "En la medida maxima permitida por la ley, AbeVision LLC no sera responsable de danos directos, indirectos, incidentales, especiales o consecuentes derivados de tu uso de la aplicacion, incluyendo pero no limitado a danos relacionados con decisiones de salud tomadas basandose en informacion proporcionada por la aplicacion." :
+                         "To the maximum extent permitted by law, AbeVision LLC shall not be liable for any direct, indirect, incidental, special, or consequential damages arising from your use of the app, including but not limited to damages related to health decisions made based on information provided by the app.")
                         .font(.subheadline)
                         .foregroundStyle(.secondary)
 
@@ -174,8 +174,8 @@ struct TermsOfServiceView: View {
                                   "12. Ley aplicable" :
                                   "12. Governing Law")
                     Text(selectedLanguage == .spanish ?
-                         "Estos terminos se rigen por las leyes de los Estados Unidos de America y el estado donde reside el desarrollador." :
-                         "These terms are governed by the laws of the United States of America and the state in which the developer resides.")
+                         "Estos terminos se rigen por las leyes del Estado de California y los Estados Unidos de América." :
+                         "These terms are governed by the laws of the State of California and the United States of America.")
                         .font(.subheadline)
                         .foregroundStyle(.secondary)
 

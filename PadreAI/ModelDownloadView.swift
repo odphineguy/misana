@@ -87,8 +87,8 @@ struct ModelDownloadView: View {
                     }
                     
                     Text(selectedLanguage == .spanish ? 
-                         "MiSana no es un doctor ni reemplaza el consejo médico profesional.\n\nEste asistente de salud es solo para fines educativos e informativos. Siempre consulta con un profesional de salud certificado para diagnósticos, tratamientos, o cualquier decisión médica.\n\nSi experimentas una emergencia médica, llama al 911 inmediatamente." : 
-                         "MiSana is not a doctor and does not replace professional medical advice.\n\nThis health assistant is for educational and informational purposes only. Always consult with a certified healthcare professional for diagnoses, treatments, or any medical decisions.\n\nIf you experience a medical emergency, call 911 immediately.")
+                         "MiSana no es un proveedor de atención médica, dispositivo médico, herramienta de diagnóstico ni servicio de emergencia.\n\nMiSana proporciona información educativa general y herramientas de organización únicamente. No diagnostica condiciones, no receta tratamientos ni reemplaza el consejo médico profesional.\n\nSiempre consulta con un profesional de salud calificado antes de tomar decisiones médicas. Si experimentas una emergencia médica, llama al 911 inmediatamente." : 
+                         "MiSana is not a healthcare provider, medical device, diagnostic tool, or emergency service.\n\nMiSana provides general educational information and organization tools only. It does not diagnose conditions, prescribe treatment, or replace professional medical advice.\n\nAlways consult a qualified healthcare professional before making medical decisions. If you experience a medical emergency, call 911 immediately.")
                         .font(.subheadline)
                         .foregroundStyle(.secondary)
                 }

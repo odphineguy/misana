@@ -98,7 +98,7 @@ struct SymptomCheckerView: View {
                                 .font(.body)
                             Text(selectedLanguage == .spanish ?
                                  "Revisar \(selectedSymptoms.count) sintoma\(selectedSymptoms.count == 1 ? "" : "s") con IA" :
-                                 "Check \(selectedSymptoms.count) symptom\(selectedSymptoms.count == 1 ? "" : "s") with AI")
+                                 "Review \(selectedSymptoms.count) symptom\(selectedSymptoms.count == 1 ? "" : "s") with AI")
                                 .fontWeight(.semibold)
                         }
                         .font(.subheadline)

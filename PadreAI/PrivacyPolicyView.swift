@@ -163,8 +163,8 @@ struct PrivacyPolicyView: View {
                                   "7. Aviso medico" :
                                   "7. Medical disclaimer")
                     Text(selectedLanguage == .spanish ?
-                         "MiSana no es un profesional medico. La aplicacion proporciona informacion educativa general y no debe usarse para diagnosticar, tratar ni manejar condiciones medicas. Siempre consulta con un profesional de salud calificado." :
-                         "MiSana is not a medical professional. The app provides general educational information and should not be used to diagnose, treat, or manage medical conditions. Always consult a qualified healthcare professional.")
+                         "MiSana no es un proveedor de atención médica, dispositivo médico, herramienta de diagnóstico, herramienta de tratamiento, herramienta de seguridad de medicamentos ni servicio de emergencia. MiSana proporciona información educativa general y herramientas de organización únicamente. No diagnostica condiciones, no receta tratamientos, no recomienda cambios de medicamentos ni reemplaza el consejo médico profesional. Los usuarios deben consultar con un profesional de salud calificado antes de tomar decisiones médicas y llamar al 911 en caso de emergencia." :
+                         "MiSana is not a healthcare provider, medical device, diagnostic tool, treatment tool, medication safety tool, or emergency service. MiSana provides general educational information and organization tools only. It does not diagnose conditions, prescribe treatment, recommend medication changes, or replace professional medical advice. Users should consult a qualified healthcare professional before making medical decisions and call 911 in an emergency.")
                         .font(.subheadline)
                         .foregroundStyle(.secondary)
 
