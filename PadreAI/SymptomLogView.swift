@@ -483,6 +483,24 @@ struct FlowLayout: Layout {
 
 // MARK: - New Entry Sheet
 
+private enum NoteCategoryPrompt: String, CaseIterable, Identifiable {
+    case sleep, stress, food, weather, position, work
+
+    var id: String { rawValue }
+
+    func label(for language: AppLanguage) -> String {
+        let isSpanish = language == .spanish
+        switch self {
+        case .sleep:    return isSpanish ? "Sueño" : "Sleep"
+        case .stress:   return isSpanish ? "Estrés" : "Stress"
+        case .food:     return isSpanish ? "Comida" : "Food"
+        case .weather:  return isSpanish ? "Clima" : "Weather"
+        case .position: return isSpanish ? "Posición" : "Position"
+        case .work:     return isSpanish ? "Trabajo" : "Work"
+        }
+    }
+}
+
 struct NewSymptomLogSheet: View {
     let selectedLanguage: AppLanguage
     let healthSummary: HealthSummary
@@ -673,19 +691,26 @@ struct NewSymptomLogSheet: View {
 
                     // Notes
                     VStack(alignment: .leading, spacing: 8) {
-                        HStack(spacing: 8) {
+                        HStack(alignment: .top, spacing: 8) {
                             Image(systemName: "note.text")
                                 .foregroundStyle(.brand)
-                            Text(selectedLanguage == .spanish ? "Notas (opcional)" : "Notes (optional)")
-                                .font(.subheadline)
-                                .fontWeight(.semibold)
+                            VStack(alignment: .leading, spacing: 2) {
+                                Text(selectedLanguage == .spanish ? "Notas (opcional)" : "Notes (optional)")
+                                    .font(.subheadline)
+                                    .fontWeight(.semibold)
+                                Text(selectedLanguage == .spanish ?
+                                     "Contexto que ayuda a notar patrones" :
+                                     "Context that helps spot patterns over time")
+                                    .font(.caption2)
+                                    .foregroundStyle(.secondary)
+                            }
                         }
                         .padding(.horizontal)
 
                         TextField(
                             selectedLanguage == .spanish ?
-                                "Algo más que quieras anotar..." :
-                                "Anything else you want to note...",
+                                "ej., mal sueño, estrés, comida, clima, posición al empezar" :
+                                "e.g., poor sleep, stress, food, weather, position when it started",
                             text: $notes,
                             axis: .vertical
                         )
@@ -698,6 +723,9 @@ struct NewSymptomLogSheet: View {
                                 .strokeBorder(Color.primary.opacity(0.1), lineWidth: 1)
                         )
                         .padding(.horizontal)
+
+                        noteCategoryChips
+                            .padding(.horizontal)
                     }
 
                     // Save button
@@ -755,6 +783,40 @@ struct NewSymptomLogSheet: View {
         case 5: return isSpanish ? "Muy mal" : "Very bad"
         default: return ""
         }
+    }
+
+    private func appendCategoryPrompt(_ category: NoteCategoryPrompt) {
+        let prefix = "\(category.label(for: selectedLanguage)): "
+        let trimmed = notes.trimmingCharacters(in: .whitespacesAndNewlines)
+        notes = trimmed.isEmpty ? prefix : trimmed + "\n" + prefix
+    }
+
+    private var noteCategoryChips: some View {
+        FlowLayout(spacing: 8) {
+            ForEach(NoteCategoryPrompt.allCases) { category in
+                noteCategoryChip(for: category)
+            }
+        }
+    }
+
+    private func noteCategoryChip(for category: NoteCategoryPrompt) -> some View {
+        Button {
+            appendCategoryPrompt(category)
+        } label: {
+            HStack(spacing: 4) {
+                Image(systemName: "plus")
+                    .font(.caption2)
+                Text(category.label(for: selectedLanguage))
+                    .font(.caption)
+                    .fontWeight(.medium)
+            }
+            .padding(.horizontal, 10)
+            .padding(.vertical, 6)
+            .background(Color.brand.opacity(0.1))
+            .foregroundStyle(Color.brand)
+            .clipShape(Capsule())
+        }
+        .buttonStyle(.plain)
     }
 
     private func capturedHealthParts() -> [String] {
