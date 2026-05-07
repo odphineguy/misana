@@ -297,13 +297,12 @@ struct MedicationView: View {
                         saveMedications()
                         showingAddSheet = false
                         refreshInteractions()
-                        // Schedule medication reminders
-                        if medication.scheduleFrequency != nil && medication.scheduleFrequency != .asNeeded {
-                            Task {
-                                let lang = UserDefaults.standard.string(forKey: "selectedLanguage") ?? "es"
-                                await MedicationReminderService.shared.requestAuthorization()
-                                MedicationReminderService.shared.scheduleReminders(for: medication, language: lang)
+                        Task {
+                            let lang = UserDefaults.standard.string(forKey: "selectedLanguage") ?? "es"
+                            if medication.scheduleFrequency != nil && medication.scheduleFrequency != .asNeeded {
+                                _ = await MedicationReminderService.shared.requestAuthorization()
                             }
+                            await MedicationReminderService.shared.scheduleReminders(for: medication, language: lang)
                         }
                     }
                 )
@@ -319,16 +318,15 @@ struct MedicationView: View {
                     editingMedication: med,
                     onSave: { updated in
                         if let idx = medications.firstIndex(where: { $0.id == med.id }) {
-                            MedicationReminderService.shared.removeReminders(for: medications[idx])
                             medications[idx] = updated
                             saveMedications()
                             refreshInteractions()
-                            if updated.scheduleFrequency != nil && updated.scheduleFrequency != .asNeeded {
-                                Task {
-                                    let lang = UserDefaults.standard.string(forKey: "selectedLanguage") ?? "es"
-                                    await MedicationReminderService.shared.requestAuthorization()
-                                    MedicationReminderService.shared.scheduleReminders(for: updated, language: lang)
+                            Task {
+                                let lang = UserDefaults.standard.string(forKey: "selectedLanguage") ?? "es"
+                                if updated.scheduleFrequency != nil && updated.scheduleFrequency != .asNeeded {
+                                    _ = await MedicationReminderService.shared.requestAuthorization()
                                 }
+                                await MedicationReminderService.shared.scheduleReminders(for: updated, language: lang)
                             }
                         }
                         editingMedication = nil
@@ -507,10 +505,12 @@ struct MedicationView: View {
                         }
                         Button(role: .destructive) {
                             if let idx = medications.firstIndex(where: { $0.id == medication.id }) {
-                                MedicationReminderService.shared.removeReminders(for: medication)
                                 medications.remove(at: idx)
                                 saveMedications()
                                 refreshInteractions()
+                                Task {
+                                    await MedicationReminderService.shared.removeReminders(for: medication)
+                                }
                             }
                         } label: {
                             Label(selectedLanguage == .spanish ? "Eliminar" : "Delete", systemImage: "trash")
@@ -769,7 +769,10 @@ struct MedicationView: View {
         refreshInteractions()
         // Sync medication reminders on load
         let lang = UserDefaults.standard.string(forKey: "selectedLanguage") ?? "es"
-        MedicationReminderService.shared.syncReminders(for: medications, language: lang)
+        let snapshot = medications
+        Task {
+            await MedicationReminderService.shared.syncReminders(for: snapshot, language: lang)
+        }
     }
 
     private func refreshInteractions() {

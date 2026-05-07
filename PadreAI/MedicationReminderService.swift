@@ -34,9 +34,11 @@ class MedicationReminderService {
 
     /// Schedule notifications for a medication based on its frequency and time.
     /// Replaces any existing notifications for this medication.
-    func scheduleReminders(for medication: Medication, language: String) {
-        // Remove existing reminders for this medication first
-        removeReminders(for: medication)
+    func scheduleReminders(for medication: Medication, language: String) async {
+        // Remove existing reminders for this medication first — must complete
+        // before we add new ones with the same identifier prefix, otherwise the
+        // async removal can race with and delete the freshly added request.
+        await removeReminders(for: medication)
 
         guard let frequency = medication.scheduleFrequency,
               frequency != .asNeeded,
@@ -49,105 +51,78 @@ class MedicationReminderService {
         let minute = calendar.component(.minute, from: scheduleTime)
         let isSpanish = language == "es"
 
-        // Build notification content
         let content = UNMutableNotificationContent()
         content.title = isSpanish ? "Hora de tu medicina" : "Time for your medication"
-        content.body = isSpanish ?
-            "\(medication.name) — \(medication.dosage)" :
-            "\(medication.name) — \(medication.dosage)"
+        content.body = "\(medication.name) — \(medication.dosage)"
         content.sound = .default
         content.categoryIdentifier = "MEDICATION_REMINDER"
 
-        // Schedule based on frequency
         switch frequency {
         case .daily:
-            // Every day at the scheduled time
-            var dateComponents = DateComponents()
-            dateComponents.hour = hour
-            dateComponents.minute = minute
-            let trigger = UNCalendarNotificationTrigger(dateMatching: dateComponents, repeats: true)
-            let request = UNNotificationRequest(
-                identifier: reminderID(for: medication, suffix: "daily"),
-                content: content,
-                trigger: trigger
-            )
-            UNUserNotificationCenter.current().add(request)
+            await addCalendarTrigger(hour: hour, minute: minute, weekday: nil,
+                                     identifier: reminderID(for: medication, suffix: "daily"),
+                                     content: content)
 
         case .twiceDaily:
-            // At scheduled time and 12 hours later
             for (i, h) in [hour, (hour + 12) % 24].enumerated() {
-                var dateComponents = DateComponents()
-                dateComponents.hour = h
-                dateComponents.minute = minute
-                let trigger = UNCalendarNotificationTrigger(dateMatching: dateComponents, repeats: true)
-                let request = UNNotificationRequest(
-                    identifier: reminderID(for: medication, suffix: "twice-\(i)"),
-                    content: content,
-                    trigger: trigger
-                )
-                UNUserNotificationCenter.current().add(request)
+                await addCalendarTrigger(hour: h, minute: minute, weekday: nil,
+                                         identifier: reminderID(for: medication, suffix: "twice-\(i)"),
+                                         content: content)
             }
 
         case .threeTimesDaily:
-            // At scheduled time, +8h, +16h
             for (i, h) in [hour, (hour + 8) % 24, (hour + 16) % 24].enumerated() {
-                var dateComponents = DateComponents()
-                dateComponents.hour = h
-                dateComponents.minute = minute
-                let trigger = UNCalendarNotificationTrigger(dateMatching: dateComponents, repeats: true)
-                let request = UNNotificationRequest(
-                    identifier: reminderID(for: medication, suffix: "thrice-\(i)"),
-                    content: content,
-                    trigger: trigger
-                )
-                UNUserNotificationCenter.current().add(request)
+                await addCalendarTrigger(hour: h, minute: minute, weekday: nil,
+                                         identifier: reminderID(for: medication, suffix: "thrice-\(i)"),
+                                         content: content)
             }
 
         case .everyOtherDay:
-            // Use a 48-hour interval trigger
             let trigger = UNTimeIntervalNotificationTrigger(timeInterval: 48 * 3600, repeats: true)
-            let request = UNNotificationRequest(
-                identifier: reminderID(for: medication, suffix: "eod"),
-                content: content,
-                trigger: trigger
-            )
-            UNUserNotificationCenter.current().add(request)
+            await add(UNNotificationRequest(identifier: reminderID(for: medication, suffix: "eod"),
+                                            content: content, trigger: trigger))
 
         case .weekly:
-            // Same day of the week at the scheduled time
-            var dateComponents = DateComponents()
-            dateComponents.hour = hour
-            dateComponents.minute = minute
-            dateComponents.weekday = calendar.component(.weekday, from: Date())
-            let trigger = UNCalendarNotificationTrigger(dateMatching: dateComponents, repeats: true)
-            let request = UNNotificationRequest(
-                identifier: reminderID(for: medication, suffix: "weekly"),
-                content: content,
-                trigger: trigger
-            )
-            UNUserNotificationCenter.current().add(request)
+            await addCalendarTrigger(hour: hour, minute: minute,
+                                     weekday: calendar.component(.weekday, from: Date()),
+                                     identifier: reminderID(for: medication, suffix: "weekly"),
+                                     content: content)
 
         case .asNeeded:
-            break // No reminders for as-needed
+            break
         }
 
         print("🔔 Scheduled reminders for \(medication.name) (\(frequency.rawValue) at \(hour):\(minute))")
     }
 
+    private func addCalendarTrigger(hour: Int, minute: Int, weekday: Int?,
+                                    identifier: String, content: UNNotificationContent) async {
+        var dateComponents = DateComponents()
+        dateComponents.hour = hour
+        dateComponents.minute = minute
+        dateComponents.weekday = weekday
+        let trigger = UNCalendarNotificationTrigger(dateMatching: dateComponents, repeats: true)
+        await add(UNNotificationRequest(identifier: identifier, content: content, trigger: trigger))
+    }
+
+    private func add(_ request: UNNotificationRequest) async {
+        do {
+            try await UNUserNotificationCenter.current().add(request)
+        } catch {
+            print("🔔 Failed to schedule \(request.identifier): \(error)")
+        }
+    }
+
     // MARK: - Remove Reminders
 
     /// Remove all notifications for a specific medication
-    func removeReminders(for medication: Medication) {
+    func removeReminders(for medication: Medication) async {
         let prefix = "med-\(medication.id.uuidString)"
-        UNUserNotificationCenter.current().getPendingNotificationRequests { requests in
-            let idsToRemove = requests
-                .filter { $0.identifier.hasPrefix(prefix) }
-                .map(\.identifier)
-            UNUserNotificationCenter.current().removePendingNotificationRequests(withIdentifiers: idsToRemove)
-            if !idsToRemove.isEmpty {
-                print("🔔 Removed \(idsToRemove.count) reminders for medication \(medication.name)")
-            }
-        }
+        let pending = await UNUserNotificationCenter.current().pendingNotificationRequests()
+        let idsToRemove = pending.filter { $0.identifier.hasPrefix(prefix) }.map(\.identifier)
+        guard !idsToRemove.isEmpty else { return }
+        UNUserNotificationCenter.current().removePendingNotificationRequests(withIdentifiers: idsToRemove)
+        print("🔔 Removed \(idsToRemove.count) reminders for medication \(medication.name)")
     }
 
     /// Remove all medication reminders
@@ -159,11 +134,10 @@ class MedicationReminderService {
     // MARK: - Sync All
 
     /// Re-schedule reminders for all medications (call after load or edit)
-    func syncReminders(for medications: [Medication], language: String) {
-        // Remove all existing, then re-schedule
+    func syncReminders(for medications: [Medication], language: String) async {
         UNUserNotificationCenter.current().removeAllPendingNotificationRequests()
         for med in medications {
-            scheduleReminders(for: med, language: language)
+            await scheduleReminders(for: med, language: language)
         }
         print("🔔 Synced reminders for \(medications.count) medications")
     }
