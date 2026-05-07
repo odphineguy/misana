@@ -9,7 +9,6 @@ import SwiftUI
 
 struct MyVisitView: View {
     let selectedLanguage: AppLanguage
-    @EnvironmentObject private var modelService: ModelCoordinator
     @State private var symptomText = ""
     @State private var generatedSummary: VisitSummary?
     @State private var isGenerating = false
@@ -148,6 +147,21 @@ struct MyVisitView: View {
                                         .allowsHitTesting(false)
                                 }
                             }
+                            .onChange(of: symptomText) { _, _ in
+                                generatedSummary = nil
+                            }
+
+                        if shouldAskForSymptoms {
+                            HStack(alignment: .top, spacing: 8) {
+                                Image(systemName: "info.circle.fill")
+                                    .foregroundStyle(.orange)
+                                Text(selectedLanguage == .spanish ?
+                                     "Agrega síntomas o preocupaciones específicas antes de crear la nota." :
+                                     "Add specific symptoms or concerns before creating the note.")
+                                    .font(.caption)
+                                    .foregroundStyle(.secondary)
+                            }
+                        }
                     }
                     .padding()
                     .background(Color(uiColor: .secondarySystemGroupedBackground))
@@ -167,22 +181,22 @@ struct MyVisitView: View {
                                 Image(systemName: "doc.text.fill")
                             }
                             Text(selectedLanguage == .spanish ?
-                                 "Generar resumen para doctor" :
-                                 "Generate summary for doctor")
+                                 "Crear nota para doctor" :
+                                 "Create note for doctor")
                         }
                         .font(.headline)
                         .foregroundStyle(.white)
                         .frame(maxWidth: .infinity)
                         .padding(.vertical, 16)
                         .background(
-                            symptomText.trimmingCharacters(in: .whitespaces).isEmpty || isGenerating
+                            !canGenerateSummary
                             ? Color.gray.opacity(0.5)
                             : Color.brand
                         )
                         .clipShape(RoundedRectangle(cornerRadius: 14))
-                        .shadow(color: symptomText.trimmingCharacters(in: .whitespaces).isEmpty ? .clear : Color.brand.opacity(0.4), radius: 8, y: 4)
+                        .shadow(color: canGenerateSummary ? Color.brand.opacity(0.4) : .clear, radius: 8, y: 4)
                     }
-                    .disabled(symptomText.trimmingCharacters(in: .whitespaces).isEmpty || isGenerating)
+                    .disabled(!canGenerateSummary)
                     .padding(.horizontal)
 
                     // MARK: - Generated summary
@@ -191,8 +205,8 @@ struct MyVisitView: View {
                             SummaryCard(
                                 title: selectedLanguage == .spanish ? "Para ti" : "For you",
                                 subtitle: selectedLanguage == .spanish ?
-                                    "Tu resumen en palabras sencillas" :
-                                    "Your summary in simple words",
+                                    "Tu nota en palabras sencillas" :
+                                    "Your note in simple words",
                                 icon: "person.fill",
                                 iconColor: .brand,
                                 accentColor: .brand,
@@ -231,6 +245,18 @@ struct MyVisitView: View {
     }
 
     @State private var recentLogs: [SymptomLogEntry] = []
+
+    private var trimmedSymptomText: String {
+        symptomText.trimmingCharacters(in: .whitespacesAndNewlines)
+    }
+
+    private var shouldAskForSymptoms: Bool {
+        !trimmedSymptomText.isEmpty && needsMoreDetail(extractedConcern(from: trimmedSymptomText))
+    }
+
+    private var canGenerateSummary: Bool {
+        !trimmedSymptomText.isEmpty && !shouldAskForSymptoms && !isGenerating
+    }
 
     private var symptomLogSection: some View {
         VStack(alignment: .leading, spacing: 12) {
@@ -274,6 +300,27 @@ struct MyVisitView: View {
                     }
                 }
             } else {
+                let allEntries = SymptomLogStore.shared.load()
+                let insights = SymptomPatternAnalyzer.insights(
+                    from: allEntries,
+                    language: selectedLanguage == .spanish ? "es" : "en"
+                )
+
+                HStack(alignment: .top, spacing: 8) {
+                    Image(systemName: insights.isEmpty ? "eye" : "sparkle.magnifyingglass")
+                        .font(.caption)
+                        .foregroundStyle(.brand)
+                    VStack(alignment: .leading, spacing: 2) {
+                        Text("Pattern Watch")
+                            .font(.caption)
+                            .fontWeight(.semibold)
+                        Text(patternWatchSummary(entryCount: allEntries.count, insights: insights))
+                            .font(.caption2)
+                            .foregroundStyle(.secondary)
+                    }
+                    Spacer()
+                }
+
                 // Show last few entries as compact rows
                 ForEach(recentLogs.prefix(3)) { entry in
                     HStack(spacing: 8) {
@@ -327,6 +374,22 @@ struct MyVisitView: View {
         .padding(.horizontal)
     }
 
+    private func patternWatchSummary(entryCount: Int, insights: [SymptomPatternInsight]) -> String {
+        if let firstInsight = insights.first {
+            return firstInsight.detail
+        }
+
+        if entryCount < 3 {
+            return selectedLanguage == .spanish ?
+                "Agrega \(3 - entryCount) registro(s) más para empezar a notar patrones." :
+                "Add \(3 - entryCount) more entry/entries to start noticing patterns."
+        }
+
+        return selectedLanguage == .spanish ?
+            "Observando tus registros. Todavía no hay un patrón claro." :
+            "Watching your logs. No clear pattern yet."
+    }
+
     private func shortDate(_ date: Date) -> String {
         let df = DateFormatter()
         df.dateFormat = selectedLanguage == .spanish ? "d MMM" : "MMM d"
@@ -337,48 +400,84 @@ struct MyVisitView: View {
     // MARK: - Generate Summary
 
     private func generateSummary() {
-        let input = symptomText.trimmingCharacters(in: .whitespaces)
-        guard !input.isEmpty else { return }
+        let input = trimmedSymptomText
+        guard canGenerateSummary else {
+            generatedSummary = nil
+            isTextFocused = true
+            return
+        }
 
         isGenerating = true
 
-        Task {
-            let visitTypeLabel = selectedType.label(for: .english)
-
-            let forYouPrompt = """
-            The user is preparing for a \(visitTypeLabel) doctor visit. They described their symptoms below. Summarize what they're experiencing in simple, clear Spanish. Do not diagnose. Do not recommend medications. Just organize their symptoms clearly in 2-3 sentences.
-
-            Patient input: \(input)
-            """
-
-            let forDoctorPrompt = """
-            The user is preparing for a \(visitTypeLabel) doctor visit. They described their symptoms below. Create a brief, structured English summary a doctor can read quickly. Use medical-appropriate language. Format: "Patient reports [symptoms]. Duration: [if mentioned]. Additional context: [if any]."
-
-            Patient input: \(input)
-            """
-
-            do {
-                let forYou = try await modelService.generateResponse(
-                    userMessage: forYouPrompt,
-                    conversationHistory: []
-                )
-                let forDoctor = try await modelService.generateResponse(
-                    userMessage: forDoctorPrompt,
-                    conversationHistory: []
-                )
-
-                await MainActor.run {
-                    withAnimation {
-                        generatedSummary = VisitSummary(forYou: forYou, forDoctor: forDoctor)
-                    }
-                    isGenerating = false
-                }
-            } catch {
-                await MainActor.run {
-                    isGenerating = false
-                }
-            }
+        let summary = makeVisitSummary(from: input)
+        withAnimation {
+            generatedSummary = summary
         }
+        isGenerating = false
+    }
+
+    private func makeVisitSummary(from input: String) -> VisitSummary {
+        let concern = extractedConcern(from: input)
+
+        if needsMoreDetail(concern) {
+            return VisitSummary(
+                forYou: selectedLanguage == .spanish ?
+                    "Escribe los síntomas o preocupaciones específicas que quieres comentar, por ejemplo cuándo empezaron, qué los mejora o empeora, y cualquier medicina que tomas." :
+                    "Add the specific symptoms or concerns you want to discuss, such as when they started, what makes them better or worse, and any medicines you take.",
+                forDoctor: "Patient is preparing for a \(selectedType.label(for: .english).lowercased()) visit but has not entered specific symptoms or concerns yet."
+            )
+        }
+
+        let visitType = selectedType.label(for: selectedLanguage).lowercased()
+        let forYou = selectedLanguage == .spanish ?
+            "Para tu \(visitType), dile a tu doctor sobre: \(concern)" :
+            "For your \(visitType), tell your doctor about: \(concern)"
+
+        let forDoctor = """
+        Visit type: \(selectedType.label(for: .english)).
+        Patient concern: \(concern)
+        """
+
+        return VisitSummary(forYou: forYou, forDoctor: forDoctor)
+    }
+
+    private func extractedConcern(from input: String) -> String {
+        let trimmed = input.trimmingCharacters(in: .whitespacesAndNewlines)
+        let lowered = trimmed.lowercased()
+        let prefixes = [
+            "doctor visit for ", "doctor appointment for ", "dr visit for ", "dr appointment for ",
+            "visit for ", "appointment for ", "checkup for ", "check-up for ",
+            "doctor visit about ", "doctor appointment about ", "visit about ", "appointment about ",
+            "doctor visit regarding ", "doctor appointment regarding ", "visit regarding ", "appointment regarding ",
+            "doctor visit ", "doctor appointment ", "dr visit ", "dr appointment ",
+            "visit ", "appointment ", "checkup ", "check-up ",
+            "cita por ", "cita para ", "cita sobre ", "consulta por ", "consulta para ", "consulta sobre "
+        ]
+
+        for prefix in prefixes where lowered.hasPrefix(prefix) {
+            return String(trimmed.dropFirst(prefix.count))
+                .trimmingCharacters(in: .whitespacesAndNewlines)
+        }
+
+        return trimmed
+    }
+
+    private func needsMoreDetail(_ input: String) -> Bool {
+        let lowered = input.lowercased().trimmingCharacters(in: .whitespacesAndNewlines)
+        let genericEntries = [
+            "doctor visit", "dr visit", "visit", "appointment", "checkup", "check-up",
+            "cita", "cita medica", "cita médica", "doctor", "doctora", "medico", "médico"
+        ]
+
+        if genericEntries.contains(lowered) {
+            return true
+        }
+
+        let words = lowered
+            .components(separatedBy: CharacterSet.alphanumerics.inverted)
+            .filter { $0.count > 2 }
+
+        return words.isEmpty
     }
 }
 
@@ -418,10 +517,26 @@ struct SummaryCard: View {
 
             Divider()
 
-            Text(content)
+            Text((try? AttributedString(markdown: content)) ?? AttributedString(content))
                 .font(.subheadline)
                 .lineSpacing(5)
                 .frame(maxWidth: .infinity, alignment: .leading)
+
+            Link(destination: sourceURL) {
+                HStack(spacing: 6) {
+                    Image(systemName: "checkmark.seal.fill")
+                    Text(selectedLanguage == .spanish ? "Fuente: MedlinePlus" : "Source: MedlinePlus")
+                }
+                .font(.caption)
+                .foregroundStyle(accentColor)
+            }
+
+            Text(selectedLanguage == .spanish ?
+                 "Siempre consulta a tu doctor. Always consult your doctor." :
+                 "Always consult your doctor.")
+                .font(.caption2)
+                .foregroundStyle(.secondary)
+                .italic()
 
             Divider()
 
@@ -459,5 +574,11 @@ struct SummaryCard: View {
             RoundedRectangle(cornerRadius: 16)
                 .strokeBorder(accentColor.opacity(0.2), lineWidth: 1)
         )
+    }
+
+    private var sourceURL: URL {
+        URL(string: selectedLanguage == .spanish ?
+            "https://medlineplus.gov/spanish/talkingwithyourdoctor.html" :
+            "https://medlineplus.gov/talkingwithyourdoctor.html")!
     }
 }

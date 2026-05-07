@@ -34,6 +34,136 @@ struct SymptomLogEntry: Identifiable, Codable {
     }
 }
 
+// MARK: - Pattern Insights
+
+struct SymptomPatternInsight: Identifiable {
+    let id = UUID()
+    let title: String
+    let detail: String
+    let doctorQuestion: String
+    let count: Int
+}
+
+enum SymptomPatternAnalyzer {
+    static func insights(from entries: [SymptomLogEntry], language: String) -> [SymptomPatternInsight] {
+        guard entries.count >= 3 else { return [] }
+
+        let isSpanish = language == "es"
+        var insights: [SymptomPatternInsight] = []
+        insights.append(contentsOf: frequentSymptomInsights(from: entries, isSpanish: isSpanish))
+        insights.append(contentsOf: headacheContextInsights(from: entries, isSpanish: isSpanish))
+        insights.append(contentsOf: medicationAdherenceInsights(from: entries, isSpanish: isSpanish))
+
+        return Array(insights.prefix(4))
+    }
+
+    private static func frequentSymptomInsights(from entries: [SymptomLogEntry], isSpanish: Bool) -> [SymptomPatternInsight] {
+        var counts: [String: Int] = [:]
+        for entry in entries {
+            for symptom in entry.symptoms {
+                counts[symptom, default: 0] += 1
+            }
+        }
+
+        return counts
+            .filter { $0.value >= 3 }
+            .sorted { $0.value > $1.value }
+            .prefix(2)
+            .map { symptom, count in
+                SymptomPatternInsight(
+                    title: isSpanish ? "Síntoma repetido" : "Repeated symptom",
+                    detail: isSpanish ?
+                        "\(symptom) aparece en \(count) registros." :
+                        "\(symptom) appears in \(count) entries.",
+                    doctorQuestion: isSpanish ?
+                        "Pregunta para tu doctor: ¿deberíamos revisar qué puede estar relacionado con estos episodios?" :
+                        "Question for your doctor: should we review what may be related to these episodes?",
+                    count: count
+                )
+            }
+    }
+
+    private static func headacheContextInsights(from entries: [SymptomLogEntry], isSpanish: Bool) -> [SymptomPatternInsight] {
+        let headacheEntries = entries.filter { entry in
+            entry.symptoms.contains { symptom in
+                symptom.localizedStandardContains("headache") ||
+                symptom.localizedStandardContains("dolor de cabeza")
+            }
+        }
+
+        guard headacheEntries.count >= 2 else { return [] }
+
+        var insights: [SymptomPatternInsight] = []
+
+        let lowSleepEntries = headacheEntries.filter { entry in
+            guard let sleepHours = entry.sleepHours else { return false }
+            return sleepHours < 6
+        }
+        if lowSleepEntries.count >= 2 {
+            insights.append(
+                SymptomPatternInsight(
+                    title: isSpanish ? "Dolor de cabeza y sueño" : "Headache and sleep",
+                    detail: isSpanish ?
+                        "\(lowSleepEntries.count) registros de dolor de cabeza ocurrieron después de menos de 6 horas de sueño." :
+                        "\(lowSleepEntries.count) headache entries happened after less than 6 hours of sleep.",
+                    doctorQuestion: isSpanish ?
+                        "Pregunta para tu doctor: ¿deberíamos revisar sueño, ronquidos o descanso alrededor de estos dolores?" :
+                        "Question for your doctor: should we review sleep, snoring, or rest around these headaches?",
+                    count: lowSleepEntries.count
+                )
+            )
+        }
+
+        let elevatedBPEntries = headacheEntries.filter { entry in
+            guard let bloodPressure = entry.bloodPressure else { return false }
+            return isElevatedBloodPressure(bloodPressure)
+        }
+        if elevatedBPEntries.count >= 2 {
+            insights.append(
+                SymptomPatternInsight(
+                    title: isSpanish ? "Dolor de cabeza y presión" : "Headache and blood pressure",
+                    detail: isSpanish ?
+                        "\(elevatedBPEntries.count) registros de dolor de cabeza tuvieron presión arterial elevada." :
+                        "\(elevatedBPEntries.count) headache entries included elevated blood pressure readings.",
+                    doctorQuestion: isSpanish ?
+                        "Pregunta para tu doctor: ¿deberíamos revisar tus lecturas de presión cuando aparece el dolor?" :
+                        "Question for your doctor: should we review your blood pressure readings when headaches happen?",
+                    count: elevatedBPEntries.count
+                )
+            )
+        }
+
+        return insights
+    }
+
+    private static func medicationAdherenceInsights(from entries: [SymptomLogEntry], isSpanish: Bool) -> [SymptomPatternInsight] {
+        let missedMedEntries = entries.filter { entry in
+            entry.medicationsTaken.contains { !$0.taken }
+        }
+
+        guard missedMedEntries.count >= 2 else { return [] }
+
+        return [
+            SymptomPatternInsight(
+                title: isSpanish ? "Síntomas y medicinas omitidas" : "Symptoms and missed medicines",
+                detail: isSpanish ?
+                    "\(missedMedEntries.count) registros incluyen una medicina marcada como no tomada." :
+                    "\(missedMedEntries.count) entries include a medicine marked as missed.",
+                doctorQuestion: isSpanish ?
+                    "Pregunta para tu doctor: ¿deberíamos revisar si los síntomas cambian cuando se omite una medicina?" :
+                    "Question for your doctor: should we review whether symptoms change when a medicine is missed?",
+                count: missedMedEntries.count
+            )
+        ]
+    }
+
+    private static func isElevatedBloodPressure(_ value: String) -> Bool {
+        let parts = value.split(separator: "/").compactMap { Int($0.trimmingCharacters(in: .whitespaces)) }
+        guard parts.count == 2 else { return false }
+        return parts[0] >= 130 || parts[1] >= 80
+    }
+}
+
 // MARK: - Common Symptoms
 
 enum CommonSymptom: String, CaseIterable, Identifiable {
@@ -129,6 +259,17 @@ class SymptomLogStore {
         lines.append(isSpanish ? "Exportado: \(dateStr)" : "Exported: \(dateStr)")
         lines.append(isSpanish ? "Entradas: \(entries.count)" : "Entries: \(entries.count)")
         lines.append(String(repeating: "─", count: 40))
+
+        let insights = SymptomPatternAnalyzer.insights(from: entries, language: language)
+        if !insights.isEmpty {
+            lines.append("")
+            lines.append(isSpanish ? "Patrones notados (no diagnóstico)" : "Patterns noticed (not a diagnosis)")
+            for insight in insights {
+                lines.append("• \(insight.detail)")
+                lines.append("  \(insight.doctorQuestion)")
+            }
+            lines.append(String(repeating: "─", count: 40))
+        }
 
         let df = DateFormatter()
         df.dateStyle = .medium

@@ -106,7 +106,8 @@ struct HealthChatView: View {
                                                     healthContext: healthKitService.summary.generateContextString(),
                                                     sourceContext: retrieval.sourceContext
                                                 )
-                                                let responseMsg = ChatMessage(text: response, isUser: false)
+                                                let responseText = retrieval.hasVerifiedSources ? response : responseWithFallbackCitation(response)
+                                                let responseMsg = ChatMessage(text: responseText, isUser: false)
                                                 messages.append(responseMsg)
                                                 if !retrieval.citations.isEmpty {
                                                     citations[responseMsg.id.uuidString] = retrieval.citations
@@ -351,7 +352,8 @@ struct HealthChatView: View {
                 healthContext: healthKitService.summary.generateContextString(),
                 sourceContext: retrieval.sourceContext
             )
-            let responseMsg = ChatMessage(text: response, isUser: false)
+            let responseText = retrieval.hasVerifiedSources ? response : responseWithFallbackCitation(response)
+            let responseMsg = ChatMessage(text: responseText, isUser: false)
             messages.append(responseMsg)
             if !retrieval.citations.isEmpty {
                 citations[responseMsg.id.uuidString] = retrieval.citations
@@ -398,7 +400,8 @@ struct HealthChatView: View {
                 // STEP 3: Display response with retrieved citations
                 await MainActor.run {
                     lastFailedMessage = nil
-                    let responseMsg = ChatMessage(text: response, isUser: false)
+                    let responseText = activeCitations.isEmpty ? responseWithFallbackCitation(response) : response
+                    let responseMsg = ChatMessage(text: responseText, isUser: false)
                     messages.append(responseMsg)
                     if !activeCitations.isEmpty {
                         citations[responseMsg.id.uuidString] = activeCitations
@@ -418,6 +421,15 @@ struct HealthChatView: View {
                 }
             }
         }
+    }
+
+    private func responseWithFallbackCitation(_ response: String) -> String {
+        response
+            .replacingOccurrences(of: #"(?i)\[source:\s*MedlinePlus\]\([^)]+\)"#, with: "", options: .regularExpression)
+            .replacingOccurrences(of: #"(?i)source:\s*MedlinePlus"#, with: "", options: .regularExpression)
+            .replacingOccurrences(of: #"(?i)Always consult your doctor\.?"#, with: "", options: .regularExpression)
+            .replacingOccurrences(of: #"(?i)Siempre consulta a tu doctor\.?"#, with: "", options: .regularExpression)
+            .trimmingCharacters(in: .whitespacesAndNewlines)
     }
 }
 
@@ -561,8 +573,8 @@ struct ChatBubbleView: View {
                     // Fallback when no specific citations found
                     VStack(alignment: .leading, spacing: 2) {
                         Text(selectedLanguage == .spanish ?
-                             "Info educativa. Consulta a tu doctor." :
-                             "Educational info. Consult your doctor.")
+                             "Info educativa. Siempre consulta a tu doctor. Always consult your doctor." :
+                             "Educational info. Always consult your doctor.")
                             .font(.system(size: 9))
                             .foregroundStyle(.secondary)
                         Link(destination: URL(string: selectedLanguage == .spanish ?
@@ -572,8 +584,8 @@ struct ChatBubbleView: View {
                                 Image(systemName: "link")
                                     .font(.system(size: 8))
                                 Text(selectedLanguage == .spanish ?
-                                     "Fuente: MedlinePlus (NIH)" :
-                                     "Source: MedlinePlus (NIH)")
+                                     "Fuente: MedlinePlus" :
+                                     "Source: MedlinePlus")
                                     .font(.system(size: 9))
                             }
                             .foregroundStyle(.brand)

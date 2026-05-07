@@ -85,6 +85,18 @@ struct SymptomLogView: View {
                         }
                         .padding(.top, 40)
                     } else {
+                        let insights = SymptomPatternAnalyzer.insights(
+                            from: logEntries,
+                            language: selectedLanguage == .spanish ? "es" : "en"
+                        )
+
+                        PatternInsightsCard(
+                            insights: insights,
+                            entryCount: logEntries.count,
+                            selectedLanguage: selectedLanguage
+                        )
+                        .padding(.horizontal)
+
                         // Export button
                         HStack {
                             Text(selectedLanguage == .spanish ?
@@ -174,6 +186,80 @@ struct SymptomLogView: View {
     private func deleteEntry(_ entry: SymptomLogEntry) {
         logEntries.removeAll { $0.id == entry.id }
         SymptomLogStore.shared.save(logEntries)
+    }
+}
+
+// MARK: - Pattern Insights
+
+struct PatternInsightsCard: View {
+    let insights: [SymptomPatternInsight]
+    let entryCount: Int
+    let selectedLanguage: AppLanguage
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            HStack(spacing: 8) {
+                Image(systemName: "sparkle.magnifyingglass")
+                    .foregroundStyle(.brand)
+                VStack(alignment: .leading, spacing: 2) {
+                    Text(selectedLanguage == .spanish ? "Patrones notados" : "Patterns noticed")
+                        .font(.subheadline)
+                        .fontWeight(.semibold)
+                    Text(selectedLanguage == .spanish ? "Observaciones de tus registros, no diagnóstico" : "Observations from your logs, not a diagnosis")
+                        .font(.caption2)
+                        .foregroundStyle(.secondary)
+                }
+                Spacer()
+            }
+
+            if insights.isEmpty {
+                HStack(alignment: .top, spacing: 8) {
+                    Image(systemName: entryCount < 3 ? "list.bullet.clipboard" : "eye")
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                    Text(emptyMessage)
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                }
+                .padding(.vertical, 2)
+            } else {
+                ForEach(insights) { insight in
+                    VStack(alignment: .leading, spacing: 6) {
+                        Text(insight.title)
+                            .font(.caption)
+                            .fontWeight(.semibold)
+                        Text(insight.detail)
+                            .font(.caption)
+                            .foregroundStyle(.primary)
+                        Text(insight.doctorQuestion)
+                            .font(.caption2)
+                            .foregroundStyle(.secondary)
+                            .italic()
+                    }
+                    .padding(.vertical, 4)
+                }
+            }
+        }
+        .padding(14)
+        .background(Color.brand.opacity(0.08))
+        .clipShape(RoundedRectangle(cornerRadius: 16))
+        .overlay(
+            RoundedRectangle(cornerRadius: 16)
+                .strokeBorder(Color.brand.opacity(0.16), lineWidth: 1)
+        )
+    }
+
+    private var emptyMessage: String {
+        if entryCount < 3 {
+            let remaining = 3 - entryCount
+            return selectedLanguage == .spanish ?
+                "Agrega \(remaining) registro(s) más para que MiSana pueda empezar a notar patrones." :
+                "Add \(remaining) more entry/entries so MiSana can start noticing patterns."
+        }
+
+        return selectedLanguage == .spanish ?
+            "MiSana está observando tus registros. Todavía no hay un patrón repetido claro." :
+            "MiSana is watching your logs. No clear repeated pattern yet."
     }
 }
 

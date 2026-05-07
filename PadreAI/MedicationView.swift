@@ -888,7 +888,7 @@ struct MedicationDetailView: View {
     let medication: Medication
     let selectedLanguage: AppLanguage
     @ObservedObject var drugService: DrugLookupService
-    @State private var spanishInfo: SpanishDrugInfo?
+    @State private var drugInfo: DrugInfo?
     @State private var isLoading = false
 
     var body: some View {
@@ -931,7 +931,7 @@ struct MedicationDetailView: View {
             }
 
             if isLoading {
-                Section(selectedLanguage == .spanish ? "Información en español" : "Spanish info") {
+                Section(selectedLanguage == .spanish ? "Información del medicamento" : "Drug info") {
                     HStack {
                         ProgressView()
                             .padding(.trailing, 8)
@@ -940,8 +940,8 @@ struct MedicationDetailView: View {
                             .foregroundStyle(.secondary)
                     }
                 }
-            } else if let info = spanishInfo {
-                Section(selectedLanguage == .spanish ? "Información en español" : "Spanish info") {
+            } else if let info = drugInfo {
+                Section(selectedLanguage == .spanish ? "Información del medicamento" : "Drug info") {
                     VStack(alignment: .leading, spacing: 8) {
                         Text(info.title)
                             .font(.subheadline)
@@ -963,8 +963,8 @@ struct MedicationDetailView: View {
             } else if medication.rxcui != nil {
                 Section {
                     Text(selectedLanguage == .spanish ?
-                         "No se encontró información en español para esta medicina." :
-                         "No Spanish info found for this medication.")
+                         "No se encontró información para esta medicina." :
+                         "No info found for this medication.")
                         .font(.caption)
                         .foregroundStyle(.secondary)
                 }
@@ -977,13 +977,17 @@ struct MedicationDetailView: View {
 
     private func fetchInfo() {
         guard let rxcui = medication.rxcui else { return }
-        if let cached = drugService.getCachedInfo(rxcui: rxcui), let info = cached.spanishInfo {
-            spanishInfo = info
+        let cachedHit: DrugInfo? = {
+            guard let cached = drugService.getCachedInfo(rxcui: rxcui) else { return nil }
+            return selectedLanguage == .spanish ? cached.spanishInfo : cached.englishInfo
+        }()
+        if let cachedHit {
+            drugInfo = cachedHit
             return
         }
         isLoading = true
         Task {
-            spanishInfo = await drugService.fetchSpanishInfo(rxcui: rxcui)
+            drugInfo = await drugService.fetchInfo(rxcui: rxcui, language: selectedLanguage)
             isLoading = false
         }
     }

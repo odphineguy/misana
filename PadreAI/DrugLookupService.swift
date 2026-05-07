@@ -16,11 +16,13 @@ struct DrugSearchResult: Identifiable, Codable {
     var id: String { rxcui }
 }
 
-struct SpanishDrugInfo: Codable {
+struct DrugInfo: Codable {
     let title: String
     let summary: String
     let url: String?
 }
+
+typealias SpanishDrugInfo = DrugInfo
 
 struct DrugInteraction: Identifiable, Codable {
     var id: String { "\(drug1Rxcui)-\(drug2Rxcui)" }
@@ -35,7 +37,8 @@ struct DrugInteraction: Identifiable, Codable {
 struct CachedDrugInfo: Codable {
     let rxcui: String
     let name: String
-    let spanishInfo: SpanishDrugInfo?
+    let spanishInfo: DrugInfo?
+    let englishInfo: DrugInfo?
     let cachedDate: Date
 }
 
@@ -191,21 +194,22 @@ class DrugLookupService: ObservableObject {
         }
     }
 
-    // MARK: - MedlinePlus Spanish Drug Info
+    // MARK: - MedlinePlus Drug Info
 
-    func fetchSpanishInfo(rxcui: String) async -> SpanishDrugInfo? {
-        if let cached = cache[rxcui], cached.spanishInfo != nil {
-            return cached.spanishInfo
+    func fetchInfo(rxcui: String, language: AppLanguage) async -> DrugInfo? {
+        if let cached = cache[rxcui], let existing = cachedInfo(cached, for: language) {
+            return existing
         }
 
-        let urlString = "https://connect.medlineplus.gov/service?mainSearchCriteria.v.cs=2.16.840.1.113883.6.88&mainSearchCriteria.v.c=\(rxcui)&informationRecipient.languageCode.c=es&knowledgeResponseType=application/json"
+        let langCode = language.rawValue
+        let urlString = "https://connect.medlineplus.gov/service?mainSearchCriteria.v.cs=2.16.840.1.113883.6.88&mainSearchCriteria.v.c=\(rxcui)&informationRecipient.languageCode.c=\(langCode)&knowledgeResponseType=application/json"
         guard let url = URL(string: urlString) else { return nil }
 
         do {
             let (data, _) = try await URLSession.shared.data(from: url)
             let info = parseMedlinePlusResponse(data)
             if let info {
-                updateCache(rxcui: rxcui, spanishInfo: info)
+                updateCache(rxcui: rxcui, info: info, language: language)
             }
             return info
         } catch {
@@ -213,7 +217,14 @@ class DrugLookupService: ObservableObject {
         }
     }
 
-    private func parseMedlinePlusResponse(_ data: Data) -> SpanishDrugInfo? {
+    private func cachedInfo(_ cached: CachedDrugInfo, for language: AppLanguage) -> DrugInfo? {
+        switch language {
+        case .spanish: return cached.spanishInfo
+        case .english: return cached.englishInfo
+        }
+    }
+
+    private func parseMedlinePlusResponse(_ data: Data) -> DrugInfo? {
         guard let json = try? JSONSerialization.jsonObject(with: data) as? [String: Any],
               let feed = json["feed"] as? [String: Any],
               let entries = feed["entry"] as? [[String: Any]],
@@ -230,7 +241,7 @@ class DrugLookupService: ObservableObject {
 
         let cleaned = summary.replacingOccurrences(of: "<[^>]+>", with: "", options: .regularExpression)
         guard !title.isEmpty else { return nil }
-        return SpanishDrugInfo(title: title, summary: cleaned, url: url)
+        return DrugInfo(title: title, summary: cleaned, url: url)
     }
 
     // MARK: - Interaction Checking
@@ -295,19 +306,18 @@ class DrugLookupService: ObservableObject {
         cache[rxcui]
     }
 
-    private func updateCache(rxcui: String, spanishInfo: SpanishDrugInfo) {
-        if var existing = cache[rxcui] {
-            existing = CachedDrugInfo(rxcui: existing.rxcui, name: existing.name, spanishInfo: spanishInfo, cachedDate: Date())
-            cache[rxcui] = existing
-        } else {
-            cache[rxcui] = CachedDrugInfo(rxcui: rxcui, name: "", spanishInfo: spanishInfo, cachedDate: Date())
-        }
+    private func updateCache(rxcui: String, info: DrugInfo, language: AppLanguage) {
+        let existing = cache[rxcui]
+        let name = existing?.name ?? ""
+        let spanish = language == .spanish ? info : existing?.spanishInfo
+        let english = language == .english ? info : existing?.englishInfo
+        cache[rxcui] = CachedDrugInfo(rxcui: rxcui, name: name, spanishInfo: spanish, englishInfo: english, cachedDate: Date())
         saveCache()
     }
 
     func cacheSearchResult(_ result: DrugSearchResult) {
         if cache[result.rxcui] == nil {
-            cache[result.rxcui] = CachedDrugInfo(rxcui: result.rxcui, name: result.name, spanishInfo: nil, cachedDate: Date())
+            cache[result.rxcui] = CachedDrugInfo(rxcui: result.rxcui, name: result.name, spanishInfo: nil, englishInfo: nil, cachedDate: Date())
             saveCache()
         }
     }
