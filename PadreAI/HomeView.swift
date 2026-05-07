@@ -82,11 +82,11 @@ struct HomeView: View {
                             .padding(.horizontal)
 
                         LazyVGrid(columns: [GridItem(.flexible(), spacing: 12), GridItem(.flexible(), spacing: 12)], spacing: 12) {
-                            NavigationLink(destination: MedicationView(selectedLanguage: selectedLanguage)) {
+                            NavigationLink(destination: SymptomLogView(selectedLanguage: selectedLanguage)) {
                                 QuickActionTile(
-                                    icon: "camera.viewfinder",
+                                    icon: "list.clipboard.fill",
                                     iconColor: .brand,
-                                    title: selectedLanguage == .spanish ? "Escanear\nmedicina" : "Scan\nmedication",
+                                    title: selectedLanguage == .spanish ? "Registrar\nsíntomas" : "Log\nsymptoms",
                                     selectedLanguage: selectedLanguage
                                 )
                             }
@@ -102,21 +102,21 @@ struct HomeView: View {
                             }
                             .buttonStyle(.plain)
 
-                            NavigationLink(destination: LookUpView(selectedLanguage: selectedLanguage)) {
+                            NavigationLink(destination: MedicationView(selectedLanguage: selectedLanguage)) {
                                 QuickActionTile(
-                                    icon: "text.magnifyingglass",
+                                    icon: "camera.viewfinder",
                                     iconColor: .brand,
-                                    title: selectedLanguage == .spanish ? "Buscar\ncondición" : "Look up\ncondition",
+                                    title: selectedLanguage == .spanish ? "Escanear\nmedicina" : "Scan\nmedication",
                                     selectedLanguage: selectedLanguage
                                 )
                             }
                             .buttonStyle(.plain)
 
-                            NavigationLink(destination: SymptomLogView(selectedLanguage: selectedLanguage)) {
+                            NavigationLink(destination: LookUpView(selectedLanguage: selectedLanguage)) {
                                 QuickActionTile(
-                                    icon: "list.clipboard.fill",
+                                    icon: "text.magnifyingglass",
                                     iconColor: .brand,
-                                    title: selectedLanguage == .spanish ? "Registrar\nsíntomas" : "Log\nsymptoms",
+                                    title: selectedLanguage == .spanish ? "Buscar\ncondición" : "Look up\ncondition",
                                     selectedLanguage: selectedLanguage
                                 )
                             }

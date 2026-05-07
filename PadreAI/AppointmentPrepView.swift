@@ -190,8 +190,8 @@ struct AppointmentPrepView: View {
                             .font(.subheadline)
                             .fontWeight(.semibold)
                         Text(selectedLanguage == .spanish ?
-                             "La IA te genera preguntas y consejos" :
-                             "AI generates questions and tips for you")
+                             "Crea una nota clara desde tus registros" :
+                             "Build a clear note from your logs")
                             .font(.caption)
                             .opacity(0.8)
                     }

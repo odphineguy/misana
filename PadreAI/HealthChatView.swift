@@ -255,25 +255,19 @@ struct HealthChatView: View {
         let welcomeText: String
         if selectedLanguage == .spanish {
             welcomeText = """
-            Hola! Soy MiSana, tu compañera de salud educativa.
+            Hola. Soy MiSana, tu cuaderno de patrones de síntomas.
 
-            En que puedo ayudarte hoy? Puedo:
-            \u{2022} Hablar de como te sientes
-            \u{2022} Explicar tus medicinas
-            \u{2022} Ayudarte a prepararte para tu cita medica
+            Estoy aquí para ayudarte a capturar cómo te sientes, notar patrones repetidos en tus registros, y llevar una nota clara a tu próxima cita.
 
-            Solo informacion educativa — no es un diagnostico.
+            Solo observaciones de tus registros — no un diagnóstico.
             """
         } else {
             welcomeText = """
-            Hello! I'm MiSana, your educational health companion.
+            Hi. I'm MiSana, your symptom-pattern notebook.
 
-            How can I help today? I can:
-            \u{2022} Talk through what you're feeling
-            \u{2022} Explain your medications
-            \u{2022} Help you prepare for your doctor visit
+            I'm here to help you capture how you feel, notice repeated patterns across your logs, and bring a clear note to your next doctor visit.
 
-            Information only — not a diagnosis.
+            Observations from your logs — not a diagnosis.
             """
         }
 

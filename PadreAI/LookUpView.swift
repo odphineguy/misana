@@ -106,7 +106,7 @@ struct LookUpView: View {
 
     private var suggestionsView: some View {
         VStack(alignment: .leading, spacing: 12) {
-            Text(selectedLanguage == .spanish ? "Preguntas comunes" : "Common questions")
+            Text(selectedLanguage == .spanish ? "Temas comunes" : "Common topics")
                 .font(.subheadline)
                 .fontWeight(.semibold)
                 .padding(.horizontal)

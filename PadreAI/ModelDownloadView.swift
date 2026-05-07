@@ -103,33 +103,25 @@ struct ModelDownloadView: View {
                          "MiSana can help you with:")
                         .font(.headline)
                     
-                    FeatureRow(
-                        icon: "pills.fill",
-                        text: selectedLanguage == .spanish ? 
-                            "Información sobre medicamentos" : 
-                            "Medication information"
-                    )
-                    
-                    FeatureRow(
-                        icon: "stethoscope",
-                        text: selectedLanguage == .spanish ?
-                            "Organizar lo que sientes para tu doctor" :
-                            "Organize what you feel for your doctor"
-                    )
+                    Text(selectedLanguage == .spanish ?
+                         "Captura de síntomas con contexto" :
+                         "Symptom capture with context")
+                        .font(.subheadline)
 
-                    FeatureRow(
-                        icon: "leaf.fill",
-                        text: selectedLanguage == .spanish ?
-                            "Información sobre remedios caseros comunes" :
-                            "Information about common home remedies"
-                    )
-                    
-                    FeatureRow(
-                        icon: "list.clipboard.fill",
-                        text: selectedLanguage == .spanish ? 
-                            "Preparación para citas médicas" : 
-                            "Medical appointment preparation"
-                    )
+                    Text(selectedLanguage == .spanish ?
+                         "Patrones a lo largo del tiempo" :
+                         "Pattern watch over time")
+                        .font(.subheadline)
+
+                    Text(selectedLanguage == .spanish ?
+                         "Nota de una página para tu doctor" :
+                         "One-page note for your doctor")
+                        .font(.subheadline)
+
+                    Text(selectedLanguage == .spanish ?
+                         "Información de medicamentos" :
+                         "Medication information")
+                        .font(.subheadline)
                 }
                 .padding()
                 .background(Color.secondary.opacity(0.1))

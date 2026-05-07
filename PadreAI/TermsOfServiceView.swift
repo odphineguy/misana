@@ -44,8 +44,8 @@ struct TermsOfServiceView: View {
                                   "2. Descripcion del servicio" :
                                   "2. Description of Service")
                     Text(selectedLanguage == .spanish ?
-                         "MiSana es una aplicación bilingüe de información y organización de salud. Ayuda a los usuarios a organizar notas de salud, buscar información pública de medicamentos en fuentes del NIH/NLM, y preparar preguntas sugeridas para discutir con un profesional de salud. MiSana usa un modelo de IA en el dispositivo para procesar tus consultas localmente en tu iPhone." :
-                         "MiSana is a bilingual health information and organization app. It helps users organize health notes, look up publicly available medication information from NIH/NLM sources, and prepare suggested questions to discuss with a healthcare professional. MiSana uses an on-device AI model to process your queries locally on your iPhone.")
+                         "MiSana es un cuaderno bilingüe de patrones de síntomas. Ayuda a los usuarios a capturar cómo se sienten con el tiempo, notar patrones repetidos en sus registros, preparar una nota clara para sus citas con el doctor, y buscar información pública de medicamentos en fuentes del NIH/NLM. MiSana usa un modelo de IA en el dispositivo para procesar tus consultas localmente en tu iPhone." :
+                         "MiSana is a bilingual symptom-pattern notebook. It helps users capture how they feel over time, notice repeated patterns across their logs, prepare a clear note for their doctor visits, and look up publicly available medication information from NIH/NLM sources. MiSana uses an on-device AI model to process your queries locally on your iPhone.")
                         .font(.subheadline)
                         .foregroundStyle(.secondary)
 
