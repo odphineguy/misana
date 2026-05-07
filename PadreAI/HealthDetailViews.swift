@@ -43,7 +43,7 @@ struct WeeklyBarChart: View {
         let df = DateFormatter()
         df.dateFormat = "EEE"
         df.locale = Locale(identifier: selectedLanguage == .spanish ? "es" : "en")
-        return String(df.string(from: date).prefix(1)).uppercased()
+        return String(df.string(from: date).prefix(2)).uppercased()
     }
 }
 
