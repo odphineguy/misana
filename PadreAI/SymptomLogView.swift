@@ -237,6 +237,31 @@ struct PatternInsightsCard: View {
                     }
                     .padding(.vertical, 6)
                 }
+
+                Divider()
+
+                VStack(alignment: .leading, spacing: 4) {
+                    Text(selectedLanguage == .spanish ?
+                         "Umbrales basados en las guías de la AHA (presión arterial) y los CDC (sueño)." :
+                         "Thresholds based on AHA blood pressure and CDC sleep guidelines.")
+                        .font(.caption2)
+                        .foregroundStyle(.secondary)
+                    Link(selectedLanguage == .spanish ?
+                         "American Heart Association — Presión arterial" :
+                         "American Heart Association — Blood Pressure",
+                         destination: URL(string: selectedLanguage == .spanish ?
+                            "https://www.heart.org/es/health-topics/high-blood-pressure/understanding-blood-pressure-readings" :
+                            "https://www.heart.org/en/health-topics/high-blood-pressure/understanding-blood-pressure-readings")!)
+                        .font(.caption2)
+                        .foregroundStyle(.brand)
+                    Link(selectedLanguage == .spanish ?
+                         "CDC — ¿Cuánto debo dormir?" :
+                         "CDC — How Much Sleep Do I Need?",
+                         destination: URL(string: "https://www.cdc.gov/sleep/about_sleep/how_much_sleep.html")!)
+                        .font(.caption2)
+                        .foregroundStyle(.brand)
+                }
+                .padding(.top, 4)
             }
         }
         .padding(16)
