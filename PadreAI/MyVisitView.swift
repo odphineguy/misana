@@ -504,12 +504,11 @@ struct SummaryCard: View {
                     .background(accentColor.opacity(iconColor == .white ? 1.0 : 0.15))
                     .clipShape(RoundedRectangle(cornerRadius: 8))
 
-                VStack(alignment: .leading, spacing: 1) {
+                VStack(alignment: .leading, spacing: 2) {
                     Text(title)
-                        .font(.subheadline)
-                        .fontWeight(.bold)
+                        .font(.headline)
                     Text(subtitle)
-                        .font(.caption2)
+                        .font(.caption)
                         .foregroundStyle(.secondary)
                 }
                 Spacer()
@@ -519,7 +518,7 @@ struct SummaryCard: View {
 
             Text((try? AttributedString(markdown: content)) ?? AttributedString(content))
                 .font(.subheadline)
-                .lineSpacing(5)
+                .lineSpacing(6)
                 .frame(maxWidth: .infinity, alignment: .leading)
 
             Link(destination: sourceURL) {
@@ -567,7 +566,7 @@ struct SummaryCard: View {
                 Spacer()
             }
         }
-        .padding(16)
+        .padding(18)
         .background(Color(uiColor: .secondarySystemGroupedBackground))
         .clipShape(RoundedRectangle(cornerRadius: 16))
         .overlay(

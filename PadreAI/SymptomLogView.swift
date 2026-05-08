@@ -197,16 +197,15 @@ struct PatternInsightsCard: View {
     let selectedLanguage: AppLanguage
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 12) {
+        VStack(alignment: .leading, spacing: 14) {
             HStack(spacing: 8) {
                 Image(systemName: "sparkle.magnifyingglass")
                     .foregroundStyle(.brand)
                 VStack(alignment: .leading, spacing: 2) {
                     Text(selectedLanguage == .spanish ? "Patrones notados" : "Patterns noticed")
-                        .font(.subheadline)
-                        .fontWeight(.semibold)
+                        .font(.headline)
                     Text(selectedLanguage == .spanish ? "Observaciones de tus registros, no diagnóstico" : "Observations from your logs, not a diagnosis")
-                        .font(.caption2)
+                        .font(.caption)
                         .foregroundStyle(.secondary)
                 }
                 Spacer()
@@ -215,10 +214,10 @@ struct PatternInsightsCard: View {
             if insights.isEmpty {
                 HStack(alignment: .top, spacing: 8) {
                     Image(systemName: entryCount < 3 ? "list.bullet.clipboard" : "eye")
-                        .font(.caption)
+                        .font(.subheadline)
                         .foregroundStyle(.secondary)
                     Text(emptyMessage)
-                        .font(.caption)
+                        .font(.subheadline)
                         .foregroundStyle(.secondary)
                 }
                 .padding(.vertical, 2)
@@ -226,21 +225,21 @@ struct PatternInsightsCard: View {
                 ForEach(insights) { insight in
                     VStack(alignment: .leading, spacing: 6) {
                         Text(insight.title)
-                            .font(.caption)
+                            .font(.subheadline)
                             .fontWeight(.semibold)
                         Text(insight.detail)
-                            .font(.caption)
+                            .font(.subheadline)
                             .foregroundStyle(.primary)
                         Text(insight.doctorQuestion)
-                            .font(.caption2)
+                            .font(.caption)
                             .foregroundStyle(.secondary)
                             .italic()
                     }
-                    .padding(.vertical, 4)
+                    .padding(.vertical, 6)
                 }
             }
         }
-        .padding(14)
+        .padding(16)
         .background(Color.brand.opacity(0.08))
         .clipShape(RoundedRectangle(cornerRadius: 16))
         .overlay(
