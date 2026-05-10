@@ -131,36 +131,12 @@ struct MedicationView: View {
         NavigationStack {
             ScrollView {
                 VStack(spacing: 20) {
-                    // MARK: - Gradient Header
-                    VStack(alignment: .leading, spacing: 6) {
-                        Text(selectedLanguage == .spanish ?
-                             "Escanear" :
-                             "Scan")
-                            .font(.title2)
-                            .fontWeight(.bold)
-                        Text(selectedLanguage == .spanish ?
-                             "Escanea etiquetas o códigos de barras para agregar tus medicinas." :
-                             "Scan labels or barcodes to add your medications.")
-                            .font(.subheadline)
-                            .foregroundStyle(.primary.opacity(0.7))
-                    }
-                    .frame(maxWidth: .infinity, alignment: .leading)
-                    .padding()
-                    .background {
-                        RoundedRectangle(cornerRadius: 16)
-                            .fill(
-                                LinearGradient(
-                                    colors: [Color.brand.opacity(0.20), Color.brand.opacity(0.08)],
-                                    startPoint: .topLeading,
-                                    endPoint: .bottomTrailing
-                                )
-                            )
-                            .overlay(
-                                RoundedRectangle(cornerRadius: 16)
-                                    .strokeBorder(Color.brand.opacity(0.15), lineWidth: 1)
-                            )
-                    }
-                    .padding(.horizontal)
+                    MiSanaPageHeader(
+                        title: selectedLanguage == .spanish ? "Escanear" : "Scan",
+                        subtitle: selectedLanguage == .spanish ?
+                            "Escanea etiquetas o códigos de barras para agregar tus medicinas." :
+                            "Scan labels or barcodes to add your medications."
+                    )
 
                     // MARK: - Scan Action Cards
                     VStack(spacing: 12) {
@@ -228,25 +204,23 @@ struct MedicationView: View {
                 }
                 .padding(.top)
             }
-            .navigationTitle(selectedLanguage == .spanish ? "Escanear" : "Scan")
+            .scrollContentBackground(.hidden)
+            .miSanaBlueHeaderBackground()
+            .navigationTitle("")
             .navigationBarTitleDisplayMode(.inline)
+            .toolbarBackground(.hidden, for: .navigationBar)
             .toolbar {
-                ToolbarItem(placement: .automatic) {
-                    Button {
-                        showingScanChoice = true
-                    } label: {
-                        Label(
-                            selectedLanguage == .spanish ? "Escanear" : "Scan",
-                            systemImage: "camera.fill"
-                        )
-                    }
-                }
-                ToolbarItem(placement: .automatic) {
+                ToolbarItem(placement: .topBarTrailing) {
                     Button {
                         scannedText = ""
                         showingAddSheet = true
                     } label: {
                         Image(systemName: "plus")
+                            .font(.title3)
+                            .foregroundColor(.white)
+                            .frame(width: 36, height: 36)
+                            .background(Color.white.opacity(0.20))
+                            .clipShape(Circle())
                     }
                 }
             }

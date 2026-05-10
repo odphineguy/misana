@@ -19,36 +19,12 @@ struct SymptomLogView: View {
             ScrollView {
                 VStack(spacing: 20) {
 
-                    // Header
-                    VStack(alignment: .leading, spacing: 6) {
-                        Text(selectedLanguage == .spanish ?
-                             "Registro de síntomas" :
-                             "Symptom tracker")
-                            .font(.title2)
-                            .fontWeight(.bold)
-                        Text(selectedLanguage == .spanish ?
-                             "Registra cómo te sientes. Tu doctor verá los patrones." :
-                             "Log how you feel. Your doctor will see the patterns.")
-                            .font(.subheadline)
-                            .foregroundStyle(.primary.opacity(0.7))
-                    }
-                    .frame(maxWidth: .infinity, alignment: .leading)
-                    .padding()
-                    .background {
-                        RoundedRectangle(cornerRadius: 16)
-                            .fill(
-                                LinearGradient(
-                                    colors: [Color.brand.opacity(0.20), Color.brand.opacity(0.08)],
-                                    startPoint: .topLeading,
-                                    endPoint: .bottomTrailing
-                                )
-                            )
-                            .overlay(
-                                RoundedRectangle(cornerRadius: 16)
-                                    .strokeBorder(Color.brand.opacity(0.15), lineWidth: 1)
-                            )
-                    }
-                    .padding(.horizontal)
+                    MiSanaPageHeader(
+                        title: selectedLanguage == .spanish ? "Registro de síntomas" : "Symptom tracker",
+                        subtitle: selectedLanguage == .spanish ?
+                            "Registra cómo te sientes. Tu doctor verá los patrones." :
+                            "Log how you feel. Your doctor will see the patterns."
+                    )
 
                     // New entry button
                     Button { showNewEntry = true } label: {
@@ -151,8 +127,11 @@ struct SymptomLogView: View {
                 }
                 .padding(.top)
             }
-            .navigationTitle(selectedLanguage == .spanish ? "Síntomas" : "Symptoms")
+            .scrollContentBackground(.hidden)
+            .miSanaBlueHeaderBackground()
+            .navigationTitle("")
             .navigationBarTitleDisplayMode(.inline)
+            .toolbarBackground(.hidden, for: .navigationBar)
             .sheet(isPresented: $showNewEntry) {
                 NewSymptomLogSheet(
                     selectedLanguage: selectedLanguage,

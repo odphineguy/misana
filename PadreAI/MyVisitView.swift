@@ -49,32 +49,12 @@ struct MyVisitView: View {
             ScrollView {
                 VStack(spacing: 24) {
 
-                    // MARK: - Header with gradient
-                    VStack(alignment: .leading, spacing: 6) {
-                        Text(selectedLanguage == .spanish ?
-                             "Prepara tu cita" :
-                             "Prepare your visit")
-                            .font(.title2)
-                            .fontWeight(.bold)
-                        Text(selectedLanguage == .spanish ?
-                             "Organiza lo que sientes para que tu doctor te entienda mejor." :
-                             "Organize how you feel so your doctor understands you better.")
-                            .font(.subheadline)
-                            .foregroundStyle(.secondary)
-                    }
-                    .frame(maxWidth: .infinity, alignment: .leading)
-                    .padding()
-                    .background {
-                        RoundedRectangle(cornerRadius: 16)
-                            .fill(
-                                LinearGradient(
-                                    colors: [Color.brand.opacity(0.15), Color.brand.opacity(0.05)],
-                                    startPoint: .topLeading,
-                                    endPoint: .bottomTrailing
-                                )
-                            )
-                    }
-                    .padding(.horizontal)
+                    MiSanaPageHeader(
+                        title: selectedLanguage == .spanish ? "Prepara tu cita" : "Prepare your visit",
+                        subtitle: selectedLanguage == .spanish ?
+                            "Organiza lo que sientes para que tu doctor te entienda mejor." :
+                            "Organize how you feel so your doctor understands you better."
+                    )
 
                     // MARK: - Visit type selector
                     VStack(alignment: .leading, spacing: 10) {
@@ -237,8 +217,9 @@ struct MyVisitView: View {
                 }
                 .padding(.top)
             }
-            .navigationTitle(selectedLanguage == .spanish ? "Mi Cita" : "My Visit")
-            .navigationBarTitleDisplayMode(.inline)
+            .scrollContentBackground(.hidden)
+            .miSanaBlueHeaderBackground()
+            .navigationBarHidden(true)
             .onTapGesture { isTextFocused = false }
             .onAppear { recentLogs = SymptomLogStore.shared.load().prefix(5).map { $0 } }
         }

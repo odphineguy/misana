@@ -555,3 +555,148 @@ struct StepsDetailView: View {
         }
     }
 }
+
+// MARK: - Active Energy Detail
+
+struct ActiveEnergyDetailView: View {
+    let selectedLanguage: AppLanguage
+    let summary: HealthSummary
+    @Environment(\.dismiss) private var dismiss
+
+    private var avgEnergy: Int {
+        guard !summary.activeEnergy.isEmpty else { return 0 }
+        return Int(summary.activeEnergy.map(\.value).reduce(0, +) / Double(summary.activeEnergy.count))
+    }
+
+    private var todayEnergy: Int {
+        Int(summary.activeEnergy.last?.value ?? 0)
+    }
+
+    private var maxEnergy: Int {
+        Int(summary.activeEnergy.map(\.value).max() ?? 0)
+    }
+
+    private var avgDistKm: Double {
+        guard !summary.distance.isEmpty else { return 0 }
+        let total = summary.distance.map(\.value).reduce(0, +)
+        return (total / Double(summary.distance.count)) / 1000
+    }
+
+    var body: some View {
+        NavigationStack {
+            ScrollView {
+                VStack(spacing: 20) {
+                    heroCard
+                    bentoCards
+                    highlights
+                }
+                .padding()
+            }
+            .background(Color(uiColor: .systemGroupedBackground))
+            .navigationTitle(selectedLanguage == .spanish ? "Energia activa" : "Active Energy")
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .cancellationAction) {
+                    Button(selectedLanguage == .spanish ? "Cerrar" : "Close") { dismiss() }
+                }
+            }
+        }
+    }
+
+    private var heroCard: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            Text(selectedLanguage == .spanish ? "Promedio diario" : "Daily average")
+                .font(.subheadline)
+                .foregroundStyle(.secondary)
+            HStack(alignment: .lastTextBaseline, spacing: 6) {
+                Text("\(avgEnergy)")
+                    .font(.system(size: 40, weight: .bold))
+                    .foregroundStyle(.orange)
+                Text("kcal")
+                    .font(.title3)
+                    .fontWeight(.medium)
+                    .foregroundStyle(.secondary)
+            }
+            if !summary.activeEnergy.isEmpty {
+                WeeklyBarChart(samples: summary.activeEnergy, color: .orange, selectedLanguage: selectedLanguage)
+                    .padding(.top, 8)
+            }
+        }
+        .padding()
+        .background {
+            ZStack {
+                RoundedRectangle(cornerRadius: 20)
+                    .fill(Color(uiColor: .secondarySystemGroupedBackground))
+                RoundedRectangle(cornerRadius: 20)
+                    .fill(
+                        LinearGradient(
+                            colors: [Color.orange.opacity(0.10), .clear, Color.orange.opacity(0.04)],
+                            startPoint: .topLeading,
+                            endPoint: .bottomTrailing
+                        )
+                    )
+            }
+        }
+        .clipShape(RoundedRectangle(cornerRadius: 20))
+        .shadow(color: Color.orange.opacity(0.14), radius: 10, y: 5)
+    }
+
+    private var bentoCards: some View {
+        HStack(spacing: 12) {
+            InsightCard(
+                icon: "flame.fill",
+                iconColor: .orange,
+                title: selectedLanguage == .spanish ? "Maximo diario" : "Daily Max",
+                value: "\(maxEnergy) kcal"
+            )
+            InsightCard(
+                icon: "figure.walk",
+                iconColor: .brand,
+                title: selectedLanguage == .spanish ? "Distancia diaria" : "Daily Distance",
+                value: String(format: "%.1f km", avgDistKm)
+            )
+        }
+    }
+
+    private var highlights: some View {
+        VStack(alignment: .leading, spacing: 10) {
+            Text(selectedLanguage == .spanish ? "Resumen" : "Highlights")
+                .font(.headline)
+
+            HighlightRow(
+                icon: "flame.fill",
+                iconBgColor: .orange,
+                title: selectedLanguage == .spanish ? "Energia hoy" : "Today's Energy",
+                subtitle: selectedLanguage == .spanish ? "Total actual" : "Current total",
+                value: "\(todayEnergy) kcal"
+            )
+
+            HighlightRow(
+                icon: "figure.walk",
+                iconBgColor: .brand,
+                title: selectedLanguage == .spanish ? "Pasos promedio" : "Avg. Steps",
+                subtitle: selectedLanguage == .spanish ? "Promedio diario" : "Daily average",
+                value: "\(summary.avgSteps)"
+            )
+
+            bestEnergyDayRow
+        }
+    }
+
+    @ViewBuilder
+    private var bestEnergyDayRow: some View {
+        if let bestDay = summary.activeEnergy.max(by: { $0.value < $1.value }) {
+            let df = DateFormatter()
+            let _ = df.dateFormat = "EEEE"
+            let _ = df.locale = Locale(identifier: selectedLanguage == .spanish ? "es" : "en")
+            HighlightRow(
+                icon: "trophy.fill",
+                iconBgColor: .yellow,
+                title: selectedLanguage == .spanish ? "Mejor dia" : "Best Day",
+                subtitle: df.string(from: bestDay.date).capitalized,
+                value: "\(Int(bestDay.value)) kcal",
+                valueColor: .green
+            )
+        }
+    }
+}

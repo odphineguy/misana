@@ -17,6 +17,7 @@ struct HomeView: View {
     @State private var showStepsDetail = false
     @State private var showHeartDetail = false
     @State private var showSleepDetail = false
+    @State private var showEnergyDetail = false
     @State private var showAboutSources = false
     @State private var showPrivacyPolicy = false
     @State private var showTermsOfService = false
@@ -27,7 +28,7 @@ struct HomeView: View {
                 VStack(spacing: 28) {
                     // Logo + Settings row
                     ZStack {
-                        Image(colorScheme == .dark ? "MiSanaLogoDark" : "MiSanaLogo")
+                        Image("MiSanaLogoDark")
                             .resizable()
                             .scaledToFit()
                             .frame(height: 44)
@@ -39,34 +40,12 @@ struct HomeView: View {
                     .padding(.horizontal)
                     .padding(.top, 8)
 
-                    // Welcome Header
-                    VStack(alignment: .leading, spacing: 6) {
-                        Text(selectedLanguage == .spanish ? "Hola!" : "Hello!")
-                            .font(.system(size: 28, weight: .bold))
-                        Text(selectedLanguage == .spanish ?
-                             "Tu puente de salud familiar." :
-                             "Your family health bridge.")
-                            .font(.subheadline)
-                            .foregroundStyle(.primary.opacity(0.7))
-                    }
-                    .frame(maxWidth: .infinity, alignment: .leading)
-                    .padding()
-                    .background {
-                        RoundedRectangle(cornerRadius: 20)
-                            .fill(
-                                LinearGradient(
-                                    colors: [Color.brand.opacity(0.20), Color.brand.opacity(0.08)],
-                                    startPoint: .topLeading,
-                                    endPoint: .bottomTrailing
-                                )
-                            )
-                            .overlay(
-                                RoundedRectangle(cornerRadius: 20)
-                                    .strokeBorder(Color.brand.opacity(0.15), lineWidth: 1)
-                            )
-                    }
-                    .clipShape(RoundedRectangle(cornerRadius: 20))
-                    .padding(.horizontal)
+                    MiSanaPageHeader(
+                        title: selectedLanguage == .spanish ? "Hola!" : "Hello!",
+                        subtitle: selectedLanguage == .spanish ?
+                            "Tu puente de salud familiar." :
+                            "Your family health bridge."
+                    )
 
                     // Health Dashboard
                     if healthKitService.isAvailable {
@@ -128,6 +107,8 @@ struct HomeView: View {
                     Spacer(minLength: 20)
                 }
             }
+            .scrollContentBackground(.hidden)
+            .miSanaBlueHeaderBackground()
             .navigationBarHidden(true)
             .sheet(isPresented: $showAboutSources) {
                 AboutHealthSourcesView(selectedLanguage: selectedLanguage)
@@ -250,89 +231,21 @@ struct HomeView: View {
     @ViewBuilder
     private var healthDashboardCard: some View {
         if healthKitService.isAuthorized {
-            VStack(spacing: 12) {
-                HStack(spacing: 12) {
-                    // Steps card
-                    Button { showStepsDetail = true } label: {
-                        VStack(alignment: .leading, spacing: 8) {
-                            HStack(spacing: 6) {
-                                Image(systemName: "figure.walk")
-                                    .font(.caption)
-                                    .foregroundStyle(.brand)
-                                Text(selectedLanguage == .spanish ? "PASOS" : "STEPS")
-                                    .font(.system(size: 10, weight: .semibold))
-                                    .foregroundStyle(.secondary)
-                            }
-                            Text("\(healthKitService.summary.todaySteps)")
-                                .font(.system(size: 28, weight: .bold))
-                            Text(selectedLanguage == .spanish ? "pasos diarios" : "daily steps")
-                                .font(.caption2)
-                                .foregroundStyle(.secondary)
-                        }
-                        .frame(maxWidth: .infinity, alignment: .leading)
-                        .padding()
-                        .liquidGlass(cornerRadius: 16, tint: .brand)
-                    }
-                    .buttonStyle(.plain)
-
-                    VStack(spacing: 12) {
-                        // Heart Rate card
-                        Button { showHeartDetail = true } label: {
-                            VStack(alignment: .leading, spacing: 4) {
-                                HStack(spacing: 4) {
-                                    Image(systemName: "heart.fill")
-                                        .font(.system(size: 10))
-                                        .foregroundStyle(.red)
-                                    Text(selectedLanguage == .spanish ? "CORAZON" : "HEART RATE")
-                                        .font(.system(size: 8, weight: .semibold))
-                                        .foregroundStyle(.secondary)
-                                }
-                                HStack(alignment: .firstTextBaseline, spacing: 2) {
-                                    Text(healthKitService.summary.lastHeartRate > 0 ?
-                                         "\(healthKitService.summary.lastHeartRate)" : "--")
-                                        .font(.system(size: 20, weight: .bold))
-                                    Text("BPM")
-                                        .font(.system(size: 9, weight: .medium))
-                                        .foregroundStyle(.secondary)
-                                }
-                            }
-                            .frame(maxWidth: .infinity, alignment: .leading)
-                            .padding(10)
-                            .liquidGlass(cornerRadius: 12, tint: .red)
-                        }
-                        .buttonStyle(.plain)
-
-                        // Sleep card
-                        Button { showSleepDetail = true } label: {
-                            VStack(alignment: .leading, spacing: 4) {
-                                HStack(spacing: 4) {
-                                    Image(systemName: "moon.fill")
-                                        .font(.system(size: 10))
-                                        .foregroundStyle(.indigo)
-                                    Text(selectedLanguage == .spanish ? "SUENO" : "SLEEP")
-                                        .font(.system(size: 8, weight: .semibold))
-                                        .foregroundStyle(.secondary)
-                                }
-                                HStack(alignment: .firstTextBaseline, spacing: 2) {
-                                    if healthKitService.summary.lastNightSleep > 0 {
-                                        let hours = Int(healthKitService.summary.lastNightSleep)
-                                        let mins = Int((healthKitService.summary.lastNightSleep - Double(hours)) * 60)
-                                        Text("\(hours)h \(mins)m")
-                                            .font(.system(size: 20, weight: .bold))
-                                    } else {
-                                        Text("--")
-                                            .font(.system(size: 20, weight: .bold))
-                                    }
-                                }
-                            }
-                            .frame(maxWidth: .infinity, alignment: .leading)
-                            .padding(10)
-                            .liquidGlass(cornerRadius: 12, tint: .indigo)
-                        }
-                        .buttonStyle(.plain)
-                    }
-                }
-            }
+            HomeHealthSection(
+                heartRate:           healthKitService.summary.lastHeartRate,
+                sleepHours:          healthKitService.summary.lastNightSleep,
+                steps:               healthKitService.summary.todaySteps,
+                activeEnergy:        Int(healthKitService.summary.activeEnergy.last?.value ?? 0),
+                heartRateHistory:    healthKitService.summary.heartRate.map(\.value),
+                sleepHistory:        healthKitService.summary.sleepHours.map(\.value),
+                stepsHistory:        healthKitService.summary.steps.map(\.value),
+                activeEnergyHistory: healthKitService.summary.activeEnergy.map(\.value),
+                language:            selectedLanguage.rawValue,
+                onHeartTap:  { showHeartDetail = true },
+                onSleepTap:  { showSleepDetail = true },
+                onStepsTap:  { showStepsDetail = true },
+                onEnergyTap: { showEnergyDetail = true }
+            )
             .sheet(isPresented: $showStepsDetail) {
                 StepsDetailView(selectedLanguage: selectedLanguage, summary: healthKitService.summary)
             }
@@ -342,21 +255,25 @@ struct HomeView: View {
             .sheet(isPresented: $showSleepDetail) {
                 SleepDetailView(selectedLanguage: selectedLanguage, summary: healthKitService.summary)
             }
+            .sheet(isPresented: $showEnergyDetail) {
+                ActiveEnergyDetailView(selectedLanguage: selectedLanguage, summary: healthKitService.summary)
+            }
         } else {
-            // Permission not yet granted
-            VStack(spacing: 12) {
-                HStack {
+            // Permission not yet granted — crisp white card, matches the welcome card
+            VStack(spacing: 14) {
+                HStack(spacing: 12) {
                     Image(systemName: "heart.text.square.fill")
                         .font(.title2)
-                        .foregroundStyle(.brand)
+                        .foregroundColor(.brand)
                     VStack(alignment: .leading, spacing: 2) {
                         Text(selectedLanguage == .spanish ? "Conectar datos de salud" : "Connect health data")
                             .font(.headline)
+                            .foregroundColor(.miSana.fg)
                         Text(selectedLanguage == .spanish ?
                              "Permite acceso a Apple Salud para recomendaciones personalizadas. Tus datos nunca salen del dispositivo." :
                              "Allow Apple Health access for personalized recommendations. Your data never leaves the device.")
                             .font(.caption)
-                            .foregroundStyle(.secondary)
+                            .foregroundColor(.miSana.fg2)
                     }
                     Spacer()
                 }
@@ -367,26 +284,30 @@ struct HomeView: View {
                     Text(selectedLanguage == .spanish ? "Conectar Apple Salud" : "Connect Apple Health")
                         .font(.subheadline)
                         .fontWeight(.semibold)
-                        .foregroundStyle(.white)
+                        .foregroundColor(.white)
                         .frame(maxWidth: .infinity)
-                        .padding(.vertical, 10)
-                        .background(Color.brand.gradient)
-                        .clipShape(RoundedRectangle(cornerRadius: 10))
-                        .shadow(color: Color.brand.opacity(0.4), radius: 6, y: 3)
+                        .padding(.vertical, 12)
+                        .background(
+                            LinearGradient(
+                                colors: [Color.brand, Color.brand.opacity(0.85)],
+                                startPoint: .topLeading,
+                                endPoint: .bottomTrailing
+                            )
+                        )
+                        .clipShape(RoundedRectangle(cornerRadius: 12))
+                        .shadow(color: Color.brand.opacity(0.30), radius: 6, y: 3)
                 }
             }
-            .padding()
+            .padding(16)
             .background(
-                RoundedRectangle(cornerRadius: 16)
-                    .fill(
-                        LinearGradient(
-                            colors: [Color.brand.opacity(0.22), Color.brand.opacity(0.10)],
-                            startPoint: .topLeading,
-                            endPoint: .bottomTrailing
-                        )
-                    )
+                RoundedRectangle(cornerRadius: 20).fill(Color.miSana.card)
             )
-            .shadow(color: Color.brand.opacity(0.18), radius: 10, y: 5)
+            .overlay(
+                RoundedRectangle(cornerRadius: 20)
+                    .strokeBorder(Color.miSana.hairline, lineWidth: 1)
+            )
+            .clipShape(RoundedRectangle(cornerRadius: 20))
+            .shadow(color: .black.opacity(0.08), radius: 10, y: 4)
         }
     }
 }
@@ -395,25 +316,20 @@ struct HomeView: View {
 
 struct QuickActionTile: View {
     let icon: String
-    let iconColor: Color
+    let iconColor: Color   // retained for API compatibility; not used in inverted style
     let title: String
     let selectedLanguage: AppLanguage
 
     var body: some View {
         VStack(spacing: 12) {
+            // White icon chip with brand-blue glyph
             Image(systemName: icon)
-                .font(.system(size: 28))
-                .foregroundStyle(.white)
+                .font(.system(size: 26, weight: .semibold))
+                .foregroundColor(.brand)
                 .frame(width: 56, height: 56)
-                .background(
-                    LinearGradient(
-                        colors: [iconColor, iconColor.opacity(0.7)],
-                        startPoint: .topLeading,
-                        endPoint: .bottomTrailing
-                    )
-                )
+                .background(Color.white)
                 .clipShape(RoundedRectangle(cornerRadius: 14))
-                .shadow(color: iconColor.opacity(0.4), radius: 6, y: 3)
+                .shadow(color: .black.opacity(0.10), radius: 4, y: 2)
 
             Text(title)
                 .font(.caption)
@@ -421,19 +337,22 @@ struct QuickActionTile: View {
                 .multilineTextAlignment(.center)
                 .lineLimit(2)
                 .fixedSize(horizontal: false, vertical: true)
+                .foregroundColor(.white)
         }
         .frame(maxWidth: .infinity)
-        .padding(.vertical, 16)
-        .background {
+        .padding(.vertical, 18)
+        .background(
             RoundedRectangle(cornerRadius: 16)
-                .fill(Color(uiColor: .secondarySystemGroupedBackground))
-        }
-        .clipShape(RoundedRectangle(cornerRadius: 16))
-        .overlay(
-            RoundedRectangle(cornerRadius: 16)
-                .strokeBorder(Color.primary.opacity(0.08), lineWidth: 1)
+                .fill(
+                    LinearGradient(
+                        colors: [Color.brand, Color.brand.opacity(0.85)],
+                        startPoint: .topLeading,
+                        endPoint: .bottomTrailing
+                    )
+                )
         )
-        .shadow(color: .black.opacity(0.08), radius: 8, y: 4)
+        .clipShape(RoundedRectangle(cornerRadius: 16))
+        .shadow(color: Color.brand.opacity(0.30), radius: 10, y: 5)
     }
 }
 

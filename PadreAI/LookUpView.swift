@@ -42,6 +42,13 @@ struct LookUpView: View {
             ScrollView {
                 VStack(spacing: 24) {
 
+                    MiSanaPageHeader(
+                        title: selectedLanguage == .spanish ? "Buscar" : "Look up",
+                        subtitle: selectedLanguage == .spanish ?
+                            "Pregunta sobre condiciones, medicinas o remedios." :
+                            "Ask about conditions, medications, or remedies."
+                    )
+
                     // MARK: - Search bar
                     HStack(spacing: 10) {
                         Image(systemName: "magnifyingglass")
@@ -96,8 +103,9 @@ struct LookUpView: View {
                 }
                 .padding(.top)
             }
-            .navigationTitle(selectedLanguage == .spanish ? "Buscar" : "Look Up")
-            .navigationBarTitleDisplayMode(.inline)
+            .scrollContentBackground(.hidden)
+            .miSanaBlueHeaderBackground()
+            .navigationBarHidden(true)
             .onTapGesture { isSearchFocused = false }
         }
     }
