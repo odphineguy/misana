@@ -11,7 +11,7 @@ struct ModelDownloadView: View {
     @ObservedObject var modelService: ModelCoordinator
     let selectedLanguage: AppLanguage
     @State private var isDownloading = false
-    @State private var showDisclaimer = true
+    @State private var showDisclaimer = false
     @State private var showErrorAlert = false
     @State private var availableSpaceGB: Double = 0
     @Environment(\.dismiss) private var dismiss

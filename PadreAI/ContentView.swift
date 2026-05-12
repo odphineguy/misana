@@ -170,6 +170,48 @@ struct HealthDisclaimerView: View {
                         .strokeBorder(Color.miSana.hairline, lineWidth: 1)
                 )
 
+                // What MiSana helps with
+                VStack(alignment: .leading, spacing: 10) {
+                    Text(selectedLanguage == .spanish ?
+                         "MiSana puede ayudarte con:" :
+                         "MiSana can help you with:")
+                        .font(.headline)
+                        .foregroundColor(.miSana.fg)
+
+                    Text(selectedLanguage == .spanish ?
+                         "Registrar síntomas con contexto" :
+                         "Symptom capture with context")
+                        .font(.subheadline)
+                        .foregroundColor(.miSana.fg2)
+
+                    Text(selectedLanguage == .spanish ?
+                         "Notar patrones a lo largo del tiempo" :
+                         "Pattern watch over time")
+                        .font(.subheadline)
+                        .foregroundColor(.miSana.fg2)
+
+                    Text(selectedLanguage == .spanish ?
+                         "Una nota de una página para tu doctor" :
+                         "One-page note for your doctor")
+                        .font(.subheadline)
+                        .foregroundColor(.miSana.fg2)
+
+                    Text(selectedLanguage == .spanish ?
+                         "Información de medicamentos" :
+                         "Medication information")
+                        .font(.subheadline)
+                        .foregroundColor(.miSana.fg2)
+                }
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .padding()
+                .background(
+                    RoundedRectangle(cornerRadius: 16).fill(Color.miSana.card)
+                )
+                .overlay(
+                    RoundedRectangle(cornerRadius: 16)
+                        .strokeBorder(Color.miSana.hairline, lineWidth: 1)
+                )
+
                 // Features
                 VStack(alignment: .leading, spacing: 12) {
                     featureRow(icon: "lock.shield.fill", color: .brand,
