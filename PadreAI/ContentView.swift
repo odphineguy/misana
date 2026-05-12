@@ -12,6 +12,9 @@ struct ContentView: View {
     @State private var selectedTab: Tab = .home
     @AppStorage("hasAcceptedDisclaimer") private var hasAcceptedDisclaimer = false
     @AppStorage("appTheme") private var appTheme: AppTheme = .system
+    @EnvironmentObject private var modelService: ModelCoordinator
+    @State private var showInitialModelDownload = false
+    @State private var hasOfferedInitialDownload = false
 
     enum Tab {
         case home
@@ -57,6 +60,30 @@ struct ContentView: View {
                 onAccept: { hasAcceptedDisclaimer = true }
             )
         }
+        .sheet(isPresented: $showInitialModelDownload) {
+            ModelDownloadView(
+                modelService: modelService,
+                selectedLanguage: selectedLanguage
+            )
+        }
+        .onAppear { offerInitialDownloadIfNeeded() }
+        .onChange(of: hasAcceptedDisclaimer) { _, accepted in
+            if accepted { offerInitialDownloadIfNeeded() }
+        }
+    }
+
+    /// On devices without Apple Foundation Models, the app has no working
+    /// engine until Qwen is downloaded. Offer the download right after the
+    /// user accepts the disclaimer (or on first appearance for returning
+    /// users in that state). Only auto-presents once per launch; the AI
+    /// Model picker in settings is the manual re-entry point.
+    private func offerInitialDownloadIfNeeded() {
+        guard !hasOfferedInitialDownload,
+              hasAcceptedDisclaimer,
+              !modelService.isFoundationAvailable,
+              !modelService.isModelDownloaded else { return }
+        hasOfferedInitialDownload = true
+        showInitialModelDownload = true
     }
 }
 
