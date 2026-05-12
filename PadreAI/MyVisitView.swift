@@ -13,6 +13,7 @@ struct MyVisitView: View {
     @State private var generatedSummary: VisitSummary?
     @State private var isGenerating = false
     @State private var selectedType: VisitType = .general
+    @State private var showingDoctorBrief = false
     @FocusState private var isTextFocused: Bool
 
     enum VisitType: String, CaseIterable, Identifiable {
@@ -194,20 +195,21 @@ struct MyVisitView: View {
                                 selectedLanguage: selectedLanguage
                             )
 
-                            SummaryCard(
-                                title: selectedLanguage == .spanish ? "Para tu doctor" : "For your doctor",
-                                subtitle: selectedLanguage == .spanish ?
-                                    "Muestra esto en tu cita" :
-                                    "Show this at your appointment",
-                                icon: "stethoscope",
-                                iconColor: .white,
-                                accentColor: .green,
-                                content: summary.forDoctor,
+                            DoctorBriefPreviewCard(
                                 selectedLanguage: selectedLanguage
-                            )
+                            ) {
+                                showingDoctorBrief = true
+                            }
                         }
                         .padding(.horizontal)
                         .transition(.move(edge: .bottom).combined(with: .opacity))
+                        .sheet(isPresented: $showingDoctorBrief) {
+                            DoctorBriefView(
+                                selectedLanguage: selectedLanguage,
+                                patientConcern: extractedConcern(from: trimmedSymptomText),
+                                visitTypeLabel: selectedType.label(for: selectedLanguage)
+                            )
+                        }
                     }
 
                     // MARK: - Symptom Log link
@@ -560,5 +562,76 @@ struct SummaryCard: View {
         URL(string: selectedLanguage == .spanish ?
             "https://medlineplus.gov/spanish/talkingwithyourdoctor.html" :
             "https://medlineplus.gov/talkingwithyourdoctor.html")!
+    }
+}
+
+// MARK: - Doctor Brief Preview Card
+
+struct DoctorBriefPreviewCard: View {
+    let selectedLanguage: AppLanguage
+    let onOpen: () -> Void
+
+    private var isSpanish: Bool { selectedLanguage == .spanish }
+
+    var body: some View {
+        Button(action: onOpen) {
+            VStack(alignment: .leading, spacing: 14) {
+                HStack(spacing: 12) {
+                    RoundedRectangle(cornerRadius: 10)
+                        .fill(Color.miSana.cardSoftBlue)
+                        .frame(width: 40, height: 40)
+                        .overlay(
+                            Image(systemName: "list.clipboard.fill")
+                                .font(.system(size: 18, weight: .semibold))
+                                .foregroundStyle(Color.miSana.brand)
+                        )
+
+                    VStack(alignment: .leading, spacing: 2) {
+                        Text(isSpanish ? "Resumen para el doctor" : "Doctor Brief")
+                            .font(.headline)
+                            .foregroundColor(.miSana.fg)
+                        Text(isSpanish ? "Síntomas, patrones, medicinas y preguntas" :
+                                          "Symptoms, patterns, meds and questions")
+                            .font(.caption)
+                            .foregroundColor(.miSana.fg2)
+                    }
+                    Spacer()
+                    Text("PDF")
+                        .font(.caption2)
+                        .fontWeight(.semibold)
+                        .foregroundStyle(Color.miSana.brand)
+                        .padding(.horizontal, 10)
+                        .padding(.vertical, 4)
+                        .background(Capsule().fill(Color.miSana.cardSoftBlue))
+                }
+
+                Rectangle()
+                    .fill(Color.miSana.hairline)
+                    .frame(height: 1)
+
+                HStack(spacing: 8) {
+                    Image(systemName: "doc.richtext")
+                        .foregroundStyle(Color.miSana.brand)
+                    Text(isSpanish ? "Ver y compartir el resumen" : "View and share the brief")
+                        .font(.subheadline)
+                        .fontWeight(.semibold)
+                        .foregroundColor(.miSana.brand)
+                    Spacer()
+                    Image(systemName: "chevron.right")
+                        .font(.caption)
+                        .foregroundColor(.miSana.fg3)
+                }
+            }
+            .padding(18)
+            .background(
+                RoundedRectangle(cornerRadius: 16).fill(Color.miSana.card)
+            )
+            .overlay(
+                RoundedRectangle(cornerRadius: 16)
+                    .strokeBorder(Color.miSana.hairline, lineWidth: 1)
+            )
+            .shadow(color: .black.opacity(0.05), radius: 10, y: 4)
+        }
+        .buttonStyle(.plain)
     }
 }
