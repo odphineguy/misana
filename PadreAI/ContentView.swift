@@ -8,10 +8,10 @@
 import SwiftUI
 
 struct ContentView: View {
-    @AppStorage("selectedLanguage") private var selectedLanguage: AppLanguage = .spanish
+    @AppStorage("selectedLanguage") private var selectedLanguage: AppLanguage = .english
     @State private var selectedTab: Tab = .home
     @AppStorage("hasAcceptedDisclaimer") private var hasAcceptedDisclaimer = false
-    @AppStorage("appTheme") private var appTheme: AppTheme = .system
+    @AppStorage("appTheme") private var appTheme: AppTheme = .light
     @EnvironmentObject private var modelService: ModelCoordinator
     @State private var showInitialModelDownload = false
     @State private var hasOfferedInitialDownload = false
@@ -130,6 +130,7 @@ struct HealthDisclaimerView: View {
                          "Important Health Notice")
                         .font(.title3)
                         .fontWeight(.bold)
+                        .foregroundColor(.miSana.fg)
 
                     Text(selectedLanguage == .spanish ?
                          """
@@ -158,10 +159,16 @@ struct HealthDisclaimerView: View {
                          """)
                         .font(.subheadline)
                         .multilineTextAlignment(.leading)
+                        .foregroundColor(.miSana.fg2)
                 }
                 .padding()
-                .background(Color.orange.opacity(0.1))
-                .clipShape(RoundedRectangle(cornerRadius: 16))
+                .background(
+                    RoundedRectangle(cornerRadius: 16).fill(Color.miSana.card)
+                )
+                .overlay(
+                    RoundedRectangle(cornerRadius: 16)
+                        .strokeBorder(Color.miSana.hairline, lineWidth: 1)
+                )
 
                 // Features
                 VStack(alignment: .leading, spacing: 12) {
@@ -204,6 +211,8 @@ struct HealthDisclaimerView: View {
             }
             .padding()
         }
+        .scrollContentBackground(.hidden)
+        .miSanaBlueHeaderBackground()
     }
 
     private func featureRow(icon: String, color: Color, text: String) -> some View {

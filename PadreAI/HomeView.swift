@@ -12,7 +12,7 @@ struct HomeView: View {
     @Binding var selectedLanguage: AppLanguage
     @EnvironmentObject private var healthKitService: HealthKitService
     @EnvironmentObject private var modelService: ModelCoordinator
-    @AppStorage("appTheme") private var appTheme: AppTheme = .system
+    @AppStorage("appTheme") private var appTheme: AppTheme = .light
     @Environment(\.colorScheme) private var colorScheme
     @State private var showStepsDetail = false
     @State private var showHeartDetail = false

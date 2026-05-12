@@ -29,6 +29,8 @@ struct ModelDownloadView: View {
                     downloadView
                 }
             }
+            .scrollContentBackground(.hidden)
+            .miSanaBlueHeaderBackground()
             .navigationTitle(selectedLanguage == .spanish ? "Configuración" : "Setup")
             .navigationBarTitleDisplayMode(.inline)
             .alert(selectedLanguage == .spanish ? "Error de Descarga" : "Download Error", isPresented: $showErrorAlert) {
@@ -93,8 +95,13 @@ struct ModelDownloadView: View {
                         .foregroundStyle(.secondary)
                 }
                 .padding()
-                .background(Color.orange.opacity(0.1))
-                .clipShape(RoundedRectangle(cornerRadius: 12))
+                .background(
+                    RoundedRectangle(cornerRadius: 12).fill(Color.miSana.cardSoftSand)
+                )
+                .overlay(
+                    RoundedRectangle(cornerRadius: 12)
+                        .strokeBorder(Color.miSana.hairline, lineWidth: 1)
+                )
                 
                 // Features
                 VStack(alignment: .leading, spacing: 12) {
@@ -124,8 +131,13 @@ struct ModelDownloadView: View {
                         .font(.subheadline)
                 }
                 .padding()
-                .background(Color.secondary.opacity(0.1))
-                .clipShape(RoundedRectangle(cornerRadius: 12))
+                .background(
+                    RoundedRectangle(cornerRadius: 12).fill(Color.miSana.card)
+                )
+                .overlay(
+                    RoundedRectangle(cornerRadius: 12)
+                        .strokeBorder(Color.miSana.hairline, lineWidth: 1)
+                )
                 
                 // Privacy Badge
                 HStack(spacing: 12) {
@@ -138,8 +150,13 @@ struct ModelDownloadView: View {
                         .foregroundStyle(.secondary)
                 }
                 .padding()
-                .background(Color.green.opacity(0.1))
-                .clipShape(RoundedRectangle(cornerRadius: 8))
+                .background(
+                    RoundedRectangle(cornerRadius: 8).fill(Color.miSana.cardSoftMint)
+                )
+                .overlay(
+                    RoundedRectangle(cornerRadius: 8)
+                        .strokeBorder(Color.miSana.hairline, lineWidth: 1)
+                )
                 
                 Spacer()
                 
@@ -219,10 +236,15 @@ struct ModelDownloadView: View {
                 }
             }
             .padding()
-            .background(Color.secondary.opacity(0.1))
-            .clipShape(RoundedRectangle(cornerRadius: 12))
+            .background(
+                RoundedRectangle(cornerRadius: 12).fill(Color.miSana.card)
+            )
+            .overlay(
+                RoundedRectangle(cornerRadius: 12)
+                    .strokeBorder(Color.miSana.hairline, lineWidth: 1)
+            )
             .padding(.horizontal)
-            
+
             // Storage Info
             storageCard
                 .padding(.horizontal)
@@ -262,8 +284,13 @@ struct ModelDownloadView: View {
                                 .foregroundStyle(.secondary)
                         }
                         .padding()
-                        .background(Color.orange.opacity(0.1))
-                        .clipShape(RoundedRectangle(cornerRadius: 10))
+                        .background(
+                            RoundedRectangle(cornerRadius: 10).fill(Color.miSana.cardSoftSand)
+                        )
+                        .overlay(
+                            RoundedRectangle(cornerRadius: 10)
+                                .strokeBorder(Color.miSana.hairline, lineWidth: 1)
+                        )
                     }
 
                     Button {
@@ -378,8 +405,14 @@ struct ModelDownloadView: View {
             }
         }
         .padding()
-        .background(hasEnoughSpace ? Color.secondary.opacity(0.1) : Color.orange.opacity(0.1))
-        .clipShape(RoundedRectangle(cornerRadius: 12))
+        .background(
+            RoundedRectangle(cornerRadius: 12)
+                .fill(hasEnoughSpace ? Color.miSana.card : Color.miSana.cardSoftSand)
+        )
+        .overlay(
+            RoundedRectangle(cornerRadius: 12)
+                .strokeBorder(Color.miSana.hairline, lineWidth: 1)
+        )
         .onAppear { checkStorage() }
     }
 
