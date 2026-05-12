@@ -44,24 +44,36 @@ struct MiSanaPageHeader: View {
 // MARK: - Background modifier
 
 extension View {
-    /// Layers a blue gradient at the top with the cream screen color below.
+    /// Layers a blue gradient at the top with the screen color below.
     /// Apply to the content container (e.g. a ScrollView) of any primary tab.
     func miSanaBlueHeaderBackground() -> some View {
-        self.background(
-            ZStack(alignment: .top) {
-                Color.miSana.screenCream.ignoresSafeArea()
-                LinearGradient(
-                    colors: [
+        self.background(MiSanaHeaderBackground())
+    }
+}
+
+private struct MiSanaHeaderBackground: View {
+    @Environment(\.colorScheme) private var scheme
+
+    var body: some View {
+        ZStack(alignment: .top) {
+            Color.miSana.screenCream.ignoresSafeArea()
+            LinearGradient(
+                colors: scheme == .dark
+                    ? [
+                        Color.brand.opacity(0.55),
+                        Color.brand.opacity(0.28),
+                        Color.brand.opacity(0.0)
+                      ]
+                    : [
                         Color.brand.opacity(0.95),
                         Color.brand.opacity(0.55),
                         Color.brand.opacity(0.0)
-                    ],
-                    startPoint: .top,
-                    endPoint: .bottom
-                )
-                .frame(height: 320)
-                .ignoresSafeArea(edges: .top)
-            }
-        )
+                      ],
+                startPoint: .top,
+                endPoint: .bottom
+            )
+            .frame(height: 320)
+            .ignoresSafeArea(edges: .top)
+        }
     }
 }
