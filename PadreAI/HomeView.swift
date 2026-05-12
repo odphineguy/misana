@@ -21,6 +21,7 @@ struct HomeView: View {
     @State private var showAboutSources = false
     @State private var showPrivacyPolicy = false
     @State private var showTermsOfService = false
+    @State private var showModelDownloadSheet = false
 
     var body: some View {
         NavigationStack {
@@ -119,6 +120,12 @@ struct HomeView: View {
             .sheet(isPresented: $showTermsOfService) {
                 TermsOfServiceView(selectedLanguage: selectedLanguage)
             }
+            .sheet(isPresented: $showModelDownloadSheet) {
+                ModelDownloadView(
+                    modelService: modelService,
+                    selectedLanguage: selectedLanguage
+                )
+            }
         }
     }
 
@@ -148,12 +155,21 @@ struct HomeView: View {
             Section(selectedLanguage == .spanish ? "Modelo de IA" : "AI Model") {
                 ForEach(ModelCoordinator.ModelEngine.allCases) { engine in
                     Button {
-                        modelService.activeEngine = engine
+                        if engine == .qwen && !modelService.isModelDownloaded {
+                            modelService.activeEngine = engine
+                            showModelDownloadSheet = true
+                        } else {
+                            modelService.activeEngine = engine
+                        }
                     } label: {
                         HStack {
                             Text(engine.rawValue)
                             if engine == .foundation && !modelService.isFoundationAvailable {
                                 Text(selectedLanguage == .spanish ? "(No disponible)" : "(Not available)")
+                                    .font(.caption2)
+                                    .foregroundStyle(.secondary)
+                            } else if engine == .qwen && !modelService.isModelDownloaded {
+                                Text(selectedLanguage == .spanish ? "(Requiere descarga)" : "(Needs download)")
                                     .font(.caption2)
                                     .foregroundStyle(.secondary)
                             }
