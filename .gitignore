@@ -23,3 +23,49 @@ llama.cpp/
 
 # CocoaPods (if used)
 Pods/
+
+# AI / coding-assistant tool dirs (machine-local config, never commit)
+.agents/
+.claude/
+.codebuddy/
+.codex/
+.commandcode/
+.continue/
+.crush/
+.factory/
+.goose/
+.junie/
+.kilocode/
+.kiro/
+.kode/
+.mcpjam/
+.memsearch/
+.mux/
+.neovate/
+.openhands/
+.pi/
+.pochi/
+.qoder/
+.qwen/
+.roo/
+.trae/
+.windsurf/
+.zencoder/
+
+# Local workspace / meta
+build_tools/
+handoff/
+skills/
+skills-lock.json
+MEMORY.md
+AGENTS.md
+
+# Anything tools pull in as node deps
+node_modules/
+
+# Secrets / credentials — never commit
+.env
+.env.*
+*.local
+secrets.*
+*.pem
