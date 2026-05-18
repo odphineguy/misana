@@ -58,8 +58,25 @@ struct SplashScreen: View {
 
     var body: some View {
         ZStack {
-            Color(uiColor: .systemBackground)
+            Color.miSana.screenCream
                 .ignoresSafeArea()
+
+            LinearGradient(
+                colors: colorScheme == .dark
+                    ? [
+                        Color.brand.opacity(0.55),
+                        Color.brand.opacity(0.28),
+                        Color.brand.opacity(0.0)
+                      ]
+                    : [
+                        Color.brand.opacity(0.95),
+                        Color.brand.opacity(0.55),
+                        Color.brand.opacity(0.0)
+                      ],
+                startPoint: .top,
+                endPoint: .bottom
+            )
+            .ignoresSafeArea()
 
             Image(colorScheme == .dark ? "MiSanaLogoDark" : "MiSanaLogo")
                 .resizable()

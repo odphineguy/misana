@@ -23,7 +23,8 @@ struct SymptomLogView: View {
                         title: selectedLanguage == .spanish ? "Registro de síntomas" : "Symptom tracker",
                         subtitle: selectedLanguage == .spanish ?
                             "Registra cómo te sientes. Tu doctor verá los patrones." :
-                            "Log how you feel. Your doctor will see the patterns."
+                            "Log how you feel. Your doctor will see the patterns.",
+                        illustration: "hero_symptom"
                     )
 
                     // New entry button

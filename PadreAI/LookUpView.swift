@@ -46,7 +46,8 @@ struct LookUpView: View {
                         title: selectedLanguage == .spanish ? "Buscar" : "Look up",
                         subtitle: selectedLanguage == .spanish ?
                             "Pregunta sobre condiciones, medicinas o remedios." :
-                            "Ask about conditions, medications, or remedies."
+                            "Ask about conditions, medications, or remedies.",
+                        illustration: "hero_look_up"
                     )
 
                     // MARK: - Search bar

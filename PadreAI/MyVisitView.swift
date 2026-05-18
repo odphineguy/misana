@@ -53,8 +53,9 @@ struct MyVisitView: View {
                     MiSanaPageHeader(
                         title: selectedLanguage == .spanish ? "Prepara tu cita" : "Prepare your visit",
                         subtitle: selectedLanguage == .spanish ?
-                            "Organiza lo que sientes para que tu doctor te entienda mejor." :
-                            "Organize how you feel so your doctor understands you better."
+                            "Muéstrale al doctor cómo te sientes." :
+                            "Show your doctor exactly how you feel.",
+                        illustration: "hero_my_visit"
                     )
 
                     // MARK: - Visit type selector

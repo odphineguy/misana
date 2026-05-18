@@ -135,7 +135,8 @@ struct MedicationView: View {
                         title: selectedLanguage == .spanish ? "Escanear" : "Scan",
                         subtitle: selectedLanguage == .spanish ?
                             "Escanea etiquetas o códigos de barras para agregar tus medicinas." :
-                            "Scan labels or barcodes to add your medications."
+                            "Scan labels or barcodes to add your medications.",
+                        illustration: "hero_scan"
                     )
 
                     // MARK: - Scan Action Cards
@@ -209,20 +210,27 @@ struct MedicationView: View {
             .navigationTitle("")
             .navigationBarTitleDisplayMode(.inline)
             .toolbarBackground(.hidden, for: .navigationBar)
-            .toolbar {
-                ToolbarItem(placement: .topBarTrailing) {
-                    Button {
-                        scannedText = ""
-                        showingAddSheet = true
-                    } label: {
-                        Image(systemName: "plus")
-                            .font(.title3)
-                            .foregroundColor(.white)
-                            .frame(width: 36, height: 36)
-                            .background(Color.white.opacity(0.20))
-                            .clipShape(Circle())
-                    }
+            .overlay(alignment: .bottomTrailing) {
+                Button {
+                    scannedText = ""
+                    prefillName = ""
+                    prefillDosage = ""
+                    prefillRxcui = nil
+                    showingAddSheet = true
+                } label: {
+                    Image(systemName: "plus")
+                        .font(.system(size: 26, weight: .semibold))
+                        .foregroundColor(.white)
+                        .frame(width: 60, height: 60)
+                        .background(
+                            Circle()
+                                .fill(Color.brand.gradient)
+                                .shadow(color: Color.brand.opacity(0.35), radius: 10, y: 4)
+                        )
                 }
+                .accessibilityLabel(selectedLanguage == .spanish ? "Añadir medicina" : "Add medication")
+                .padding(.trailing, 20)
+                .padding(.bottom, 20)
             }
             .confirmationDialog(
                 selectedLanguage == .spanish ? "Escanear medicamento" : "Scan medication",

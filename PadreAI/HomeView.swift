@@ -45,7 +45,8 @@ struct HomeView: View {
                         title: selectedLanguage == .spanish ? "Hola!" : "Hello!",
                         subtitle: selectedLanguage == .spanish ?
                             "Tu puente de salud familiar." :
-                            "Your family health bridge."
+                            "Your family health bridge.",
+                        illustration: "hero_home"
                     )
 
                     // Health Dashboard
